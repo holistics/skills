@@ -5,7 +5,7 @@
     "email": "engineering@holistics.io"
   },
   "metadata": {
-    "description": "Holistics skills",
+    "description": "Skills for developing and using Holistics BI platform to build analytics and get insights",
     "version": "0.0.1"
   },
   "plugins": [
