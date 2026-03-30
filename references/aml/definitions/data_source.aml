@@ -1,0 +1,27 @@
+Type PostgreSQL(elem_name_as: 'name') {
+  display_name (optional): String
+  type: 'postgresql'
+  host: String
+  port: Number
+  database_name: String
+  user: String
+  password: String
+
+  @doc
+    Abort any query that takes more than specificed number of miliseconds.
+  ;;
+  connect_timeout (default: 30000): Number
+
+  @doc
+    Enable Holistics to fetch the schema information of this data source
+  ;;
+  enable_schema_info (default: true): Boolean
+
+  verify_ssl (optional): String
+  client_public_key (optional): String
+  client_private_key (optional): String
+}
+
+// TODO: Support other data source types
+
+Type DataSource = PostgreSQL

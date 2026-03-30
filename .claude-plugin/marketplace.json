@@ -1,0 +1,39 @@
+{
+  "name": "holistics-skills",
+  "owner": {
+    "name": "Holistics",
+    "email": "engineering@holistics.io"
+  },
+  "metadata": {
+    "description": "Holistics skills",
+    "version": "0.0.1"
+  },
+  "plugins": [
+    {
+      "name": "holistics",
+      "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/search-docs",
+        "./skills/use-existing-viz",
+        "./skills/analyze-data",
+        "./skills/visualize-data",
+        "./skills/write-aql"
+      ]
+    },
+    {
+      "name": "holistics-dev",
+      "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env.",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/search-docs",
+        "./skills/develop-amql",
+        "./skills/visualize-data",
+        "./skills/analyze-data",
+        "./skills/write-aql"
+      ]
+    }
+  ]
+}

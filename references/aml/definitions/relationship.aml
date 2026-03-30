@@ -1,0 +1,19 @@
+Type RelationshipConfig {
+  rel: Relationship
+  active: Boolean
+  direction (default: 'two_way'): 'one_to_many' | 'one_way' | 'two_way'
+}
+
+Func rel_config(rel: Relationship, active: Boolean, direction: 'one_to_many' | 'one_way' | 'two_way') {
+  RelationshipConfig {
+    rel: rel
+    active: active
+    direction: direction
+  }
+}
+
+Type Relationship {
+  type: 'many_to_one' | 'one_to_one'
+  from: FieldRef
+  to: FieldRef
+}
