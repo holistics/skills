@@ -6,6 +6,9 @@ description: Search and use visualizations that already exist in the project to 
 ## NOTE
 This is currently not available in Holistics Development environment.
 
+## Pre-requisites
+* Set up Holistics MCP
+
 ## Context
 * "viz" or "viz blocks" refer to visualization blocks defined in Dashboards (.page.aml files)
 

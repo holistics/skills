@@ -3,13 +3,15 @@ name: develop-amql
 description: Write and edit AML/AQL code for Holistics models, datasets, dashboards, and metrics. Use this whenever the user wants to create or modify a model, dataset, dashboard page, AQL metric, or any file in an AMQL project.
 ---
 
-## Rules
+## Instructions
+* Use [](../working-in-development/) skill to prepare for the development
 * **NEVER** assume any AML/AQL syntax, functions, or references.
-* Refer to [](../../references/) and use `search_docs` to learn about code syntax.
-* Use `fetch_dataset` to learn about the dataset (e.g. all available models and fields within that dataset), in order to make accurate edits.
-* Use `generate_aql` to write AQL (e.g. AQL metrics).
-* Use `generate_viz` to define Viz.
-* Use `list_data_sources`, `list_data_source_schemas`, `read_data_source_schema`, `read_data_source_table_schema` to study the underlying database schema in order to write relevant and accurate modeling codes.
+* Use Holistics knowledge and tools
+  * Refer to [](../../references/) and use `search_docs` to learn about code syntax.
+  * Use `fetch_dataset` to learn about the dataset (e.g. all available models and fields within that dataset), in order to make accurate edits.
+  * Use `generate_aql` to write AQL (e.g. AQL metrics).
+  * Use `generate_viz` to define Viz.
+  * Use `list_data_sources`, `list_data_source_schemas`, `read_data_source_schema`, `read_data_source_table_schema` to study the underlying database schema in order to write relevant and accurate modeling codes.
 * Pay attention to code diagnostics and fix them if possible.
 
 ## Example workflow

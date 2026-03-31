@@ -3,6 +3,9 @@ name: write-aql
 description: Write and run AQL (Analytic Query Language) queries to answer data questions. Use this whenever the user asks for data, wants to query a dataset, needs to filter/aggregate/join data, or asks about metrics and dimensions in Holistics.
 ---
 
+## Pre-requisites
+* Set up Holistics MCP
+
 ## Writing AQL
 * Always use `generate_aql` tool to write AQLs instead of writing yourself. It can understand the question well and write accurate queries.
 * In your natural language query:

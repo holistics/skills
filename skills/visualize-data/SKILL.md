@@ -7,6 +7,9 @@ description: Create charts, tables, and visualizations from queries. Use this wh
 * Create efficient but highly readable tables/charts by applying good visualization settings and formattings.
 * Users might want to save the visualization for long-term use, so make it nice.
 
+## Pre-requisites
+* Set up Holistics MCP
+
 ## Recommended workflow
 1. `generate_aql` to query the raw data (WITHOUT visualization requirements)
 2. `generate_viz` to create a viz on top of that AQL query (apply visualization requirements and default formattings)

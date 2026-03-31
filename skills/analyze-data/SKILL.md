@@ -3,6 +3,9 @@ name: analyze-data
 description: Explain AQL queries and their results, and provide data insights. Use this whenever the user asks what a query does, wants to understand results, or needs to dig deeper into why a metric changed.
 ---
 
+## Pre-requisites
+* Set up Holistics MCP
+
 ## Syntactic and descriptive
 Always use `explain_result` tool to syntactically/descriptively explain AQLs and their results. It can understand AQL accurately and provide accurate answers.
 
