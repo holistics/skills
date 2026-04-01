@@ -1,0 +1,28 @@
+Type FullPersistence {
+  // persisted table will be written into this schema
+  schema: String
+
+  // create a view pointing to the persisted table with this name
+  view_name (optional): String
+  on_cascade (default: 'rebuild'): 'rebuild' | 'reuse'
+  custom_ddl (optional): Heredoc[Any]
+}
+
+Type IncrementalPersistence {
+  // persisted_table will be written into this schema
+  schema: String
+
+  // create a view pointing to the persisted table with this name
+  view_name (optional): String
+
+  on_cascade (default: 'rebuild'): 'rebuild' | 'reuse'
+
+  incremental_column: String
+  primary_key (optional): String
+  custom_ddl (optional): Heredoc[Any]
+}
+
+// Persistence that runs outside of Holistics
+Type ExternalPersistence {
+  table_name: String
+}

@@ -1,6 +1,6 @@
 ---
-name: setup-live-holistics-mcp
-description: Use this skill to set up Holistics MCP and enable useful tools such as `execute_aql` and `generate_viz` on published analytics
+name: setup-holistics-mcp
+description: Use this skill to set up Holistics MCP and enable useful tools such as `execute_aql` and `generate_viz`
 ---
 
 ## Holistics MCP

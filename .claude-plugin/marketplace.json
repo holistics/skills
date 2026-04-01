@@ -12,33 +12,12 @@
     {
       "name": "holistics-reporting",
       "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/working-in-reporting",
-        "./skills/setup-live-holistics-mcp",
-        "./skills/search-docs",
-        "./skills/use-existing-viz",
-        "./skills/analyze-data",
-        "./skills/visualize-data",
-        "./skills/write-aql"
-      ]
+      "source": "./plugins/holistics-reporting"
     },
     {
       "name": "holistics-development",
       "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env.",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./skills/working-in-development",
-        "./skills/setup-dev-holistics-mcp",
-        "./skills/setup-holistics-cli",
-        "./skills/search-docs",
-        "./skills/develop-amql",
-        "./skills/visualize-data",
-        "./skills/analyze-data",
-        "./skills/write-aql"
-      ]
+      "source": "./plugins/holistics-development"
     }
   ]
 }

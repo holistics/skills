@@ -1,0 +1,28 @@
+Type PreAggTimeGranularity = 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
+Type PreAggAggregationType = 'avg' | 'sum' | 'count' | 'count distinct' | 'min' |
+                             'max' | 'median' | 'stdev' | 'stdevp' | 'var' | 'varp' |
+                             'custom'
+
+
+
+Type PreAggregate (elem_name_as: 'name') {
+  dimension (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name
+  ) {
+    for: FieldRef
+    time_granularity(optional): PreAggTimeGranularity
+  }
+
+  measure (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name
+  ) {
+    for: FieldRef
+    aggregation_type: PreAggAggregationType
+  }
+
+  persistence: ExternalPersistence | FullPersistence | IncrementalPersistence
+}

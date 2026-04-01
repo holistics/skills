@@ -1,0 +1,120 @@
+Type Dimension (elem_name_as: 'name') {
+  label                                     : String
+  type                                      : DimensionType
+  hidden        (default: false)            : Boolean
+  description   (optional)                  : String
+  definition    (optional)                  : Heredoc[Any] | Slot[Heredoc[Any]]
+  format        (optional)                  : Format
+  primary_key   (default: false)            : Boolean
+}
+
+Type Measure (elem_name_as: 'name') {
+  label                                     : String
+  type                                      : MeasureType
+  hidden        (default: false)            : Boolean
+  description   (optional)                  : String
+  definition                                : Heredoc[Any]
+  aggregation_type (default: 'custom')      : String
+  format        (optional)                  : Format
+}
+
+Type Param (elem_name_as: 'name') {
+  label                                     : String
+  type                                      : ParamType
+  hidden        (default: false)            : Boolean
+  description   (optional)                  : String
+  allowed_values (optional)                 : List[Any]
+}
+
+Type TableModel (elem_name_as: 'name') {
+  type                        : 'table'
+  label             (optional): String
+  description       (optional): String
+  owner             (optional): String // email
+  data_source_name  (optional): String | Slot[String]
+  table_name: String | Slot[String]
+
+  import_source            (optional): ImportSource
+
+  dimension (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Dimension
+
+  measure (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Measure
+
+  param (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Param
+}
+
+Type QueryModel (elem_name_as: 'name') {
+  type                           : 'query'
+  label             (optional)   : String
+  description       (optional)   : String
+  owner             (optional)   : String // email
+  data_source_name  (optional)   : String | Slot[String]
+  query                          : Heredoc[Any] | Slot[Heredoc[Any]]
+  models            (default: []): List[Any]             // List of models that the query used
+
+  persistence (optional): FullPersistence | IncrementalPersistence
+
+  dimension (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Dimension
+
+  measure (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Measure
+
+  param (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Param
+}
+
+Type Model = TableModel | QueryModel
+
+Type PartialModel = Partial[TableModel] | Partial[QueryModel]
+Type PartialTableModel = Partial[TableModel]
+Type PartialQueryModel = Partial[QueryModel]
+
+Type DimensionType = 'text' | 'number' | 'date' | 'datetime' | 'truefalse' | 'json' | 'unknown'
+
+Type MeasureType = DimensionType
+
+Type ParamType = 'text' | 'number' | 'date' | 'datetime' | 'truefalse'
+
+Type AggregationType = 'avg' | 'sum' | 'count' | 'count distinct' | 'min' |
+                       'max' | 'median' | 'stdev' | 'stdevp' | 'var' | 'varp' |
+                       'running sum' | 'running avg' | 'running count' | 'running min' | 'running max' |
+                       'custom'
+
+Type FieldRef {
+  model: String
+  field: String
+}
+
+Func ref(model_name: String, field_name: String) {
+  FieldRef { model: model_name, field: field_name }
+}
+
+Func r() {}

@@ -1,0 +1,324 @@
+const orders_detail = [
+  r(ecommerce_orders.id),
+  r(ecommerce_orders.status),
+  r(ecommerce_orders.created_at),
+  r(ecommerce_orders.discount),
+  r(ecommerce_orders.delivery_attempts),
+]
+
+const users_detail = [
+  r(ecommerce_users.id),
+  r(ecommerce_users.full_name),
+  r(ecommerce_users.gender),
+  r(ecommerce_users.email),
+  r(ecommerce_cities.name),
+]
+
+const products_detail = [
+  r(ecommerce_products.id),
+  r(ecommerce_products.name),
+  r(ecommerce_products.price),
+]
+
+@tag('1️⃣ Trust/Endorsed')
+Dataset demo_ecommerce {
+  label: '[Demo] Ecommerce Official (2025)'
+  description: '''
+# Dataset Capabilities
+
+## What this dataset can answer
+- Financials: Waterfall from GMV (Demand) to NMV (Fulfilled Sales) to Revenue (Platform Earnings).
+- Operational Health: Distinctions between pre-delivery failures (cancellations) and post-delivery failures (refunds).
+- Customer Loyalty: Identification of repeat buyers (is_repeated_buyer).
+- Granularity: Performance by Merchant, Product Category, Country, and City.
+
+## What this dataset cannot answer
+- Net Profit: Operational costs (marketing, server costs, salaries) are not in this dataset.
+- Marketing Attribution: Traffic sources (e.g., Google Ads vs. Facebook) are not tracked here.
+- Inventory: There is no stock level or "out of stock" data.
+
+# Persona Guidelines
+- Executives:
+  - Focus on high-level metrics, trends, Revenue, YoY.
+- Sales / Category Manager
+  - Focus on merchant/category rankings.
+- Data Team
+  - Be precise about definitions and grain.
+'''
+  data_source_name: 'demodb'
+  owner: 'user@company.com'
+
+  models: [
+    ecommerce_products,
+    ecommerce_merchants,
+    ecommerce_countries,
+    ecommerce_orders,
+    ecommerce_users,
+    ecommerce_order_items,
+    ecommerce_cities,
+    map_categories,
+    param_model_demo,
+    dim_dates,
+    ecommerce_employees,
+  ]
+  relationships: [
+    relationship(ecommerce_order_items.order_id > ecommerce_orders.id, true),
+    relationship(ecommerce_orders.user_id > ecommerce_users.id, true),
+
+    relationship(ecommerce_users.city_id > ecommerce_cities.id, true),
+    relationship(ecommerce_cities.country_code > ecommerce_countries.code, true),
+    relationship(ecommerce_merchants.city_id > ecommerce_cities.id, false), // optional: not all analyses need this
+
+    relationship(ecommerce_order_items.product_id > ecommerce_products.id, true),
+    relationship(ecommerce_products.merchant_id > ecommerce_merchants.id, true),
+    relationship(ecommerce_products.category_id > map_categories.category_id, true),
+
+    relationship(ecommerce_orders.created_date > dim_dates.date_key, true),
+    relationship(ecommerce_users.sign_up_date > dim_dates.date_key, false), // optional: secondary date relationship
+    relationship(ecommerce_employees.merchant_id > ecommerce_merchants.id, true),
+  ]
+
+  permission vendor_access {
+    field: ref('ecommerce_merchants', 'id')
+    operator: 'matches_user_attribute'
+    value: 'vendor_id'
+  }
+
+  permission country_access {
+    field: ref('ecommerce_countries', 'name')
+    operator: 'matches_user_attribute'
+    value: 'country'
+  }
+
+  permission city_access {
+    field: ref('ecommerce_cities', 'name')
+    operator: 'matches_user_attribute'
+    value: 'city'
+  }
+
+  dimension product_image {
+    model: ecommerce_product_images
+    label: 'Product Image'
+    type: 'text'
+    definition: @aql concat('<img src="', ecommerce_product_images.url, '" style="text-align:center;height:50px;object-fit:cover" />') ;;
+  }
+
+
+  metric total_users {
+    label: 'Total Users'
+    type: 'number'
+    definition: @aql count(ecommerce_users.id) ;;
+    description: ''
+  }
+
+  metric total_orders {
+    label: "Total Orders"
+    type: "number"
+    hidden: false
+    definition: @aql count(ecommerce_orders.id);;
+    description: ''
+  }
+
+  metric gmv {
+    label: "GMV (Gross Merchandise Value)"
+    type: "number"
+    hidden: false
+    definition: @aql ecommerce_order_items | sum(ecommerce_order_items.quantity * ecommerce_products.price);;
+    format: "[\$\$]#,###0"
+    description: 'Gross value of items ordered before discounts; includes all statuses.'
+  }
+
+  metric total_discount {
+    label: "Total Discount"
+    type: "number"
+    hidden: false
+    definition: @aql gmv - revenue;;
+    format: "[\$\$]#,###0"
+    description: '''GMV-to-Revenue gap.
+Note: This is not a pure discount measure; it blends discount effects, cancellations/refunds (via NMV), and commission mechanics. Do not present it as "discount given".
+'''
+  }
+
+  metric nmv {
+    label: "NMV (Net Merchandise Value)"
+    type: "number"
+    hidden: false
+    definition: @aql (ecommerce_order_items | sum(ecommerce_order_items.quantity * ecommerce_products.price * (1 - ecommerce_orders.discount))) |  where(ecommerce_orders.status not in ['cancelled', 'refunded']);;
+    format: "[\$\$]#,###0"
+    description: 'Realized fulfilled value after order-level discounts; excludes `cancelled` and `refunded`.'
+  }
+
+  metric revenue {
+    label: "Total Revenue"
+    type: "number"
+    hidden: false
+    definition: @aql nmv * revenue_commission;;
+    format: "[\$\$]#,###0"
+    description: '''Platform revenue from fulfilled orders.
+Note: Not net profit; commission is demo-fixed (see `revenue_commission`).
+'''
+  }
+
+  metric aov {
+    label: "AOV (Average Order Value)"
+    type: "number"
+    hidden: false
+    definition: @aql gmv / total_orders;;
+    format: "[\$\$]#,###0"
+    description: '''Average gross value per order.
+Note: For "fulfilled AOV," you would need NMV per delivered order.
+'''
+  }
+
+  metric total_orders_across_all {
+    label: "Total Orders Across All"
+    type: "number"
+    hidden: false
+    definition: @aql total_orders | of_all(ecommerce_orders);;
+    description: ''
+  }
+
+  view {
+    // Core Volume Metrics
+    group volume_metrics {
+      metric total_orders
+      metric total_delivered_orders
+      metric total_cancelled_orders
+      metric total_refunded_orders
+      metric running_total_orders
+      metric total_orders_across_all
+    }
+
+    // User & Customer Metrics
+    group user_metrics {
+      metric total_users
+      metric total_buyers
+      metric total_repeated_buyers
+      metric retention
+    }
+
+    // Revenue & Value Metrics
+    group revenue_metrics {
+      metric gmv
+      metric nmv
+      metric revenue
+      metric aov
+      metric total_discount
+      metric revenue_commission
+    }
+
+    // Order Value by Status
+    group order_value_metrics {
+      metric delivered_value
+      metric cancelled_value
+      metric refunded_value
+    }
+
+    // Performance & Ratio Metrics
+    group performance_metrics {
+      metric percent_of_total
+      metric cancelled_order_ratio
+      metric cancelled_value_ratio
+    }
+
+    model ecommerce_products {
+    }
+    model ecommerce_merchants {
+    }
+    model ecommerce_countries {
+    }
+    model ecommerce_orders {
+    }
+    model ecommerce_users {
+    }
+    model ecommerce_order_items {
+    }
+    model ecommerce_cities {
+    }
+    model map_categories {
+    }
+    model dim_dates {
+    }
+    model ecommerce_employees {
+    }
+  }
+
+  context {
+    analysis {
+      underlying_data {
+        metric total_orders {
+          view order_records {
+            label: 'Order records'
+            fields: orders_detail
+          }
+
+          view user_records {
+            label: 'User records'
+            fields: users_detail
+          }
+
+          view product_records {
+            label: 'Product records'
+            fields: products_detail
+          }
+        }
+
+        metric gmv {
+          view order_records {
+            label: 'Order records'
+            fields: orders_detail
+          }
+
+          view user_records {
+            label: 'User records'
+            fields: users_detail
+          }
+        }
+
+        metric aov {
+          view order_value_details {
+            label: 'Order value details'
+            fields: [
+              r(ecommerce_order_items.order_id),
+              r(ecommerce_order_items.product_id),
+              r(ecommerce_order_items.quantity),
+              r(ecommerce_products.price),
+            ]
+          }
+
+          view aov_by_users {
+            label: 'AOV by users'
+            fields: users_detail
+          }
+        }
+      }
+
+      breakdown {
+        group locations {
+          label: 'Locations'
+          fields: [
+            r(ecommerce_countries.continent_name),
+            r(ecommerce_countries.name),
+            r(ecommerce_cities.name),
+          ]
+        }
+
+        group product_categories {
+          label: 'Product categories'
+          fields: [
+            r(map_categories.category),
+            r(ecommerce_products.name),
+          ]
+        }
+
+        group user_demographics {
+          label: 'User demographics'
+          fields: [
+            r(ecommerce_users.gender),
+            r(ecommerce_users.age),
+          ]
+        }
+      }
+    }
+  }
+}

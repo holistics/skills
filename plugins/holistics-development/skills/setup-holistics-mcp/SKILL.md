@@ -1,6 +1,6 @@
 ---
-name: setup-dev-holistics-mcp
-description: Use this skill to set up Holistics development MCP and enable useful tools such as `execute_aql` and `generate_viz`
+name: setup-holistics-mcp
+description: Use this skill to set up Holistics MCP and enable useful tools such as `execute_aql` and `generate_viz`
 ---
 
 ## Holistics MCP

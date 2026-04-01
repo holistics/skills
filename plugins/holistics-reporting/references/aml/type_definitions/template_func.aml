@@ -1,0 +1,31 @@
+Type GeneralParamMetadata {
+  description(optional): String
+}
+
+Type StringParamMetadata {
+  description(optional): String
+  input_type(optional): 'input' | 'select' | 'color-picker'
+  options(optional): List[String]
+}
+
+Type NumberParamMetadata {
+  description(optional): String
+  min(optional): Number
+  max(optional): Number
+  step(optional): Number
+}
+
+Type VizFieldParamMetadata {
+  description(optional): String
+  dataset(optional): Dataset | String
+  dataset_param(optional): String
+  metrics_only(optional): Boolean
+  allow_aggregation(optional): Boolean
+  allow_transformation(optional): Boolean
+}
+
+Type TemplateParamMetadata = GeneralParamMetadata | StringParamMetadata | NumberParamMetadata | VizFieldParamMetadata
+
+Type TemplateFuncMetadata {
+  param (elem_name_as: 'uname', body_as: 'def', multiple: true, unique_elem_name: true): TemplateParamMetadata
+}

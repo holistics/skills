@@ -1,0 +1,88 @@
+@tag('1️⃣ Trust/Endorsed')
+Model ecommerce_orders {
+  type: 'table'
+  label: 'Orders'
+  description: ''
+  data_source_name: "demodb"
+  owner: 'user@company.com'
+  table_name: '"ecommerce"."orders"'
+
+  dimension id {
+    label: 'Id'
+    type: 'number'
+    description: 'Unique identifier for each order'
+    hidden: false
+    primary_key: true
+    definition: @sql {{ #SOURCE.id }};;
+  }
+  dimension status {
+    label: 'Status'
+    type: 'text'
+    definition: @sql {{ #SOURCE.status }};;
+    description: "Delivered / Refunded / Canceled"
+  }
+  dimension created_at {
+    label: 'Created At'
+    type: 'datetime'
+    hidden: false
+    definition: @sql {{ #SOURCE.created_at }};;
+  }
+  dimension user_id {
+    label: 'User Id'
+    type: 'number'
+    description: 'Reference to the user who placed the order'
+    hidden: true
+    definition: @sql {{ #SOURCE.user_id }};;
+  }
+  dimension discount {
+    label: 'Discount'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.discount }};;
+  }
+  dimension delivery_attempts {
+    label: 'Delivery Attempts'
+    type: 'number'
+    hidden: false
+    definition: @sql {{ #SOURCE.delivery_attempts }};;
+  }
+  dimension created_date {
+    label: 'Created Date'
+    type: 'date'
+    definition: @sql {{ #SOURCE.created_at }}::date;;
+    description: "Date-stamp of the order when it was created"
+    hidden: true
+  }
+  dimension order_month {
+    label: "Order Month"
+    type: "text"
+    definition: @sql LPAD((DATE_PART('month', {{ created_at }}))::text, 2, '0') || ' ' || TO_CHAR({{ created_at }}, 'Month');;
+    description: "Month created of order"
+  }
+  measure total_order {
+    label: "Total Orders Count"
+    type: "number"
+    definition: @sql {{ id }};;
+    description: "The total number of orders"
+    aggregation_type: "count"
+  }
+  measure cumm_orders {
+    label: 'Cumulative Orders'
+    type: 'number'
+    description: "The cumulative total of orders."
+    hidden: true
+    definition: @aql running_total(ecommerce_orders.total_order, ecommerce_orders.order_month) ;;
+    aggregation_type: "custom"
+  }
+  measure orders_2023 {
+    label: '2023'
+    type: "number"
+    definition: @aql count(ecommerce_orders.id) | where(ecommerce_orders.created_at matches @2023) ;;
+  }
+
+  measure orders_2024 {
+    label: '2024'
+    type: "number"
+    definition: @aql count(ecommerce_orders.id) | where(ecommerce_orders.created_at matches @2024) ;;
+  }
+}

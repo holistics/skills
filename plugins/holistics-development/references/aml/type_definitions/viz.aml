@@ -1,0 +1,1444 @@
+Type Operator = 'is' | 'is_not' | 'contains' | 'does_not_contain' | 'starts_with' | 'ends_with' | 'is_null' | 'not_null' | 'matches_user_attribute' | 'top' | 'bottom' | 'matches' | 'last' | 'next' | 'between' | 'before' | 'after' | 'match_ranges' | 'less_than' | 'greater_than'
+
+Type Modifier = 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour' | 'minute';
+
+Type LineStyle = 'solid' | 'dashed' | 'dotted'
+
+Type LineInterpolation = 'linear' | 'smooth' | 'step' | 'step_before' | 'step_after'
+
+Type IndexBasedSortSetting {
+  field_index: Number
+  direction: 'asc' | 'desc'
+}
+Type KeyBasedSortSetting {
+  key: String
+  direction: 'asc' | 'desc'
+}
+Type SortSetting = IndexBasedSortSetting | KeyBasedSortSetting
+
+Type ConditionOptions {
+  include_current_period(optional): Boolean
+  rank_by(optional): {
+    field: VizFieldRef
+    logic(optional): 'standard' | 'dense'
+    aggregation(optional): AggregationType
+  }
+}
+
+Type Condition {
+  operator: Operator
+  value: String | Number | Boolean | List[String | Number | Boolean]
+  modifier(optional): Modifier
+  options(optional): ConditionOptions
+}
+
+Type AndFilters {
+  filters: List[FilterGroupItem]
+}
+
+Type OrFilters {
+  filters: List[FilterGroupItem]
+}
+
+Type VizFilter {
+  field: VizFieldRef
+  aggregation(optional): AggregationType
+  operator: Operator
+  value: String | Number | Boolean | List[String | Number | Boolean]
+  modifier(optional): Modifier
+  options(optional): ConditionOptions
+}
+
+Type FilterGroupItem = AndFilters | OrFilters | VizFilter
+
+Type FilterGroup = AndFilters | OrFilters
+
+Type DataType = 'text' | 'number' | 'date' | 'datetime' | 'truefalse' | 'json' | 'unknown'
+Type VizFieldRef = FieldRef | String
+
+Type RegressionLine {
+  type: 'linear' | 'logarithmic' | 'power' | 'exponential'
+}
+
+Type ReferenceLine {
+  type: 'avg' | 'sum' | 'median' | 'min' | 'max'
+}
+
+Type CustomGrain {
+  field: VizFieldRef
+  transformation(optional): String
+}
+
+Type PercentOfTotalField {
+  of_all: 'grand_total' | 'row' | 'column' | List[CustomGrain]
+}
+
+Type MovingCalculationField {
+  type: 'sum' | 'avg' | 'min' | 'max' | 'count' | 'stdev' | 'stdevp' | 'var' | 'varp'
+  order: 'row' | 'column' | List[CustomGrain]
+  range {
+    previous(optional): Number
+    next(optional): Number
+  }
+  null_if_not_enough_values(optional): Boolean
+}
+
+Type PeriodOverPeriodComparison {
+  time_dimension: VizFieldRef
+  display: 'value' | 'change' | 'percent_change'
+  comparison_period: String
+}
+
+Type TextStyle {
+  font_color(optional): String
+  font_size(optional): Number
+}
+
+Type AlignmentPosition = 'left' | 'right' | 'center'
+
+Type ConstantVizField {
+  value: Number
+  label(optional): String
+  format(optional) {
+    type: 'auto' | 'text' | 'html' | 'date' | 'number' | 'datetime'
+    pattern(optional): String
+    separator(optional): String
+    group_separator(optional): String
+    decimal_separator(optional): String
+  }
+  uname(optional): String
+}
+
+Type VizFieldFull {
+  ref: VizFieldRef
+  label(optional): String
+  transformation(optional):  String
+  aggregation(optional): String
+  format(optional) {
+    type: 'auto' | 'text' | 'html' | 'date' | 'number' | 'datetime' | 'json'
+    pattern(optional): String
+    separator(optional): String
+    group_separator(optional): String
+    decimal_separator(optional): String
+  }
+  analytic(optional): RegressionLine | ReferenceLine | PercentOfTotalField | MovingCalculationField | PeriodOverPeriodComparison
+  action(
+    elem_name_as: 'uname',
+    body_as: 'def',
+    multiple: true,
+    unique_elem_name: true
+  ): VizAction
+  uname(optional): String
+  hidden(optional): Boolean
+  break_by_legend(optional): Boolean
+  merge_legend(optional): Boolean
+}
+Type VizField = VizFieldFull | VizFieldRef | ConstantVizField
+
+Type VizTooltip {
+  field: VizField
+}
+
+Type ColumnWidth {
+  key: String
+  width: Number
+}
+
+Type ColumnStyle {
+  key: String
+  @doc Not yet applicable - Coming in a future update. ;;
+  alignment(optional): AlignmentPosition
+  @doc Not yet applicable - Coming in a future update. ;;
+  font_color(optional): String
+  @doc Not yet applicable - Coming in a future update. ;;
+  bg_color(optional): String
+  width(optional): Number
+}
+
+Type DataTable (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+    hidden(default: false): Boolean
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  fields: List[VizField]
+  settings(optional) {
+    pagination_size(optional): Number
+    show_row_number(optional): Boolean
+    show_row_with_no_data(optional): Boolean
+    @doc Deprecated. Use "wrap_header_text" and "wrap_cell_text" instead;;
+    row_height(optional): 'single_line' | 'multiple_lines'
+    wrap_header_text(optional): Boolean
+    wrap_cell_text(optional): Boolean
+    show_sum_row(optional): Boolean
+    show_average_row(optional): Boolean
+    conditional_formats(optional): List[ConditionalFormat]
+    sorts(optional): List[SortSetting]
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    @doc Deprecated. Use the "width" property of "column_styles" instead ;;
+    column_width(optional) {
+      type(optional): 'auto'
+      manual_widths(optional): List[ColumnWidth]
+    }
+    aggregate_awareness(optional): VizAggregateAwareness
+    frozen_columns(optional): Number
+    single_cell_display(optional): 'large' | 'normal'
+    column_styles(optional): List[ColumnStyle]
+  }
+  theme(optional): VizTheme
+}
+
+Type PivotTable (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  rows(optional): List[VizField]
+  columns(optional): List[VizField]
+  values(optional): List[VizField]
+  settings(optional) {
+    @doc Deprecated. Use "frozen_columns" instead ;;
+    freeze_rows(optional): Boolean
+    pagination_size(optional): Number
+    empty_cell_as_zero(optional): Boolean
+    show_row_with_no_data(optional): Boolean
+    @doc Deprecated. Use "wrap_header_text" and "wrap_cell_text" instead;;
+    row_height(optional): 'single_line' | 'multiple_lines'
+    wrap_header_text(optional): Boolean
+    wrap_cell_text(optional): Boolean
+    show_row_total(optional): Boolean
+    show_column_total(optional): Boolean
+    show_sub_total(optional): Boolean
+    conditional_formats(optional): List[ConditionalFormat]
+    sorts(optional): List[SortSetting]
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    @doc Deprecated. Use the "width" property of "column_styles" instead ;;
+    column_width(optional) {
+      type(optional): 'auto'
+      manual_widths(optional): List[ColumnWidth]
+    }
+    aggregate_awareness(optional): VizAggregateAwareness
+    frozen_columns(optional): Number
+    value_labels_position(optional) {
+      placement(optional): 'rows' | 'columns'
+      order(optional): Number | 'first' | 'last'
+    }
+    column_styles(optional): List[ColumnStyle]
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type LegendPosition = 'top' | 'bottom' | 'left' | 'right' | 'hidden'
+Type LineFamilySort {
+  field_index(optional): Number
+  direction(optional): 'asc' | 'desc'
+  type(optional): 'xaxis' | 'yaxis' | 'series' | 'tooltip'
+}
+Type CombinationChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    label(optional): String
+    series(multiple: true, unique_elem_name: false) {
+      mark_type(optional): 'auto' | 'area' | 'line' | 'column' | 'bar'
+      field: VizField
+      settings(optional) {
+        color(optional): String
+        color_palette(optional): ColorPalette
+        line_style(optional): LineStyle
+        line_interpolation(optional): LineInterpolation
+        point(multiple: true) {
+          value: String | Number | Boolean
+          color(optional): String
+          line_style(optional): LineStyle
+          line_interpolation(optional): LineInterpolation
+          hidden(optional): Boolean
+        }
+      }
+    }
+    settings(optional) {
+      alignment(optional): 'left' | 'right'
+      scale(optional): 'linear' | 'logarithmic'
+      axis_min(optional): Number
+      axis_max(optional): Number
+      show_data_label_by(optional): 'value' | 'percentage'
+      stack_series_by(optional): 'value' | 'percentage'
+      reverse_stack(optional): Boolean
+      show_stack_total(optional): Boolean
+      show_total_in_tooltip(optional): Boolean
+      group_values_into(optional): Number
+      hidden(optional): Boolean
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    x_axis_label(optional): String
+    x_axis_show_null_datetime(optional): Boolean
+    legend_label(optional): LegendPosition
+    show_rows_with_no_data(optional): Boolean
+    show_data_points(optional): Boolean
+    connect_discontinuous_points(optional): Boolean
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    sort(optional): LineFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type LineChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    label(optional): String
+    series(multiple: true, unique_elem_name: false) {
+      field: VizField
+      settings(optional) {
+        color(optional): String
+        color_palette(optional): ColorPalette
+        line_style(optional): LineStyle
+        line_interpolation(optional): LineInterpolation
+        point(multiple: true) {
+          value: String | Number | Boolean
+          color(optional): String
+          line_style(optional): LineStyle
+          line_interpolation(optional): LineInterpolation
+          hidden(optional): Boolean
+        }
+      }
+    }
+    settings(optional) {
+      alignment(optional): 'left' | 'right'
+      scale(optional): 'linear' | 'logarithmic'
+      axis_min(optional): Number
+      axis_max(optional): Number
+      show_data_label_by(optional): 'value' | 'percentage'
+      stack_series_by(optional): 'value' | 'percentage'
+      reverse_stack(optional): Boolean
+      show_stack_total(optional): Boolean
+      show_total_in_tooltip(optional): Boolean
+      group_values_into(optional): Number
+      hidden(optional): Boolean
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    x_axis_label(optional): String
+    x_axis_show_null_datetime(optional): Boolean
+    legend_label(optional): LegendPosition
+    show_rows_with_no_data(optional): Boolean
+    show_data_points(optional): Boolean
+    connect_discontinuous_points(optional): Boolean
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    sort(optional): LineFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type AreaChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    label(optional): String
+    series(multiple: true, unique_elem_name: false) {
+      field: VizField
+      settings(optional) {
+        color(optional): String
+        color_palette(optional): ColorPalette
+        line_style(optional): LineStyle
+        line_interpolation(optional): LineInterpolation
+        point(multiple: true) {
+          value: String | Number | Boolean
+          color(optional): String
+          line_style(optional): LineStyle
+          line_interpolation(optional): LineInterpolation
+          hidden(optional): Boolean
+        }
+      }
+    }
+    settings(optional) {
+      alignment(optional): 'left' | 'right'
+      scale(optional): 'linear' | 'logarithmic'
+      axis_min(optional): Number
+      axis_max(optional): Number
+      show_data_label_by(optional): 'value' | 'percentage'
+      stack_series_by(optional): 'value' | 'percentage'
+      reverse_stack(optional): Boolean
+      show_stack_total(optional): Boolean
+      show_total_in_tooltip(optional): Boolean
+      group_values_into(optional): Number
+      hidden(optional): Boolean
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    x_axis_label(optional): String
+    x_axis_show_null_datetime(optional): Boolean
+    legend_label(optional): LegendPosition
+    show_rows_with_no_data(optional): Boolean
+    show_data_points(optional): Boolean
+    connect_discontinuous_points(optional): Boolean
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    sort(optional): LineFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type ColumnChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    label(optional): String
+    series(multiple: true, unique_elem_name: false) {
+      field: VizField
+      settings(optional) {
+        color(optional): String
+        color_palette(optional): ColorPalette
+        line_style(optional): LineStyle
+        line_interpolation(optional): LineInterpolation
+        point(multiple: true) {
+          value: String | Number | Boolean
+          color(optional): String
+          line_style(optional): LineStyle
+          line_interpolation(optional): LineInterpolation
+          hidden(optional): Boolean
+        }
+      }
+    }
+    settings(optional) {
+      alignment(optional): 'left' | 'right'
+      scale(optional): 'linear' | 'logarithmic'
+      axis_min(optional): Number
+      axis_max(optional): Number
+      show_data_label_by(optional): 'value' | 'percentage'
+      stack_series_by(optional): 'value' | 'percentage'
+      reverse_stack(optional): Boolean
+      show_stack_total(optional): Boolean
+      show_total_in_tooltip(optional): Boolean
+      group_values_into(optional): Number
+      hidden(optional): Boolean
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    x_axis_label(optional): String
+    x_axis_show_null_datetime(optional): Boolean
+    legend_label(optional): LegendPosition
+    show_rows_with_no_data(optional): Boolean
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    sort(optional): LineFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type BarChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    label(optional): String
+    series(multiple: true, unique_elem_name: false) {
+      field: VizField
+      settings(optional) {
+        color(optional): String
+        color_palette(optional): ColorPalette
+        line_style(optional): LineStyle
+        line_interpolation(optional): LineInterpolation
+        point(multiple: true) {
+          value: String | Number | Boolean
+          color(optional): String
+          line_style(optional): LineStyle
+          line_interpolation(optional): LineInterpolation
+          hidden(optional): Boolean
+        }
+      }
+    }
+    settings(optional) {
+      alignment(optional): 'left' | 'right'
+      scale(optional): 'linear' | 'logarithmic'
+      axis_min(optional): Number
+      axis_max(optional): Number
+      show_data_label_by(optional): 'value' | 'percentage'
+      stack_series_by(optional): 'value' | 'percentage'
+      reverse_stack(optional): Boolean
+      show_stack_total(optional): Boolean
+      show_total_in_tooltip(optional): Boolean
+      group_values_into(optional): Number
+      hidden(optional): Boolean
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    x_axis_label(optional): String
+    x_axis_show_null_datetime(optional): Boolean
+    legend_label(optional): LegendPosition
+    show_rows_with_no_data(optional): Boolean
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    sort(optional): LineFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type PieFamilySort {
+  field_index(optional): Number
+  direction(optional): 'asc' | 'desc'
+  type(optional): 'pie' | 'tooltip'
+}
+
+Type PieChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  legend(optional): VizField
+  series(multiple: true, unique_elem_name: false) {
+    field: VizField
+    settings(optional) {
+      color(optional): String
+      color_palette(optional): ColorPalette
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color(optional): String
+        hidden(optional): Boolean
+      }
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    display_as_donut(optional): Boolean
+    legend_label(optional): LegendPosition
+    @doc Deprecated. Use "show_data_label" and "show_percentage" instead ;;
+    show_data_label_by(optional): 'value' | 'percentage'
+    show_data_label(optional): Boolean
+    show_percentage(optional):Boolean
+    data_label_position(optional): 'none' | 'inside' | 'outside'
+    show_total(optional): Boolean
+    group_values_into(optional): Number
+    row_limit(optional): Number
+    sort(optional): 'asc' | 'desc' | PieFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type PyramidChart {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  legend(optional): VizField
+  series(multiple: true, unique_elem_name: false) {
+    field: VizField
+    settings(optional) {
+      color(optional): String
+      color_palette(optional): ColorPalette
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color(optional): String
+        hidden(optional): Boolean
+      }
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    legend_label(optional): LegendPosition
+    @doc Deprecated. Use "show_data_label" and "show_percentage" instead ;;
+    show_data_label_by(optional): 'value' | 'percentage'
+    show_data_label(optional): Boolean
+    show_percentage(optional):Boolean
+    data_label_position(optional): 'none' | 'inside' | 'outside'
+    show_total(optional): Boolean
+    group_values_into(optional): Number
+    row_limit(optional): Number
+    sort(optional): 'asc' | 'desc' | PieFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+Type FunnelChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  legend(optional): VizField
+  series(multiple: true, unique_elem_name: false) {
+    field: VizField
+    settings(optional) {
+      color(optional): String
+      color_palette(optional): ColorPalette
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color(optional): String
+        hidden(optional): Boolean
+      }
+    }
+  }
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    legend_label(optional): LegendPosition
+    @doc Deprecated. Use "show_data_label" and "show_percentage" instead ;;
+    show_data_label_by(optional): 'value' | 'percentage'
+    show_data_label(optional): Boolean
+    show_percentage(optional):Boolean
+    data_label_position(optional): 'none' | 'inside' | 'outside'
+    show_total(optional): Boolean
+    group_values_into(optional): Number
+    row_limit(optional): Number
+    sort(optional): 'asc' | 'desc' | PieFamilySort
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type BubbleChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_col: VizField
+  y_col: VizField
+  z_col: VizField
+  group_col(optional): VizField
+  label_col(optional): VizField
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type ScatterChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  x_col: VizField
+  y_col: VizField
+  group_col(optional): VizField
+  label_col(optional): VizField
+  tooltips(optional): List[VizTooltip]
+  settings(optional) {
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type RetentionHeatmap (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  cohort: VizField
+  cohort_size(optional): VizField
+  cohort_duration: VizField
+  cohort_value: VizField
+
+  settings(optional) {
+    display_percentage_values(optional): Boolean
+    convert_empty_to_zero(optional): Boolean
+    @doc row_limit has no effect on RetentionHeatmap and should not be used. Retained only for legacy compatibility ;;
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type ConversionFunnel  (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  breakdown_by(optional): VizField
+  values: List[VizField]
+  settings(optional) {
+    columns_color(optional): String
+    circle_color(optional): String
+    row_limit(optional): Number
+    show_label(optional): Boolean
+    show_table(optional): Boolean
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type MetricSeries {
+  field: VizField
+  settings(optional) {
+    indent(optional): Number
+    mark_type(optional): 'column' | 'line'
+  }
+}
+Type MetricHeading {
+  label: String
+  settings(optional) {
+    indent(optional): Number
+    text_color(optional): String
+    background_color(optional): String
+  }
+}
+Type MetricSheet (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  date_field: VizField
+  rows: List[MetricSeries | MetricHeading]
+  settings(optional) {
+    max_column(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type RelativePopValue {
+  duration: Number
+  granularity: 'day' | 'week' | 'month' | 'quarter' | 'year'
+}
+Type AbsolutePopValue {
+  from: String
+  to: String
+}
+Type VizPopSettings {
+  field: VizFieldRef
+  show_growth_rate(optional): Boolean
+  value(optional): RelativePopValue | AbsolutePopValue
+
+  @doc Deprecated. use "value" instead ;;
+  duration(optional): Number
+  @doc Deprecated. use "value" instead ;;
+  granularity(optional): 'day' | 'week' | 'month' | 'quarter' | 'year'
+}
+Type VizAggregateAwareness {
+  enabled(default: true): Boolean
+  debug_comments(default: true): Boolean
+}
+
+Type MetricKpi (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  value: VizField
+  compare_value(optional): VizField | VizPopSettings
+  settings(optional) {
+    @doc Deprecated. Put "reverse_color" inside "compare_value" instead ;;
+    reverse_color(optional): Boolean
+    display_mode(optional): 'single' | 'compare_by_number' | 'compare_by_percent' | 'progress'
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+    label(optional): TextStyle
+    metric_value(optional): TextStyle
+    alignment(optional): AlignmentPosition
+    progress(optional) {
+      bar(optional) {
+        color(optional): String
+      }
+      text(optional): TextStyle
+    }
+    compare_value(optional) {
+      reverse_color(optional): Boolean
+      font_size(optional): Number
+    }
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type RadarChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  label(optional): String
+  x_axis(optional): VizField
+  legend(optional): VizField
+  y_axis(multiple: true, unique_elem_name: false) {
+    field: VizField
+    color(optional): String
+  }
+  settings(optional) {
+    legend_label(optional): LegendPosition
+    y_axis_min(optional): Number
+    y_axis_max(optional): Number
+    grid_line(optional): 'polygon' | 'circle'
+    series_type(optional): 'line' | 'area'
+    show_data_label(optional): Boolean
+    show_marker(optional): Boolean
+    row_limit(optional): Number
+    sort(optional): 'asc' | 'desc'
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type WordCloud (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  words: VizField
+  weight: VizField
+  settings(optional) {
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type GaugeChart (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  value: VizField
+  max_value: VizField
+  settings(optional) {
+    label(optional): String
+    suffix(optional): String
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type MapTileProvider = 'light' | 'dark' | 'street' | 'satellite' | 'outdoor' | 'onemap' | 'onemap_landlot'
+
+Type Heatmap (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  lat: VizField
+  lng: VizField
+  value(optional): VizField
+  settings(optional): {
+    map_background(optional): MapTileProvider
+    opacity(optional): Number
+    intensity(optional): Number
+    default_view(optional) {
+      zoom_level: Number
+      center {
+        lat: Number
+        lng: Number
+      }
+    }
+    color_scale(optional): 'vertical' | 'horizontal' | 'hidden'
+    value_colors(optional): {
+      min {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+      mid(optional) {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color(optional): String
+      }
+      max {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+    }
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type PointMap (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  lat: VizField
+  lng: VizField
+  legend(optional): VizField
+  tooltips(optional): List[VizTooltip]
+  value(optional): VizField
+  settings(optional): {
+    color_scale(optional): 'vertical' | 'horizontal' | 'hidden'
+    map_background(optional): MapTileProvider
+    point_size(optional): Number,
+    default_view(optional) {
+      zoom_level: Number
+      center {
+        lat: Number
+        lng: Number
+      }
+    }
+    scale(optional): 'linear' | 'logarithmic'
+    legend_colors (optional) {
+      color: String
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color: String
+      }
+    }
+    value_colors(optional): {
+      style(optional): 'step' | 'smooth'
+      steps(optional): Number
+      min {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+      mid(optional) {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color(optional): String
+      }
+      max {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+    }
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type CustomMapLocation {
+  custom_map_id: Number
+  custom_map_property: String
+}
+
+Type FilledMap (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  location(multiple: true, unique_elem_name: false) {
+    field: VizField
+    location_type(optional): 'country' | 'city' | 'continent' | 'state' | 'none' | CustomMapLocation
+    primary_field(optional): Boolean
+  }
+  legend(optional): VizField
+  value(optional): VizField
+  tooltips(optional): List[VizTooltip]
+  settings(optional): {
+    color_scale(optional): 'vertical' | 'horizontal' | 'hidden'
+    map_background(optional): MapTileProvider
+    default_view(optional) {
+      zoom_level: Number
+      center {
+        lat: Number
+        lng: Number
+      }
+    }
+    value_colors(optional): {
+      style(optional): 'step' | 'smooth'
+      steps(optional): Number
+      min {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+      mid(optional) {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color(optional): String
+      }
+      max {
+        type(optional): 'value' | 'percentage'
+        value(optional): Number
+        color: String
+      }
+    }
+    legend_colors (optional) {
+      color: String
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color: String
+      }
+    }
+    location_colors (optional) {
+      color: String
+      point(multiple: true) {
+        value: String | Number | Boolean
+        color: String
+      }
+    }
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type CustomChart {
+  custom_chart_id: Number
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  field (elem_name_as: 'uname', body_as: 'val', multiple: true, unique_elem_name: true) : VizField
+  setting (elem_name_as: 'uname', body_as: 'val', multiple: true, unique_elem_name: true) : Boolean | String | Number
+  settings(optional) {
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+  }
+  theme(optional): VizTheme
+}
+
+Type MarkdownViz (elem_name_as: 'uname') {
+  dataset: String | Dataset
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    formula: Heredoc['aml' | 'sql' | 'aql']
+    calc_type: 'dimension' | 'measure'
+    data_type: DataType
+    model(optional): String | Model
+  }
+  conditions(optional): List[String]
+  filter_groups(optional): List[FilterGroup]
+  filter(multiple: true) {
+    field: VizFieldRef
+    aggregation(optional): AggregationType
+    operator: Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+    modifier(optional): Modifier
+    options(optional): ConditionOptions
+  }
+  rows(optional): List[VizField]
+  columns(optional): List[VizField]
+  values(optional): List[VizField]
+
+  content: Heredoc['md']
+
+  settings(optional) {
+    pagination_size(optional): Number
+    show_row_with_no_data(optional): Boolean
+    show_row_total(optional): Boolean
+    show_column_total(optional): Boolean
+    show_sub_total(optional): Boolean
+    sorts(optional): List[SortSetting]
+    pop(optional): VizPopSettings
+    row_limit(optional): Number
+    aggregate_awareness(optional): VizAggregateAwareness
+    analysis_interactions(optional): AnalysisInteractions
+  }
+  theme(optional): VizTheme
+  context(optional) {
+    analysis(optional): AnalysisContext
+  }
+}
+
+Type Viz = DataTable | PivotTable | LineChart | ColumnChart | BarChart | AreaChart | CombinationChart | PieChart | PyramidChart | FunnelChart | RetentionHeatmap | BubbleChart | ScatterChart | ConversionFunnel | MetricSheet| MetricKpi | GaugeChart | WordCloud | RadarChart | Heatmap | FilledMap | PointMap | CustomChart | MarkdownViz
