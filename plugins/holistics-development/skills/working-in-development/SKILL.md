@@ -6,6 +6,7 @@ description: Use Holistics analytics engineering skills and tooling to develop a
 # Working in development
 * Holistics Development environment is where the user develops their analytics as-code (AMQL), including modeling, metrics, dashboards, etc. before publishing them to the Reporting environment to provide analytics to end-users.
 * Set up Holistics MCP to use powerful Holistics tools and make your development faster, more efficient, and more accurate.
+* **ALWAYS** read [](../../references/holistics.md), and other references if necessary, to understand the Holistics and AMQL context
 
 ## Holistics CLI
 ### Setup (once)
