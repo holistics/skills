@@ -1,0 +1,205 @@
+Dashboard car_retails_dashboard {
+  title: 'Car Retails'
+  description: ''
+  owner: 'scott.bui@holistics.io'
+  block title: TextBlock {
+    content: @md # Your title goes here ;;
+  }
+  block v_2c7f: VizBlock {
+    label: 'Count of Employee_number by Country and City'
+    viz: ColumnChart {
+      dataset: car_retails
+      x_axis: VizFieldFull {
+        ref: r(car_retails_offices.country)
+        format {
+          type: 'text'
+        }
+      }
+      legend: VizFieldFull {
+        ref: r(car_retails_offices.city)
+        format {
+          type: 'text'
+        }
+      }
+      y_axis {
+        series {
+          field: VizFieldFull {
+            ref: r(car_retails_employees.employee_number)
+            aggregation: 'count'
+            format {
+              type: 'number'
+              pattern: 'inherited'
+            }
+          }
+          settings {
+            point {
+              value: 'Boston'
+              color: '#255DD4'
+            }
+            point {
+              value: 'London'
+              color: '#18A59E'
+            }
+            point {
+              value: 'NYC'
+              color: '#07326C'
+            }
+            point {
+              value: 'Paris'
+              color: '#AF7DED'
+            }
+            point {
+              value: 'San Francisco'
+              color: '#A50E43'
+            }
+            point {
+              value: 'Sydney'
+              color: '#F2B602'
+            }
+            point {
+              value: 'Tokyo'
+              color: '#E27712'
+            }
+          }
+        }
+      }
+      settings {
+        row_limit: 5000
+        x_axis_show_null_datetime: false
+        aggregate_awareness {
+          enabled: true
+          debug_comments: true
+        }
+      }
+    }
+  }
+
+  block v_total_sales: VizBlock {
+    settings {
+      hide_label: true
+    }
+    label: ''
+    viz: MetricKpi {
+      dataset: car_retails
+      calculation total_sales_amount {
+        label: ''
+        formula: @aql car_retails_payments | sum(car_retails_payments.amount);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      value: VizFieldFull {
+        ref: 'total_sales_amount'
+        format {
+          type: 'number'
+          pattern: '#,###0.00'
+        }
+      }
+      settings {
+        display_mode: 'single'
+        alignment: 'center'
+      }
+    }
+  }
+  block v_unique_customers: VizBlock {
+    label: 'Unique Customer Count KPI'
+    viz: MetricKpi {
+      dataset: car_retails
+      calculation unique_customer_count {
+        label: 'Unique Customer Count'
+        formula: @aql car_retails_customers | count_distinct(car_retails_customers.customer_number);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      value: VizFieldFull {
+        ref: 'unique_customer_count'
+        format {
+          type: 'number'
+          pattern: '#,###'
+        }
+      }
+      settings {
+        display_mode: 'single'
+        alignment: 'center'
+        metric_value {
+          font_size: 36
+        }
+        label {
+          font_size: 16
+        }
+        row_limit: 1
+      }
+    }
+    settings {
+      hide_label: true
+    }
+  }
+  block v_monthly_sales: VizBlock {
+    label: 'Monthly Sales Trend'
+    viz: LineChart {
+      dataset: car_retails
+      calculation total_amount {
+        label: 'Total Amount'
+        formula: @aql car_retails_payments | sum(car_retails_payments.amount);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      x_axis: VizFieldFull {
+        label: 'Payment Month'
+        ref: r(car_retails_payments.payment_date)
+        transformation: 'datetrunc month'
+        format {
+          type: 'date'
+          pattern: 'LLL yyyy'
+        }
+      }
+      y_axis {
+        series {
+          field: VizFieldFull {
+            label: 'Total Amount'
+            ref: 'total_amount'
+            format {
+              type: 'number'
+              pattern: '#,###0.00'
+            }
+          }
+        }
+      }
+      settings {
+        sort: LineFamilySort {
+          type: 'xaxis'
+          direction: 'asc'
+        }
+        row_limit: 100
+        show_data_points: true
+      }
+    }
+  }
+
+  view: CanvasLayout {
+    label: 'View 1'
+    width: 1300
+    height: 800
+    grid_size: 20
+    auto_expand_vertically: true
+    block title {
+      position: pos(20, 20, 1260, 60)
+    }
+    block v_total_sales {
+      position: pos(20, 100, 400, 120)
+    }
+    block v_unique_customers {
+      position: pos(440, 100, 400, 120)
+    }
+    block v_monthly_sales {
+      position: pos(20, 240, 820, 280)
+    }
+    block v_2c7f {
+      position: pos(860, 100, 420, 420)
+    }
+    mobile {
+      mode: 'auto'
+    }
+  }
+
+  theme: H.themes.vanilla
+}
