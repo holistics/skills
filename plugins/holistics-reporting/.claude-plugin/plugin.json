@@ -1,0 +1,19 @@
+{
+  "name": "holistics-reporting",
+  "version": "0.0.1",
+  "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
+  "repository": "https://github.com/holistics/holistics-agent-skills",
+  "keywords": ["holistics", "analytics", "aql", "reporting", "bi", "dashboards"],
+  "owner": {
+    "name": "Holistics",
+    "email": "engineering@holistics.io"
+  },
+  "skills": [
+    "./skills/working-in-reporting",
+    "./skills/search-docs",
+    "./skills/use-existing-viz",
+    "./skills/analyze-data",
+    "./skills/visualize-data",
+    "./skills/write-aql"
+  ]
+}
