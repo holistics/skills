@@ -1,0 +1,163 @@
+Type AnalysisContextUnderlyingData {
+  metric(elem_name_as: 'metric', multiple: true, unique_elem_name: true) {
+    view(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+      label(optional): String
+      description(optional): String
+      fields: List[FieldRef]
+    }
+  }
+}
+
+Type AnalysisContextBreakdown {
+  group(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
+    label(optional): String
+    description(optional): String
+    fields: List[FieldRef]
+  }
+}
+
+Type AnalysisContext {
+  underlying_data(optional): AnalysisContextUnderlyingData
+
+  breakdown(optional): AnalysisContextBreakdown
+}
+
+Type AnalysisInteractions {
+  view_underlying_data(optional) { enabled(optional): Boolean }
+  breakdown(optional) {
+    enabled(optional): Boolean
+    smart_suggestions_enabled(optional): Boolean
+  }
+}
+
+Type DatasetDimension (elem_name_as: 'name') {
+  model                          : Model
+  label                          : String
+  type                           : DimensionType
+  hidden        (default: false) : Boolean
+  description   (optional)       : String
+  definition    (optional)       : Heredoc[Any]
+  format        (optional)       : Format
+}
+
+Type Metric (elem_name_as: 'name') {
+  label                          : String
+  type                           : MeasureType
+  hidden        (default: false) : Boolean
+  description   (optional)       : String
+  definition                     : Heredoc['aql']
+  format        (optional)       : Format
+}
+
+Type DatasetSettings {
+  analysis_interactions(optional): AnalysisInteractions
+}
+
+Type DatasetContext {
+  analysis(optional): AnalysisContext
+}
+
+Type Dataset (elem_name_as: 'name') {
+  __engine__ (optional): String
+  label (optional): String
+  description (optional): String
+  owner (optional): String
+  data_source_name: String | Slot[String]
+  models: List[Any]
+  relationships: List[Any]
+  distinct_rows (default: true): Boolean
+
+  dimension (
+    elem_name_as: 'name',
+    multiple: true
+  ): DatasetDimension
+
+  metric (
+    elem_name_as: 'name',
+    multiple: true,
+    unique_elem_name,
+    root_namespace
+  ): Metric
+
+  view (optional, multiple: true) {
+    model (
+      elem_name_as: 'name',
+      multiple: true,
+      optional,
+      allow_no_body
+    ) {
+      group (
+        elem_name_as: 'name',
+        multiple: true,
+        optional
+      ) {
+        field (
+          elem_name_as: 'name',
+          multiple: true,
+          allow_no_body
+        )
+      }
+      field (
+        elem_name_as: 'name',
+        multiple: true,
+        optional,
+        allow_no_body
+      )
+    }
+    group (
+      elem_name_as: 'name',
+      multiple: true,
+      optional
+    ) {
+      model (
+        elem_name_as: 'name',
+        multiple: true,
+        allow_no_body
+      ) {
+        group (
+          elem_name_as: 'name',
+          multiple: true,
+          optional
+        ) {
+          field (
+            elem_name_as: 'name',
+            multiple: true,
+            allow_no_body
+          )
+        }
+        field (
+          elem_name_as: 'name',
+          multiple: true,
+          optional,
+          allow_no_body
+        )
+      }
+
+      metric (
+        elem_name_as: 'name',
+        multiple: true,
+        optional,
+        allow_no_body
+      )
+    }
+  }
+
+  pre_aggregates (optional): Dict[String, PreAggregate]
+
+  permission (
+    elem_name_as: 'name',
+    unique_elem_name,
+    multiple
+  ) {
+    field: FieldRef,
+    operator (default: 'is'): Operator
+    value: String | Number | Boolean | List[String | Number | Boolean]
+            // | Slot[String] | Slot[Number] | Slot[Boolean]
+  }
+
+  context(optional): DatasetContext
+
+  settings(optional): DatasetSettings
+}
+
+Type PartialDataset = Partial[Dataset]

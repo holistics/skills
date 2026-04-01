@@ -1,0 +1,21 @@
+Type ImportColumnConfig {
+  csv_column: String
+  db_column: String
+  data_type: DimensionType
+}
+
+Type ImportSource (elem_name_as: 'name') {
+  type: 'csv' | 'excel' | 'spreadsheet'
+  original_file_name: String
+  hash: String
+  uploaded_at (optional): String
+  column_configs (optional): List[ImportColumnConfig]
+  settings (optional) {
+    delimiter (optional): String
+    encoding (optional): String
+    has_header (optional): Boolean
+    quote_char (optional): String
+    escape_char (optional): String
+    skip_rows (optional): Number
+  }
+}

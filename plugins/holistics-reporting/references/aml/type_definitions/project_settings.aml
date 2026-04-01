@@ -1,0 +1,9 @@
+Type ProjectSettings {
+  dashboard(optional) {
+    default_template(optional): Dashboard
+  }
+  data_import(optional) {
+    default_write_schema(optional): String
+  }
+}
+

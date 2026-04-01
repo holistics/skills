@@ -1,0 +1,23 @@
+Type EmbedDashboard {
+  dashboard: Dashboard
+}
+
+Type EmbedDataset {
+  dataset: Dataset
+}
+
+Type EmbedObject = EmbedDashboard | EmbedDataset | Dashboard | Dataset
+
+// Type EmbedOrg (elem_name_as: 'uname')  {
+//   objects: List[EmbedObject]
+// }
+
+Type EmbedPortal (elem_name_as: 'uname') {
+  description (optional): String
+  objects: List[EmbedObject]
+  initial_object (optional): Dashboard | Dataset | 'ai'
+  required_permissions (optional): List[Any]
+  on_missing_user_attribute (default: 'show_error'): 'show_error' | 'show_no_data'
+  default_user_attributes (default: {}): Dict[String, String | Number | Boolean | List[String | Number | Boolean]]
+  // orgs (optional): List[EmbedOrg]
+}
