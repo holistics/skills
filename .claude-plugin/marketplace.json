@@ -12,12 +12,12 @@
     {
       "name": "holistics-reporting",
       "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
-      "source": "./plugins/holistics-reporting"
+      "source": "./skills/holistics-reporting"
     },
     {
       "name": "holistics-development",
       "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env.",
-      "source": "./plugins/holistics-development"
+      "source": "./skills/holistics-development"
     }
   ]
 }
