@@ -9,7 +9,7 @@ description: Use Holistics analytics skills and tooling to work with Holistics a
 
 ## Holistics MCP
 ### Setup (once)
-Use [](../setup-holistics-mcp/) skill
+Use [](../setup-live-holistics-mcp/) skill
 
 ### Usage
 Utilize relevant Holistics MCP tools for your work. They provide high-quality knowledge and outputs.

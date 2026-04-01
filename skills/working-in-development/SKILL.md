@@ -18,7 +18,7 @@ Use [](../setup-holistics-cli/) skill
 
 ## Holistics MCP
 ### Setup (once)
-Use [](../setup-holistics-mcp/) skill
+Use [](../setup-dev-holistics-mcp/) skill
 
 ### Usage
 Utilize relevant Holistics MCP tools for your work. They provide high-quality knowledge and outputs.
