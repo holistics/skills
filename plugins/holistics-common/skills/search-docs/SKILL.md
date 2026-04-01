@@ -18,4 +18,5 @@ description: Search Holistics documentation to answer questions about features, 
 Use `search_docs` to look up Holistics knowledge. Do **NOT** use `search_docs` for how to use your tools — you are already provided with enough information for that.
 
 ## Other references
-* You can check out https://docs.holistics.io when `search_docs` doesn't work well.
+* See [](../../references/)
+* You can also check out https://docs.holistics.io when `search_docs` doesn't work well.

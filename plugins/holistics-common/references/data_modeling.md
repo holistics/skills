@@ -6,8 +6,7 @@
 * A Dataset CANNOT reference database tables directly. Users must create data models on top of those tables first.
 
 ## Examples
-* [](/aml/examples/model.md)
-* [](/aml/examples/dataset.md)
+* See [](./aml/examples/)
 
 ## Related
 * [](./data_format.md)

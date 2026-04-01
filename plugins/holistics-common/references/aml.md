@@ -6,8 +6,8 @@ Type uname {
 }
 ```
 
-## Definitions
-See [](./aml/definitions/) folder.
+## Type definitions
+See [](./aml/type_definitions/) folder.
 
 ## Examples
 See [](./aml/examples/) folder.
