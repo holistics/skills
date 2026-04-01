@@ -1,5 +1,3 @@
-Example AML Dataset:
-```aml
 const orders_detail = [
   r(ecommerce_orders.id),
   r(ecommerce_orders.status),
@@ -23,7 +21,7 @@ const products_detail = [
 ]
 
 @tag('1️⃣ Trust/Endorsed')
-Dataset demo_ecommerce_version_2 {
+Dataset demo_ecommerce {
   label: '[Demo] Ecommerce Official (2025)'
   description: '''
 # Dataset Capabilities
@@ -324,4 +322,3 @@ Note: For "fulfilled AOV," you would need NMV per delivered order.
     }
   }
 }
-```

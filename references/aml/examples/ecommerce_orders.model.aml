@@ -1,5 +1,3 @@
-Example AML Model:
-```aml
 @tag('1️⃣ Trust/Endorsed')
 Model ecommerce_orders {
   type: 'table'
@@ -88,4 +86,3 @@ Model ecommerce_orders {
     definition: @aql count(ecommerce_orders.id) | where(ecommerce_orders.created_at matches @2024) ;;
   }
 }
-```
