@@ -12,3 +12,5 @@ Within claude code, run this command to add Holistics skills marketplace:
 ```
 
 Then, browse and install the relevant plugins via `/plugin` > `Marketplaces` > `holistics-skills` > `Browse plugins` > Install
+
+(Optional) enable auto-update via `/plugin` > `Marketplaces` > `holistics-skills` > `Enable auto-update`
