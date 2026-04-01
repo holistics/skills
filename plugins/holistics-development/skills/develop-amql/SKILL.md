@@ -39,5 +39,5 @@ description: Write and edit AML/AQL code for Holistics models, datasets, dashboa
 
 ## Related skills
 * [](../search-docs/)
-* [](../writing-aql/)
-* [](../visualizing-data/)
+* [](../write-aql/)
+* [](../visualize-data/)
