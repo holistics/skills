@@ -2,6 +2,7 @@
   "name": "skills",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "private": true,
   "scripts": {
     "commit": "git-cz",
