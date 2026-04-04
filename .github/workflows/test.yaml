@@ -1,0 +1,18 @@
+name: Test
+
+on:
+  workflow_call:
+    inputs:
+      all:
+        type: boolean
+        default: false
+
+jobs:
+  commitlint:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: wagoid/commitlint-github-action@v6
