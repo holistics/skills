@@ -3,7 +3,9 @@ set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-while IFS= read -r -d '' link_file; do
+sync_link() {
+  local link_file="$1"
+  local dest_dir source_rel source_dir
   dest_dir="$(dirname "$link_file")"
   source_rel="$(cat "$link_file" | tr -d '[:space:]')"
   source_dir="$REPO_ROOT/$source_rel"
@@ -14,11 +16,20 @@ while IFS= read -r -d '' link_file; do
   fi
 
   echo "Syncing ${dest_dir#"$REPO_ROOT/"} <- $source_rel"
-  # Wipe dest and replace with a fresh copy of source, then restore .link
   rm -rf "$dest_dir"
   cp -r "$source_dir" "$dest_dir"
   echo "$source_rel" > "$dest_dir/.link"
-done < <(find "$REPO_ROOT" -name '.link' -print0)
+}
+
+if [ $# -eq 1 ]; then
+  arg="$1"
+  [[ "$arg" != */.link ]] && arg="$arg/.link"
+  sync_link "$arg"
+else
+  while IFS= read -r -d '' link_file; do
+    sync_link "$link_file"
+  done < <(find "$REPO_ROOT" -name '.link' -print0)
+fi
 
 echo ""
 echo "All links synced."

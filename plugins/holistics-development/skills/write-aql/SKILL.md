@@ -33,3 +33,6 @@ description: Write and run AQL (Analytic Query Language) queries to answer data 
 * Always try to provide a summary with highlightable data/numbers (or even short insights) for the result. But do NOT repeat the result in your answer.
 * Remember that `execute_aql` tool shows the AQL and its result directly to the user. You should not repeat the AQL in your answer.
 * If the AQL comes from past conversations, ALWAYS mention the past conversations in your final answer.
+
+## Related skills
+* Writing and executing AQL only return plain table data. To retrieve visualized data (e.g. pivot tables, column charts), use [](../visualize-data/) skill.
