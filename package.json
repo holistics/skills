@@ -5,7 +5,11 @@
   "private": true,
   "scripts": {
     "commit": "git-cz",
-    "prepare": "husky"
+    "prepare": "husky",
+    "bump": "node scripts/bump.js",
+    "sync-links": "bash scripts/sync-links.sh",
+    "create-link": "bash scripts/create-link.sh",
+    "validate-links": "bash scripts/validate-links.sh"
   },
   "config": {
     "commitizen": {
@@ -18,10 +22,11 @@
     "@commitlint/cz-commitlint": "^20.2.0",
     "@commitlint/types": "^20.2.0",
     "commitizen": "^4.3.0",
-    "conventional-changelog-cli": "^5.0.0",
+    "conventional-changelog": "^7.2.0",
     "conventional-changelog-conventionalcommits": "^8.0.0",
     "conventional-changelog-core": "^8.0.0",
-    "husky": "^9.1.5"
+    "husky": "^9.1.5",
+    "semver": "^7.7.4"
   },
   "keywords": [],
   "packageManager": "pnpm@10.22.0"
