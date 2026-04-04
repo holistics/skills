@@ -1,0 +1,51 @@
+name: Tag new version for a plugin
+description: |
+  Create a new GitHub tag for a released plugin version.
+  Reads version from .claude-plugin/plugin.json and creates the appropriate tag.
+
+inputs:
+  plugin:
+    description: 'Plugin name (e.g., holistics-development)'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Get version from plugin.json
+      id: get-version
+      shell: bash
+      working-directory: ./plugins/${{ inputs.plugin }}
+      run: |
+        set -euo pipefail
+        VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
+        echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+        TAG="${{ inputs.plugin }}-v${VERSION}"
+        echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Check if tag exists
+      id: check-tag
+      shell: bash
+      run: |
+        TAG="${{ steps.get-version.outputs.TAG }}"
+        if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+          echo "Tag $TAG already exists"
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "Tag $TAG does not exist"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create and push tag
+      if: steps.check-tag.outputs.exists != 'true'
+      shell: bash
+      env:
+        TAG: ${{ steps.get-version.outputs.TAG }}
+      run: |
+        git tag "$TAG" HEAD
+        git push -u origin "$TAG"
+        echo "Created tag: $TAG"
+
+    - name: Skip existing tag
+      if: steps.check-tag.outputs.exists == 'true'
+      shell: bash
+      run: echo "Skipping — tag ${{ steps.get-version.outputs.TAG }} already exists"

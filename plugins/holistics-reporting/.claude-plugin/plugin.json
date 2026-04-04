@@ -1,11 +1,18 @@
 {
   "name": "holistics-reporting",
   "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Holistics"
   },
   "homepage": "https://holistics.io",
   "repository": "https://github.com/holistics/skills",
-  "keywords": ["holistics", "analytics", "aql", "reporting", "bi", "dashboards"]
+  "keywords": [
+    "holistics",
+    "analytics",
+    "aql",
+    "reporting",
+    "bi",
+    "dashboards"
+  ]
 }

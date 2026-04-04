@@ -5,8 +5,10 @@ description: Use Holistics analytics skills and tooling to work with Holistics a
 
 # Working in reporting
 * Holistics Reporting environment is where the user utilize the already-published analytics to query datasets, view dashboards, or do self-serve analytics in general, to gain insights for their business.
+
+## Mandatory preparation steps
+* **ALWAYS** read [](../../references/holistics.md), and other references if necessary, to understand the Holistics context properly. Your knowledge and assumptions about Holistics are likely inaccurate or outdated.
 * Set up Holistics MCP to use powerful Holistics tools and to perform analytics faster, more efficient, and more accurate.
-* **ALWAYS** read [](../../references/holistics.md), and other references if necessary, to understand the Holistics context
 
 ## Holistics MCP
 ### Setup (once)

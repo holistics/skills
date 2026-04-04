@@ -1,0 +1,45 @@
+name: Tag new version for the marketplace
+description: |
+  Create a new GitHub tag for a released marketplace version.
+  Reads version from .claude-plugin/marketplace.json and creates the appropriate tag.
+
+runs:
+  using: composite
+  steps:
+    - name: Get version from marketplace.json
+      id: get-version
+      shell: bash
+      run: |
+        set -euo pipefail
+        VERSION=$(jq -r '.metadata.version' .claude-plugin/marketplace.json)
+        echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+        TAG="marketplace-v${VERSION}"
+        echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
+
+    - name: Check if tag exists
+      id: check-tag
+      shell: bash
+      run: |
+        TAG="${{ steps.get-version.outputs.TAG }}"
+        if git ls-remote --tags origin | grep -q "refs/tags/${TAG}$"; then
+          echo "Tag $TAG already exists"
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "Tag $TAG does not exist"
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Create and push tag
+      if: steps.check-tag.outputs.exists != 'true'
+      shell: bash
+      env:
+        TAG: ${{ steps.get-version.outputs.TAG }}
+      run: |
+        git tag "$TAG" HEAD
+        git push -u origin "$TAG"
+        echo "Created tag: $TAG"
+
+    - name: Skip existing tag
+      if: steps.check-tag.outputs.exists == 'true'
+      shell: bash
+      run: echo "Skipping — tag ${{ steps.get-version.outputs.TAG }} already exists"
