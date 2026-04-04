@@ -4,12 +4,33 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ERRORS=0
 WARNINGS=0
+SOFT_WARNINGS=false
 
-# Warn about .link files deleted in the working tree or staging area
+for arg in "$@"; do
+  [ "$arg" = "--soft-warnings" ] && SOFT_WARNINGS=true
+done
+
+# Detect removed .link files
+removed_links=()
 while IFS= read -r deleted; do
-  echo "WARNING: .link file removed — run 'pnpm sync-links' or restore it: $deleted"
-  ((WARNINGS++))
+  removed_links+=("$deleted")
 done < <(git -C "$REPO_ROOT" diff --name-only HEAD -- '*.link' 2>/dev/null | grep '\.link$' || true)
+
+if [ "${#removed_links[@]}" -gt 0 ]; then
+  for f in "${removed_links[@]}"; do
+    echo "WARNING: .link file removed: $f"
+    ((WARNINGS++))
+  done
+  echo ""
+
+  if [ "$SOFT_WARNINGS" = false ]; then
+    read -r -p "Proceed with removed links? [y/N] " reply
+    if [[ ! "$reply" =~ ^[Yy]$ ]]; then
+      echo "Aborted."
+      exit 1
+    fi
+  fi
+fi
 
 # Validate contents of each linked directory against its source
 while IFS= read -r -d '' link_file; do
