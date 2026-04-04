@@ -1,0 +1,86 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: continuous_delivery
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+    secrets: inherit
+
+  test_passed:
+    needs: [test]
+    # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks#handling-skipped-but-required-checks
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: re-actors/alls-green@release/v1
+        with:
+          jobs: ${{ toJSON(needs) }}
+
+  changes:
+    runs-on: ubuntu-24.04
+    outputs:
+      holistics_development: ${{ steps.filter.outputs.holistics_development_any_changed }}
+      holistics_reporting: ${{ steps.filter.outputs.holistics_reporting_any_changed }}
+      marketplace: ${{ steps.filter.outputs.marketplace_any_changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: tj-actions/changed-files@v45
+        id: filter
+        with:
+          files_yaml: |
+            holistics_development:
+              - 'plugins/holistics-development/.claude-plugin/plugin.json'
+            holistics_reporting:
+              - 'plugins/holistics-reporting/.claude-plugin/plugin.json'
+            marketplace:
+              - '.claude-plugin/marketplace.json'
+      - name: Show changes
+        run: echo "$OUTPUTS"
+        shell: bash
+        env:
+          OUTPUTS: ${{ toJSON(steps.filter.outputs) }}
+
+  tag_holistics_development:
+    needs: [test_passed, changes]
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.holistics_development == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.HOLISTICS_DEPLOY_KEY }}
+      - name: Tag version for holistics-development
+        uses: ./.github/actions/tag_version_plugin
+        with:
+          plugin: development
+
+  tag_holistics_reporting:
+    needs: [test_passed, changes]
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.holistics_reporting == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.HOLISTICS_DEPLOY_KEY }}
+      - name: Tag version for holistics-reporting
+        uses: ./.github/actions/tag_version_plugin
+        with:
+          plugin: reporting
+
+  tag_marketplace:
+    needs: [test_passed, changes]
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.marketplace == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.HOLISTICS_DEPLOY_KEY }}
+      - name: Tag version for marketplace
+        uses: ./.github/actions/tag_version_marketplace
