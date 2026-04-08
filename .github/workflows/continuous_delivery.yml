@@ -59,7 +59,7 @@ jobs:
       - name: Tag version for holistics-development
         uses: ./.github/actions/tag_version_plugin
         with:
-          plugin: development
+          plugin: holistics-development
 
   tag_holistics_reporting:
     needs: [test_passed, changes]
@@ -72,7 +72,7 @@ jobs:
       - name: Tag version for holistics-reporting
         uses: ./.github/actions/tag_version_plugin
         with:
-          plugin: reporting
+          plugin: holistics-reporting
 
   tag_marketplace:
     needs: [test_passed, changes]
