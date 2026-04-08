@@ -1,7 +1,7 @@
 {
   "name": "holistics-reporting",
   "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": {
     "name": "Holistics"
   },
