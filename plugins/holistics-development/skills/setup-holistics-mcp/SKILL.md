@@ -1,6 +1,6 @@
 ---
 name: setup-holistics-mcp
-description: Use this skill to set up Holistics MCP and enable useful tools such as `execute_aql` and `generate_viz`
+description: Use this skill to set up Holistics MCP and enable useful tools such as `search_docs`, `execute_aql`, and `generate_viz`
 ---
 
 ## Holistics MCP
@@ -12,7 +12,7 @@ description: Use this skill to set up Holistics MCP and enable useful tools such
   * EU: https://mcp-eu.holistics.io/mcp
   * Other: let user input
 3. Ask the user to provide their Holistics API Key
-4. Configure MCP server for the user
+4. Configure MCP server for the user (preferrably using Claude CLI)
 ```json
 {
   "mcpServers": {
