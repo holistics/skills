@@ -1,6 +1,6 @@
 ---
 name: working-in-reporting
-description: Use Holistics analytics skills and tooling to work with Holistics analytics more effeciently and effectively. Tooling includes: MCP tools such as `generate_viz`, `search_docs`. Use this whenever the user is trying to perform analytics using their Holistics platform.
+description: "Use Holistics analytics skills and tooling to work with Holistics analytics more efficiently and effectively. Tooling includes MCP tools such as `generate_viz` and `search_docs`. Use this whenever the user is trying to perform analytics using their Holistics platform."
 ---
 
 # Working in reporting

@@ -1,6 +1,6 @@
 ---
 name: working-in-development
-description: Use Holistics analytics engineering skills and tooling to develop analytics in Holistics more effeciently and effectively. Tooling includes: MCP tools such as `generate_viz`, `search_docs`, and CLI such as `holistics aml validate`. Use this whenever working in a Holistics (AMQL) project.
+description: "Use Holistics analytics engineering skills and tooling to develop analytics in Holistics more efficiently and effectively. Tooling includes MCP tools such as `generate_viz` and `search_docs`, and CLI such as `holistics aml validate`. Use this whenever working in a Holistics (AMQL) project."
 ---
 
 # Working in development
