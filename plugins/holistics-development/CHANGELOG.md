@@ -1,3 +1,5 @@
+## [0.0.4](https://github.com/holistics/skills/compare/holistics-development-v0.0.3...holistics-development-v0.0.4) (2026-04-27)
+
 ## 0.0.3 (2026-04-08)
 
 ### Features
