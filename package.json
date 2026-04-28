@@ -10,7 +10,8 @@
     "bump": "node scripts/bump.js",
     "sync-links": "bash scripts/sync-links.sh",
     "create-link": "bash scripts/create-link.sh",
-    "validate-links": "bash scripts/validate-links.sh"
+    "validate-links": "bash scripts/validate-links.sh",
+    "validate-frontmatter": "node scripts/validate-frontmatter.js"
   },
   "config": {
     "commitizen": {
@@ -26,6 +27,8 @@
     "conventional-changelog": "^7.2.0",
     "conventional-changelog-conventionalcommits": "^8.0.0",
     "conventional-changelog-core": "^8.0.0",
+    "glob": "^13.0.6",
+    "gray-matter": "^4.0.3",
     "husky": "^9.1.5",
     "semver": "^7.7.4"
   },
