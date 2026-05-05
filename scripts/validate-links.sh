@@ -4,17 +4,17 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ERRORS=0
 WARNINGS=0
-SOFT_WARNINGS=false
+IGNORE_REMOVALS=false
 
 for arg in "$@"; do
-  [ "$arg" = "--soft-warnings" ] && SOFT_WARNINGS=true
+  [ "$arg" = "--ignore-removals" ] && IGNORE_REMOVALS=true
 done
 
 # Detect removed .link files
 removed_links=()
 while IFS= read -r deleted; do
   removed_links+=("$deleted")
-done < <(git -C "$REPO_ROOT" diff --name-only HEAD -- '*.link' 2>/dev/null | grep '\.link$' || true)
+done < <(git -C "$REPO_ROOT" diff --name-only --diff-filter=D HEAD -- '*.link' 2>/dev/null | grep '\.link$' || true)
 
 if [ "${#removed_links[@]}" -gt 0 ]; then
   for f in "${removed_links[@]}"; do
@@ -23,7 +23,7 @@ if [ "${#removed_links[@]}" -gt 0 ]; then
   done
   echo ""
 
-  if [ "$SOFT_WARNINGS" = false ]; then
+  if [ "$IGNORE_REMOVALS" = false ]; then
     read -r -p "Proceed with removed links? [y/N] " reply
     if [[ ! "$reply" =~ ^[Yy]$ ]]; then
       echo "Aborted."
