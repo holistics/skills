@@ -8,8 +8,12 @@ const Configuration: UserConfig = {
       2,
       'always',
       [
+        'plugins.common',
         'plugins.development',
         'plugins.reporting',
+        'native.common',
+        'native.development',
+        'native.reporting',
       ]
     ],
     'type-enum': [
