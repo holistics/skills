@@ -23,6 +23,11 @@
       "name": "analytics",
       "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools.",
       "source": "./plugins/analytics"
+    },
+    {
+      "name": "analytics-finance",
+      "description": "Analytics skills for finance and SaaS metrics: revenue, lifetime value, unit economics, and similar workflows.",
+      "source": "./plugins/analytics-finance"
     }
   ]
 }
