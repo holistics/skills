@@ -69,12 +69,15 @@ Then browse and install the relevant plugins via `/plugin` > `Marketplaces` > `h
 (Optional) enable auto-update via `/plugin` > `Marketplaces` > `holistics-skills` > `Enable auto-update`.
 
 ### Picking a plugin
-* `analytics`: Generic analytics workflows (data exploration, analysis, reporting) that aren't tied to Holistics. Use it on its own, or alongside the Holistics plugins below.
-* `holistics-development`: When you are developing your AMQL project with coding agents such as Claude Code, Codex, etc.
-* `holistics-reporting`: When you want to ask data questions on published AMQL objects (datasets, dashboards, etc.) with general agents such as Claude.ai, ChatGPT, etc.
+Browse the linked `skills/` folders to see the actual skill files for each plugin.
+
+* [`analytics`](./plugins/analytics/skills/): Generic analytics workflows (data exploration, analysis, reporting) that aren't tied to Holistics. Use it on its own, or alongside the plugins below.
+* [`analytics-finance`](./plugins/analytics-finance/skills/): Finance and SaaS metrics — lifetime value, unit economics, and similar workflows.
+* [`holistics-development`](./plugins/holistics-development/skills/): When you are developing your AMQL project with coding agents such as Claude Code, Codex, etc.
+* [`holistics-reporting`](./plugins/holistics-reporting/skills/): When you want to ask data questions on published AMQL objects (datasets, dashboards, etc.) with general agents such as Claude.ai, ChatGPT, etc.
 
 ## For Holistics native agent
-Skills under `native-skills/` can be imported into the **Holistics App** to extend its built-in AI agent. They run inside Holistics and have access to native web UI and backend features.
+Skills under [`native-skills/`](./native-skills/) can be imported into the **Holistics App** to extend its built-in AI agent. They run inside Holistics and have access to native web UI and backend features. Browse the folder to see what's available.
 
 To install: in the Skill creation UI inside Holistics, choose to import from the Holistics native skill library.
 
