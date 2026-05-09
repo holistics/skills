@@ -14,9 +14,9 @@ flowchart LR
         direction TB
         A[<b>Analytics skills</b><br/><i>plugins/analytics*</i>]
         H[<b>Holistics skills</b><br/><i>plugins/holistics-*</i>]
-        U1([Generic analytics tasks<br/>For both humans & AI agents])
+        U1([Generic analytics tasks<br/>For any humans & AI agents])
         P1(( + ))
-        U2([Your own AI agents<br/>Claude Code, Claude.ai, ChatGPT, etc.])
+        U2([Your own AI agents with Holistics access<br/>- Claude Code, Claude.ai, ChatGPT, etc.])
 
         A ---> U1
         A --- P1
