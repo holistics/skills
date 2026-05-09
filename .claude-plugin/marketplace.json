@@ -18,6 +18,11 @@
       "name": "holistics-development",
       "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env.",
       "source": "./plugins/holistics-development"
+    },
+    {
+      "name": "analytics",
+      "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools.",
+      "source": "./plugins/analytics"
     }
   ]
 }

@@ -11,6 +11,7 @@ const Configuration: UserConfig = {
         'plugins.common',
         'plugins.development',
         'plugins.reporting',
+        'plugins.analytics',
         'native.common',
         'native.development',
         'native.reporting',
