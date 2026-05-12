@@ -28,6 +28,7 @@ jobs:
       holistics_development: ${{ steps.filter.outputs.holistics_development_any_changed }}
       holistics_reporting: ${{ steps.filter.outputs.holistics_reporting_any_changed }}
       marketplace: ${{ steps.filter.outputs.marketplace_any_changed }}
+      native_skills: ${{ steps.filter.outputs.native_skills_any_changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +43,8 @@ jobs:
               - 'plugins/holistics-reporting/.claude-plugin/plugin.json'
             marketplace:
               - '.claude-plugin/marketplace.json'
+            native_skills:
+              - 'native-skills/**'
       - name: Show changes
         run: echo "$OUTPUTS"
         shell: bash
@@ -84,3 +87,11 @@ jobs:
           ssh-key: ${{ secrets.HOLISTICS_DEPLOY_KEY }}
       - name: Tag version for marketplace
         uses: ./.github/actions/tag_version_marketplace
+
+  release_native_skills_latest:
+    needs: [test_passed, changes]
+    if: needs.changes.outputs.native_skills == 'true'
+    uses: ./.github/workflows/release_native_skills_latest.yaml
+    permissions:
+      contents: write
+    secrets: inherit

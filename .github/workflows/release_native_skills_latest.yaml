@@ -1,0 +1,35 @@
+name: Release native-skills (latest)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build tarball
+        run: tar -czf native-skills.tar.gz -C native-skills .
+      - name: Update native-skills-latest release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          NOTES="Auto-generated tarball of \`native-skills/\` at commit ${GITHUB_SHA}."
+          if gh release view native-skills-latest >/dev/null 2>&1; then
+            echo "Release exists — updating asset in place and re-pointing tag"
+            gh release upload native-skills-latest native-skills.tar.gz --clobber
+            gh release edit native-skills-latest --notes "$NOTES"
+            git tag -f native-skills-latest "$GITHUB_SHA"
+            git push --force origin "refs/tags/native-skills-latest"
+          else
+            echo "Release does not exist — creating"
+            gh release create native-skills-latest native-skills.tar.gz \
+              --title "native-skills (latest)" \
+              --notes "$NOTES" \
+              --target "$GITHUB_SHA" \
+              --latest=false
+          fi
