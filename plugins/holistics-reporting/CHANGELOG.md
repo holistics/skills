@@ -1,3 +1,9 @@
+## [0.1.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.0.4...holistics-reporting-v0.1.0) (2026-05-13)
+
+### Features
+
+* update mcp to use OAuth ([e559e34](https://github.com/holistics/skills/commit/e559e349365e2b0d19052378fe19ec9190ca2789))
+
 ## [0.0.4](https://github.com/holistics/skills/compare/holistics-reporting-v0.0.3...holistics-reporting-v0.0.4) (2026-04-27)
 
 ## 0.0.3 (2026-04-08)
