@@ -6,29 +6,24 @@ description: Use this skill to set up Holistics MCP and enable useful tools such
 ## Holistics MCP
 ### Setup (once)
 1. Ask the user to [enable Holistics AI](https://docs.holistics.io/docs/ai#getting-started)
-2. Ask the user to pick their <MCP_SERVER_ADDRESS> from this list:
-  * APAC: https://mcp-apac.holistics.io/mcp
-  * US: https://mcp-us.holistics.io/mcp
-  * EU: https://mcp-eu.holistics.io/mcp
-  * Other: let user input
-3. Ask the user to provide their Holistics API Key
-4. Configure MCP server for the user (preferrably using Claude CLI)
+2. Ask the user to pick their <MCP_SERVER_ADDRESS> from based on their login URL:
+  * secure.holistics.io (APAC region) -> https://mcp-apac.holistics.io/development/mcp
+  * us.holistics.io (US region) -> https://mcp-us.holistics.io/development/mcp
+  * eu.holistics.io (EU region) -> https://mcp-eu.holistics.io/development/mcp
+  * Other: let user input the MCP URL
+3. Configure MCP server for the user (preferrably using Claude CLI)
 ```json
 {
   "mcpServers": {
     "holistics-development": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "mcp-remote",
-        "<MCP_SERVER_ADDRESS>",
-        "--header",
-        "X-Holistics-Key:<YOUR_HOLISTICS_API_KEY>"
-        "X-Holistics-Env:development"
-      ]
+      "type": "http",
+      "url": "<MCP_SERVER_ADDRESS>"
     }
   }
 }
 ```
 
-NOTE: at any point, if the user rejects a step (e.g. providing API key), you can give them instructions instead of doing the configuration for them.
+NOTE: at any point, if the user rejects a step, you can give them instructions instead of doing the configuration for them.
+
+### References
+* https://docs.holistics.io/docs/ai/mcp-server#how-to-connect
