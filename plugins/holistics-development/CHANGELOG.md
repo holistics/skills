@@ -1,3 +1,9 @@
+## [0.2.0](https://github.com/holistics/skills/compare/holistics-development-v0.1.0...holistics-development-v0.2.0) (2026-05-13)
+
+### Features
+
+* update mcp to use OAuth ([e559e34](https://github.com/holistics/skills/commit/e559e349365e2b0d19052378fe19ec9190ca2789))
+
 ## [0.1.0](https://github.com/holistics/skills/compare/holistics-development-v0.0.4...holistics-development-v0.1.0) (2026-05-05)
 
 ### Features
