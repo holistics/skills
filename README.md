@@ -77,9 +77,12 @@ Browse the linked `skills/` folders to see the actual skill files for each plugi
 * [`holistics-reporting`](./plugins/holistics-reporting/skills/): When you want to ask data questions on published AMQL objects (datasets, dashboards, etc.) with general agents such as Claude.ai, ChatGPT, etc.
 
 ## For Holistics native agent
-Skills under [`native-skills/`](./native-skills/) can be imported into the **Holistics App** to extend its built-in AI agent. They run inside Holistics and have access to native web UI and backend features. Browse the folder to see what's available.
+Skills under [`native-skills/`](./native-skills/) can be used by Holistics App to extend **Holistics native AI agent**. They run inside Holistics and have access to native web UI and backend features. Browse the folder to see what's available.
 
-To install: in the Skill creation UI inside Holistics, choose to import from the Holistics native skill library.
+* [`optional`](./native-skills/optional/): Optional skills that **can be imported** based on your Holistics organisation's needs.
+* [`built-in`](./native-skills/built-in/): Built-in skills that are **already included** in the base skillset of Holistics native AI agent.
+
+To import or override: in the Skill creation UI inside Holistics, select skills on the **From library** tab.
 
 # Contributions are welcomed
 We welcome contributions of new skills, improvements to existing ones, and bug fixes — for the generic Analytics plugins, the Holistics-specific plugins, and the native skills used by Holistics' built-in AI agent.
