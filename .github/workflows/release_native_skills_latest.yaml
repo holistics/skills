@@ -22,9 +22,11 @@ jobs:
           if gh release view native-skills-latest >/dev/null 2>&1; then
             echo "Release exists — updating asset in place and re-pointing tag"
             gh release upload native-skills-latest native-skills.tar.gz --clobber
-            gh release edit native-skills-latest --notes "$NOTES"
             git tag -f native-skills-latest "$GITHUB_SHA"
             git push --force origin "refs/tags/native-skills-latest"
+            # Toggle draft to republish — refreshes `published_at` so the release date updates
+            gh release edit native-skills-latest --draft=true
+            gh release edit native-skills-latest --draft=false --notes "$NOTES"
           else
             echo "Release does not exist — creating"
             gh release create native-skills-latest native-skills.tar.gz \
