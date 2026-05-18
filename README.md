@@ -90,3 +90,6 @@ We welcome contributions of new skills, improvements to existing ones, and bug f
 To get started, see [DEVELOPMENT.md](./DEVELOPMENT.md) for the repository structure and tooling. Then open a pull request against `main` with your changes; for new skills, drop them under the appropriate `plugins/<plugin-name>/skills/` directory (or `native-skills/` for the Holistics native AI agent).
 
 For bug reports or ideas, please [open an issue](https://github.com/holistics/skills/issues).
+
+# License
+This repository is licensed under the [Apache License 2.0](./LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
