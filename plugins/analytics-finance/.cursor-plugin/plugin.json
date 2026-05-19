@@ -1,0 +1,18 @@
+{
+  "name": "analytics-finance",
+  "description": "Analytics skills for finance and SaaS metrics: revenue tracking, lifetime value, unit economics, and similar workflows.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Holistics"
+  },
+  "homepage": "https://holistics.io",
+  "repository": "https://github.com/holistics/skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "analytics",
+    "finance",
+    "metrics",
+    "ltv",
+    "unit-economics"
+  ]
+}

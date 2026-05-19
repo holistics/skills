@@ -68,6 +68,14 @@ Then browse and install the relevant plugins via `/plugin` > `Marketplaces` > `h
 
 (Optional) enable auto-update via `/plugin` > `Marketplaces` > `holistics-skills` > `Enable auto-update`.
 
+### Cursor
+Cursor's plugin marketplaces are managed at the team/org level (Teams or Enterprise plans). An admin imports the marketplace once, then teammates install individual plugins.
+
+1. As an admin, go to **Dashboard** → **Settings** → **Plugins**.
+2. Under **Team Marketplaces**, click **Import** and paste `https://github.com/holistics/skills`.
+3. Review the parsed plugins, set Team Access groups if needed, name the marketplace, and save.
+4. Teammates open the marketplace panel in Cursor and install the plugins they want (required plugins install automatically).
+
 ### Picking a plugin
 Browse the linked `skills/` folders to see the actual skill files for each plugin.
 
