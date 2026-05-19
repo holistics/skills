@@ -13,9 +13,8 @@ const Configuration: UserConfig = {
         'plugins.reporting',
         'plugins.analytics',
         'plugins.analytics-finance',
-        'native.common',
-        'native.development',
-        'native.reporting',
+        'native.built-in',
+        'native.optional',
       ]
     ],
     'type-enum': [
