@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Skills for developing and using Holistics BI platform to build analytics and get insights",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "plugins": [
     {
@@ -28,6 +28,11 @@
       "name": "analytics-finance",
       "description": "Analytics skills for finance and SaaS metrics: revenue, lifetime value, unit economics, and similar workflows.",
       "source": "./plugins/analytics-finance"
+    },
+    {
+      "name": "holistics-migrate-power-bi",
+      "description": "Skills for migrating Power BI semantic models, reports, and DAX measures to Holistics AMQL projects.",
+      "source": "./plugins/holistics-migrate-power-bi"
     }
   ]
 }
