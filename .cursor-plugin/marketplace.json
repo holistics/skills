@@ -1,0 +1,33 @@
+{
+  "name": "holistics-skills",
+  "owner": {
+    "name": "Holistics",
+    "email": "engineering@holistics.io"
+  },
+  "metadata": {
+    "description": "Skills for developing and using Holistics BI platform to build analytics and get insights",
+    "version": "0.4.0"
+  },
+  "plugins": [
+    {
+      "name": "holistics-reporting",
+      "source": "plugins/holistics-reporting",
+      "description": "Skills for exploring and analyzing data in Holistics using published analytics."
+    },
+    {
+      "name": "holistics-development",
+      "source": "plugins/holistics-development",
+      "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env."
+    },
+    {
+      "name": "analytics",
+      "source": "plugins/analytics",
+      "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools."
+    },
+    {
+      "name": "analytics-finance",
+      "source": "plugins/analytics-finance",
+      "description": "Analytics skills for finance and SaaS metrics: revenue, lifetime value, unit economics, and similar workflows."
+    }
+  ]
+}

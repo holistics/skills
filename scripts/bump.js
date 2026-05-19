@@ -34,22 +34,46 @@ const pluginName = basename(path)
 
 execSync('git fetch --tags', { stdio: 'inherit' })
 
-// Update version in plugin.json
-const pluginJsonPath = resolve(REPO_ROOT, path, '.claude-plugin/plugin.json')
-const pluginJson = JSON.parse(readFileSync(pluginJsonPath, 'utf8'))
-const prevVersion = pluginJson.version
-pluginJson.version = version
-writeFileSync(pluginJsonPath, JSON.stringify(pluginJson, null, 2) + '\n')
-console.log(`Updated ${pluginJsonPath}: ${prevVersion} -> ${version}`)
+// Bump each ecosystem's plugin manifest and its own marketplace in lockstep.
+// A plugin version only affects its own marketplace — Claude and Cursor evolve independently.
+const ecosystems = [
+  { name: 'claude', pluginManifest: '.claude-plugin/plugin.json', marketplace: '.claude-plugin/marketplace.json' },
+  { name: 'cursor', pluginManifest: '.cursor-plugin/plugin.json', marketplace: '.cursor-plugin/marketplace.json' },
+]
 
-// Bump marketplace version using the same semver increment type
-const marketplacePath = resolve(REPO_ROOT, '.claude-plugin/marketplace.json')
-const marketplace = JSON.parse(readFileSync(marketplacePath, 'utf8'))
-const prevMarketplaceVersion = marketplace.metadata.version
-const releaseType = semver.diff(prevVersion, version)
-marketplace.metadata.version = semver.inc(prevMarketplaceVersion, releaseType)
-writeFileSync(marketplacePath, JSON.stringify(marketplace, null, 2) + '\n')
-console.log(`Updated ${marketplacePath}: ${prevMarketplaceVersion} -> ${marketplace.metadata.version}`)
+let bumpedAny = false
+for (const { name, pluginManifest, marketplace: marketplaceRel } of ecosystems) {
+  const pluginJsonPath = resolve(REPO_ROOT, path, pluginManifest)
+  if (!existsSync(pluginJsonPath)) {
+    console.log(`Skipping ${name}: ${pluginJsonPath} not present`)
+    continue
+  }
+
+  const pluginJson = JSON.parse(readFileSync(pluginJsonPath, 'utf8'))
+  const prevVersion = pluginJson.version
+  pluginJson.version = version
+  writeFileSync(pluginJsonPath, JSON.stringify(pluginJson, null, 2) + '\n')
+  console.log(`Updated ${pluginJsonPath}: ${prevVersion} -> ${version}`)
+
+  const marketplacePath = resolve(REPO_ROOT, marketplaceRel)
+  if (!existsSync(marketplacePath)) {
+    console.log(`Skipping ${name} marketplace: ${marketplacePath} not present`)
+  } else {
+    const marketplaceJson = JSON.parse(readFileSync(marketplacePath, 'utf8'))
+    const prevMarketplaceVersion = marketplaceJson.metadata.version
+    const releaseType = semver.diff(prevVersion, version)
+    marketplaceJson.metadata.version = semver.inc(prevMarketplaceVersion, releaseType)
+    writeFileSync(marketplacePath, JSON.stringify(marketplaceJson, null, 2) + '\n')
+    console.log(`Updated ${marketplacePath}: ${prevMarketplaceVersion} -> ${marketplaceJson.metadata.version}`)
+  }
+
+  bumpedAny = true
+}
+
+if (!bumpedAny) {
+  console.error(`No plugin manifest found under ${path}`)
+  process.exit(1)
+}
 
 // Write context for conventional-changelog
 const contextFile = '/tmp/holistics-skills-bump-context.json'
