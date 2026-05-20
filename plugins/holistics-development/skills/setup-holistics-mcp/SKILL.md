@@ -1,9 +1,14 @@
 ---
 name: setup-holistics-mcp
-description: Use this skill to set up Holistics MCP and enable useful tools such as `search_docs`, `execute_aql`, and `generate_viz`
+description: Use this skill to set up or review Holistics MCP connection and enable useful tools such as `search_docs`, `execute_aql`, and `generate_viz`
 ---
 
-## Holistics MCP
+## IMPORTANT: Use CLI MCP instead
+Use `holistics mcp` command instead. It provides access to all MCP tools without any additional setup or maintenance.
+
+Only set up or maintain agent's direct MCP connection when explicitly asked by the user.
+
+## Direct Holistics MCP connection
 ### Setup (once)
 1. Ask the user to [enable Holistics AI](https://docs.holistics.io/docs/ai#getting-started)
 2. Ask the user to pick their <MCP_SERVER_ADDRESS> from based on their login URL:
