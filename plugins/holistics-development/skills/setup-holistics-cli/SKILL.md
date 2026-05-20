@@ -1,10 +1,10 @@
 ---
 name: setup-holistics-cli
-description: Use this skill to set up Holistics CLI and enable useful tools such as `holistics aml validate`
+description: Use this skill to set up Holistics CLI and enable useful tools such as `holistics aml validate`, `holistics sync-code`, and `holistics mcp` tools such as `holistics mcp execute_aql`, `holistics mcp list_datasets`
 ---
 
 ## Holistics CLI
-### Setup (once)
+### Install
 #### macOS and Linux
 ```bash
 curl -fsSL https://raw.githubusercontent.com/holistics/holistics-cli/refs/heads/master/install.sh | bash
@@ -15,3 +15,11 @@ The CLI is not compatible with MacOS 12.x (Monterey), which reached end of life 
 
 #### Windows
 At the moment, we do not have an installation script for Windows. Please manually download the [latest release](https://github.com/holistics/holistics-cli/releases/latest), then add it to your Path in the Environment Variables.
+
+### Login
+* Use `holistics auth` to login
+  * Use `holistics auth --help` first to find out the login region/domains
+  * Ask user to pick or enter their login region or custom domain
+
+## References
+* Refer to [](../working-in-development/) skill to see how CLI fits in the development workflow.
