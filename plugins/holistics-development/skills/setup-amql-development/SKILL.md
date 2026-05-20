@@ -1,9 +1,9 @@
 ---
-name: working-in-development
-description: "Use this whenever working in a (Holistics) AMQL project (i.e. with AML files). It guides you to set up the development environment and tooling properly, and provides the general best practice when working in an AMQL project. Example tooling: `holistics mcp generate_viz`, `holistics mcp search_docs`, `holistics aml validate`."
+name: setup-amql-development
+description: "Use this whenever working in a (Holistics) AMQL project (i.e. with AML files). It guides you to set up and review the AMQL development environment and tooling properly. Tooling includes CLI, MCP, code synchronization, etc."
 ---
 
-# Working in development
+# Setup AMQL development
 * Holistics Development environment is where the user develops their analytics as-code (AMQL), including modeling, metrics, dashboards, etc. before publishing them to the Reporting environment to provide analytics to end-users.
 
 ## Mandatory preparation steps
