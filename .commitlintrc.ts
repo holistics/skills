@@ -13,6 +13,7 @@ const Configuration: UserConfig = {
         'plugins.reporting',
         'plugins.analytics',
         'plugins.analytics-finance',
+        'plugins.holistics-migrate-power-bi',
         'native.built-in',
         'native.optional',
       ]

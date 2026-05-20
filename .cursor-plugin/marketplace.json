@@ -20,6 +20,11 @@
       "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env."
     },
     {
+      "name": "holistics-migrate-power-bi",
+      "source": "plugins/holistics-migrate-power-bi",
+      "description": "Skills for migrating Power BI semantic models, reports, and DAX measures to Holistics AMQL projects."
+    },
+    {
       "name": "analytics",
       "source": "plugins/analytics",
       "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools."

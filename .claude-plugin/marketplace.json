@@ -6,7 +6,7 @@
   },
   "metadata": {
     "description": "Skills for developing and using Holistics BI platform to build analytics and get insights",
-    "version": "0.4.0"
+    "version": "0.5.0"
   },
   "plugins": [
     {
@@ -18,6 +18,11 @@
       "name": "holistics-development",
       "description": "Skills for exploring, analyzing, and developing analytics code in Holistics Development env.",
       "source": "./plugins/holistics-development"
+    },
+    {
+      "name": "holistics-migrate-power-bi",
+      "description": "Skills for migrating Power BI semantic models, reports, and DAX measures to Holistics AMQL projects.",
+      "source": "./plugins/holistics-migrate-power-bi"
     },
     {
       "name": "analytics",
