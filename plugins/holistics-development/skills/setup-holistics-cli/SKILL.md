@@ -22,4 +22,4 @@ At the moment, we do not have an installation script for Windows. Please manuall
   * Ask user to pick or enter their login region or custom domain
 
 ## References
-* Refer to [](../working-in-development/) skill to see how CLI fits in the development workflow.
+* Refer to [](../setup-amql-development/) skill to see how CLI fits in the development workflow.
