@@ -16,7 +16,7 @@ description: "Use this whenever working in a (Holistics) AMQL project (i.e. with
 Use [](../setup-holistics-cli/) skill
 
 ### Usage
-* Use `holistics sync-code` to synchronize local codes with Holistics backend, enabling and making sure tools run on latest codes
+* Use `holistics sync-code --background` to synchronize local codes with Holistics backend, enabling and making sure tools run on latest codes
 * Use `holistics aml validate <files...>` to validate AML files after making every new change. For example:
   * `holistics aml validate "new file.model.aml" "new_file2.dataset.aml"`
   * `holistics aml validate **/*.aml`
