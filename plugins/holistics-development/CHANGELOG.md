@@ -1,3 +1,9 @@
+## [0.3.0](https://github.com/holistics/skills/compare/holistics-development-v0.2.0...holistics-development-v0.3.0) (2026-05-21)
+
+### Features
+
+* **plugins.development:** using MCP via CLI ([7de9752](https://github.com/holistics/skills/commit/7de9752278efbc9ee9041e18cf41b0d954465c21))
+
 ## [0.2.0](https://github.com/holistics/skills/compare/holistics-development-v0.1.0...holistics-development-v0.2.0) (2026-05-13)
 
 ### Features
