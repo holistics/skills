@@ -5,12 +5,12 @@ Per-concept structural mapping. Verify exact AML syntax with `search_docs` or th
 ## Table → Model
 
 ### TMDL (input)
-```tmdl
+
+````tmdl
 table Sales
 	column SalesOrderLineKey
 		dataType: int64
 		sourceColumn: SalesOrderLineKey
-		isHidden
 
 	column 'Sales Amount'
 		dataType: decimal
@@ -25,9 +25,10 @@ table Sales
 	partition Sales = m
 		mode: import
 		source = ```let Source = Excel.Workbook(...) in Sales```
-```
+````
 
 ### AML (output) — `models/tables/sales.model.aml`
+
 ```aml
 Model sales {
   type: 'table'
@@ -38,7 +39,7 @@ Model sales {
   dimension sales_order_line_key {
     label: 'Sales Order Line Key'
     type: 'number'
-    hidden: true
+    primary_key: true
     definition: @sql {{ #SOURCE.sales_order_line_key }} ;;
   }
 
@@ -81,11 +82,13 @@ Model active_users {
 ## Calculated column → dimension
 
 ### DAX
+
 ```dax
 'Sales'[Margin] = Sales[SalesAmount] - Sales[TotalProductCost]
 ```
 
 ### AML
+
 ```aml
 dimension margin {
   label: 'Margin'
@@ -99,6 +102,7 @@ Prefer an AQL definition when expressing relational logic. Fall back to SQL for 
 ## Relationships → dataset
 
 ### TMDL (`relationships.tmdl`)
+
 ```tmdl
 relationship sales_to_customer
 	fromColumn: Sales.CustomerKey
@@ -120,11 +124,12 @@ relationship sales_shipdate_to_date
 ```
 
 ### AML (`datasets/aw_sales.dataset.aml`)
+
 ```aml
 Dataset aw_sales {
   label: 'AdventureWorks Sales'
 
-  models: [sales, customer, dates, product, reseller, sales_order, sales_territory]
+  models: [sales, customer, dates, product, reseller, sales_order, sales_territory,]
 
   relationships: [
     relationship(sales.customer_key > customer.customer_key, true),
@@ -132,20 +137,20 @@ Dataset aw_sales {
     // active date relationship
     relationship(sales.order_date_key > dates.date_key, true),
 
-    // role-playing date relationships (named aliases)
-    relationship(sales.due_date_key  > dates.date_key, false) { alias: 'due_date'  },
-    relationship(sales.ship_date_key > dates.date_key, false) { alias: 'ship_date' }
+    // role-playing date relationships
+    relationship(sales.due_date_key  > dates.date_key, false),
+    relationship(sales.ship_date_key > dates.date_key, false),
   ]
 }
 ```
 
-An `isActive: false` Power BI relationship maps to `false` in the relationship tuple together with an `alias`. The alias is the name used inside `with_relationships(...)` in any metric that needs that join path.
+An `isActive: false` Power BI relationship maps to `false` in the relationship. The alias is the name used inside `with_relationships(...)` in any metric that needs that join path.
 
 Confirm the exact relationship syntax with `search_docs`; the alias mechanism may use a slightly different keyword depending on your Holistics version.
 
 ## Role-playing dimension pattern
 
-Power BI uses `USERELATIONSHIP` inside `CALCULATE` to activate an inactive join. Holistics replaces this with a named alias:
+Power BI uses `USERELATIONSHIP` inside `CALCULATE` to activate an inactive join. Holistics replaces this with a `with_relationships(...)` piped:
 
 ```dax
 Sales Amount by Due Date =
@@ -170,17 +175,18 @@ metric sales_amount_by_due_date {
 
 ## Hidden / display folder / format mapping
 
-| TMDL property | AML equivalent |
-|---------------|----------------|
-| `isHidden` | `hidden: true` |
-| `formatString: "$#,##0.00"` | `format: '$#,##0.00'` |
-| `displayFolder: "KPIs"` | Model or dataset grouping, or a `folder:` metadata field |
-| `description: "..."` | `description: '...'` |
-| `dataType: int64 / decimal / double` | `type: 'number'` |
-| `dataType: string` | `type: 'text'` |
-| `dataType: dateTime` | `type: 'datetime'` |
-| `dataType: boolean` | `type: 'truefalse'` |
-| `sortByColumn: <col>` | A sort-by directive on the dimension |
+| TMDL property                        | AML equivalent        |
+| ------------------------------------ | --------------------- |
+| `isHidden`                           | `hidden: true`        |
+| `formatString: "$#,##0.00"`          | `format: '$#,##0.00'` |
+| `displayFolder: "KPIs"`              |                       |
+| `description: "..."`                 | `description: '...'`  |
+| `dataType: int64 / decimal / double` | `type: 'number'`      |
+| `dataType: string`                   | `type: 'text'`        |
+| `dataType: dateTime`                 | `type: 'datetime'`    |
+| `dataType: boolean`                  | `type: 'truefalse'`   |
+| other data types                     | `type: 'unknown'`     |
+| `sortByColumn: <col>`                |                       |
 
 ## Date table
 

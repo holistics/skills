@@ -43,7 +43,7 @@ The goal is to confirm that a Holistics metric returns values identical to (or w
 
 1. **Grain mismatch**: is the warehouse table at a different grain than the Power BI imported table? Check `count(*)` per source.
 2. **Relationship path**: is the active or the aliased relationship being used? Inspect the compiled SQL via the Holistics query preview.
-3. **Filter context**: does the metric include an unintended `with_filter`? Strip filters one at a time.
+3. **Filter context**: does the metric include an unintended `where`? Strip filters one at a time.
 4. **Time zone**: Power BI imports often coerce timestamps, while the warehouse may store UTC. Compare a single row's timestamp.
 5. **Null handling**: DAX's `IF(ISBLANK(...), 0, ...)` vs SQL `coalesce`. Check whether nulls participate.
 6. **Distinct count semantics**: `DISTINCTCOUNT` vs `count_distinct` over a different relational path can include or exclude different rows.
