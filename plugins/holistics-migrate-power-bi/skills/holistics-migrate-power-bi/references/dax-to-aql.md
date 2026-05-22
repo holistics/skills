@@ -351,6 +351,6 @@ Same shape works for "average daily order count", "best month for revenue", etc.
    - ranking → `rank(order:, partition:)`
 3. Choose the target shape: prefer a `metric @aql` first; fall back to a `measure @sql` only when AQL truly lacks the primitive.
 4. Call `generate_aql` with the DAX, the intent, and the model schema as natural-language context.
-5. Run `validate_aql` (MCP) or `holistics aml validate` (CLI).
+5. Run `holistics aml validate` and `holistics mcp validate_aql` (CLI).
 6. Compare values against Power BI (see [](./validation.md)).
 7. If values disagree near `of_all` / `rank` / window functions, re-read the [pipeline order of operations](https://docs.holistics.io/docs/as-code/aql/order-of-operations) — step 4 (filter pruning) and step 3 (window in dimensions) cover most surprises.
