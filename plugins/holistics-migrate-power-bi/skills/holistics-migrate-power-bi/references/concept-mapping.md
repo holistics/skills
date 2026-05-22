@@ -34,7 +34,7 @@ Reference table. Use this during the inventory and translation phases. Need more
 | Display folder                                     | Dataset folder structure or model grouping         |                                                               |
 | Marked Date table                                  | Not required                                       | Period functions work on any timestamp column.                |
 | Active relationship                                | Relationship in the dataset with `true` flag       |                                                               |
-| `isActive: false` relationship + `USERELATIONSHIP` | Relationship with `false` flag                     |                                                               |
+| `isActive: false` relationship + `USERELATIONSHIP` | Relationship with `false` flag; activate per metric via `with_relationships()` | See `dax-to-aql.md` for syntax.                              |
 | Row-level security (RLS) role                      | Dataset row-level permission                       | Different syntax; re-implement.                               |
 | Calculation group                                  | `metric` composition + dimension scope             | Achieved via reusable metrics.                                |
 | Field parameter                                    | Parameter or variable in the dashboard             | Re-create as a parameter.                                     |
