@@ -30,7 +30,7 @@ Each phase calls out the **skills** and **CLI tools** to use.
 
 | Phase        | Goal                                                                | Tools / Skills                                                                                                        |
 | ------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 0. Setup     | CLI + MCP ready, repo cloned, dev env selected.                     | `setup-holistics-cli`, `setup-holistics-mcp`, `working-in-development`.                                               |
+| 0. Setup     | CLI ready, repo cloned, dev env selected.                     | `setup-holistics-cli`, `setup-amql-development`.                                               |
 | 1. Export    | `.pbix` → `.pbip` (text).                                           | Power BI Desktop.                                                                                                     |
 | 2. Inventory | Catalogue tables, measures, relationships, pages, visuals, filters. | `rg`, `find`, `holistics mcp search_docs` for unknown Holistics concepts.                                             |
 | 3. Warehouse | Land Power BI imports / M queries in the warehouse.                 | dbt or SQL views. Verify with `holistics mcp list_data_sources` + `read_data_source_table_schema`.                    |
