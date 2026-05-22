@@ -175,7 +175,7 @@ holistics mcp execute_aql '{"dataset_uname":"<ds>","aql":"<aql>","title":"parity
 This plugin orchestrates skills from the `holistics-development` and `holistics-reporting` plugins. Load them on demand:
 
 - `setup-holistics-cli` — install / authenticate the CLI; provides `holistics aml validate`, `holistics mcp`, `holistics sync-code`.
-- `working-in-development` — repo conventions and the validate-as-you-go loop.
+- `setup-amql-development` — repo conventions and the validate-as-you-go loop.
 - `develop-amql` — author AML models, datasets, and dashboards.
 - `write-aql` — generate AQL via `generate_aql`.
 - `search-docs` — look up Holistics syntax and concepts.
