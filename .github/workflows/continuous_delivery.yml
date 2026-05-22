@@ -27,6 +27,7 @@ jobs:
     outputs:
       holistics_development: ${{ steps.filter.outputs.holistics_development_any_changed }}
       holistics_reporting: ${{ steps.filter.outputs.holistics_reporting_any_changed }}
+      holistics_migrate_power_bi: ${{ steps.filter.outputs.holistics_migrate_power_bi_any_changed }}
       marketplace: ${{ steps.filter.outputs.marketplace_any_changed }}
       native_skills: ${{ steps.filter.outputs.native_skills_any_changed }}
     steps:
@@ -41,6 +42,8 @@ jobs:
               - 'plugins/holistics-development/.claude-plugin/plugin.json'
             holistics_reporting:
               - 'plugins/holistics-reporting/.claude-plugin/plugin.json'
+            holistics_migrate_power_bi:
+              - 'plugins/holistics-migrate-power-bi/.claude-plugin/plugin.json'
             marketplace:
               - '.claude-plugin/marketplace.json'
             native_skills:
@@ -76,6 +79,19 @@ jobs:
         uses: ./.github/actions/tag_version_plugin
         with:
           plugin: holistics-reporting
+
+  tag_holistics_migrate_power_bi:
+    needs: [test_passed, changes]
+    runs-on: ubuntu-24.04
+    if: needs.changes.outputs.holistics_migrate_power_bi == 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.HOLISTICS_DEPLOY_KEY }}
+      - name: Tag version for holistics-migrate-power-bi
+        uses: ./.github/actions/tag_version_plugin
+        with:
+          plugin: holistics-migrate-power-bi
 
   tag_marketplace:
     needs: [test_passed, changes]

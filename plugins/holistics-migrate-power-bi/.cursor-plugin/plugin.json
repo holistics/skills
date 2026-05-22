@@ -1,7 +1,7 @@
 {
   "name": "holistics-migrate-power-bi",
   "description": "Skills for migrating Power BI semantic models, reports, and DAX measures to Holistics AMQL projects.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": {
     "name": "Holistics"
   },
