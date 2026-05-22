@@ -37,7 +37,8 @@ Reference table. Use this during the inventory and translation phases. Need more
 | `isActive: false` relationship + `USERELATIONSHIP` | Relationship with `false` flag; activate per metric via `with_relationships()` | See `dax-to-aql.md` for syntax.                              |
 | Row-level security (RLS) role                      | Dataset row-level permission                       | Different syntax; re-implement.                               |
 | Calculation group                                  | `metric` composition + dimension scope             | Achieved via reusable metrics.                                |
-| Field parameter                                    | Parameter or variable in the dashboard             | Re-create as a parameter.                                     |
+| Field parameter (dimension swap)                   | Dynamic dimension via `param` + `case` in the model | Re-create with a parameter field driving a `case`-based dimension. See [Dynamic Dimensions](https://docs.holistics.io/docs/modeling/dynamic-dimensions). |
+| Field parameter (measure swap)                     | Dynamic metric via parameter + `case`               | Same pattern, branching over metrics instead of dimensions.   |
 
 ## Reporting
 

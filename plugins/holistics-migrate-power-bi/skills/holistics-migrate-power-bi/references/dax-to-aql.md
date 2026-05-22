@@ -150,10 +150,21 @@ with_relationships(metric,
 )
 ```
 
+Or:
+
+```
+metric
+| with_relationships(
+    relationship(model_1.field_1 > model_2.field_2, true | false, 'one_way' | 'two_way'),
+    relationship(...)
+)
+```
+
 Short form (defaults: `true`, `'two_way'`):
 
 ```
 with_relationships(metric, model_1.field_1 > model_2.field_2)
+metric | with_relationships(model_1.field_1 > model_2.field_2)
 ```
 
 ## ALL / reset filter context (percent of total)
