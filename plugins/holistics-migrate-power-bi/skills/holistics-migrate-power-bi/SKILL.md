@@ -9,7 +9,7 @@ This skill orchestrates a migration. It does **not** author AML/AQL by hand. All
 
 - **Prereqs:** Before writing anything, load the [`setup-amql-development`](../../../holistics-development/skills/setup-amql-development) skill first. It prepares the necessary tools such as `holistics aml validate`, `holistics aml compile`, `holistics sync-code`, `holistics mcp generate_aql`, `holistics mcp execute_aql`, etc., to let you work efficiently and accurately.
 - **For every AML/AQL change**, defer to [`develop-amql`](../../../holistics-development/skills/develop-amql) (models, datasets, dashboards), [type references](../../../holistics-development/references), and [`write-aql`](../../../holistics-development/skills/write-aql) (metrics). They wrap `generate_aql` / `validate_aql` correctly.
-- **NEVER** guess AML keys, AQL function names, or operator semantics. Use `holistics mcp search_docs '{"question": "..."}'` (or call the `search_docs` MCP tool directly) before writing anything novel.
+- **NEVER** guess AML keys, AQL function names, or operator semantics. Use `holistics mcp search_docs '{"question": "..."}'` before writing anything novel.
 - **NEVER** hand-write AQL. Use `holistics mcp generate_aql '{"dataset_uname": "...", "query": "..."}'` (or the `write-aql` skill) with the original DAX, the model schema, and the business intent.
 - **Validate every change** with `holistics aml validate <files>` after every edit, and re-run `holistics mcp validate_aql '{"aql": "...", "dataset_uname": "..."}'` for every metric.
 - **Value parity** is non-negotiable: use `holistics mcp execute_aql` (or the `analyze-data` skill) to query Holistics and compare to Power BI for 5–10 dimension combinations per measure.
@@ -30,7 +30,7 @@ Each phase calls out the **skills** and **CLI tools** to use.
 
 | Phase        | Goal                                                                | Tools / Skills                                                                                                        |
 | ------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| 0. Setup     | CLI ready, repo cloned, dev env selected.                     | `setup-holistics-cli`, `setup-amql-development`.                                               |
+| 0. Setup     | CLI ready, repo cloned, dev env selected.                           | `setup-holistics-cli`, `setup-amql-development`.                                                                      |
 | 1. Export    | `.pbix` → `.pbip` (text).                                           | Power BI Desktop.                                                                                                     |
 | 2. Inventory | Catalogue tables, measures, relationships, pages, visuals, filters. | `rg`, `find`, `holistics mcp search_docs` for unknown Holistics concepts.                                             |
 | 3. Warehouse | Land Power BI imports / M queries in the warehouse.                 | dbt or SQL views. Verify with `holistics mcp list_data_sources` + `read_data_source_table_schema`.                    |
@@ -97,7 +97,7 @@ holistics-project/
 
 ## Hard rules
 
-- **Use the CLI + MCP for everything**: validation (`holistics aml validate`), AQL generation (`holistics mcp generate_aql`), AQL validation (`holistics mcp validate_aql`), warehouse introspection (`holistics mcp read_data_source_table_schema`), and live execution (`holistics mcp execute_aql`).
+- **Use the CLI for everything**: validation (`holistics aml validate`), AQL generation (`holistics mcp generate_aql`), AQL validation (`holistics mcp validate_aql`), warehouse introspection (`holistics mcp read_data_source_table_schema`), and live execution (`holistics mcp execute_aql`).
 - **Never hand-write AQL**. Always go through `write-aql` / `generate_aql`, passing the original DAX and intent as context.
 - **Never invent AML keys, AQL functions, or operator semantics**. Read [](./references/), then call `holistics mcp search_docs` to confirm.
 - **Validate after every edit**: `holistics aml validate <files>` for AML; `holistics mcp validate_aql` for each metric.
@@ -117,7 +117,7 @@ rg 'USERELATIONSHIP|CALCULATE|SAMEPERIODLASTYEAR|ALL\(|ALLEXCEPT|RANKX' <pbip>/<
 find <pbip>/<name>.Report/definition/pages -name '*.json'
 ```
 
-### Holistics target inventory (via CLI / MCP)
+### Holistics target inventory (via CLI)
 
 ```bash
 # Confirm the warehouse source landed
@@ -175,7 +175,6 @@ holistics mcp execute_aql '{"dataset_uname":"<ds>","aql":"<aql>","title":"parity
 This plugin orchestrates skills from the `holistics-development` and `holistics-reporting` plugins. Load them on demand:
 
 - `setup-holistics-cli` — install / authenticate the CLI; provides `holistics aml validate`, `holistics mcp`, `holistics sync-code`.
-- `setup-holistics-mcp` — enable MCP tools (`search_docs`, `generate_aql`, `execute_aql`, `generate_viz`, etc.).
 - `working-in-development` — repo conventions and the validate-as-you-go loop.
 - `develop-amql` — author AML models, datasets, and dashboards.
 - `write-aql` — generate AQL via `generate_aql`.
