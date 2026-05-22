@@ -21,7 +21,7 @@ holistics aml validate datasets/aw_sales.dataset.aml
 holistics aml validate dashboards/executive_summary.page.aml
 ```
 
-Or use `validate_aql` via MCP for individual AQL snippets. CI should run `holistics aml validate` on every pull request.
+Then run `holisitcs mcp validate_aql` for individual AQL snippets. CI should run `holistics aml validate` on every pull request.
 
 ## Layer 2 — Per-measure value parity
 
@@ -29,15 +29,15 @@ The goal is to confirm that a Holistics metric returns values identical to (or w
 
 ### Sampling rules
 
-* At least ten dim combinations per measure.
-* Include: a total (no filter), one common dim filter, one date range, one role-playing-relationship slice if applicable, and one edge case (null, empty, or zero rows).
-* For 50 or more measures, automate by scripting an export of Power BI values (DAX Studio → CSV) and a parallel `execute_aql` batch in Holistics.
+- At least ten dim combinations per measure.
+- Include: a total (no filter), one common dim filter, one date range, one role-playing-relationship slice if applicable, and one edge case (null, empty, or zero rows).
+- For 50 or more measures, automate by scripting an export of Power BI values (DAX Studio → CSV) and a parallel `execute_aql` batch in Holistics.
 
 ### Tolerance
 
-* Exact match for integer counts.
-* ±0.01 absolute, or ±0.001% relative, for currency and decimal values (to handle floating-point drift).
-* Any difference outside tolerance must be diagnosed, not papered over.
+- Exact match for integer counts.
+- ±0.01 absolute, or ±0.001% relative, for currency and decimal values (to handle floating-point drift).
+- Any difference outside tolerance must be diagnosed, not papered over.
 
 ### Diagnostic checklist when values disagree
 
@@ -52,13 +52,13 @@ The goal is to confirm that a Holistics metric returns values identical to (or w
 
 ### Sample value-parity sheet
 
-| Measure | Filter / dim | Power BI value | Holistics value | Δ | Δ % | Status |
-|---------|--------------|----------------|------------------|---|------|--------|
-| Total Sales | (none) | 29,358,677.22 | 29,358,677.22 | 0.00 | 0.00% | ✅ |
-| Total Sales | Year=2024 | 9,127,442.10 | 9,127,442.10 | 0.00 | 0.00% | ✅ |
-| Sales YoY % | Year=2024 | 12.3% | 12.3% | 0.0pp | — | ✅ |
-| Sales by Due Date | Year=2024 | 8,994,107.55 | 8,994,107.55 | 0.00 | 0.00% | ✅ |
-| Margin % | Category=Bikes | 12.7% | 12.7% | 0.0pp | — | ✅ |
+| Measure           | Filter / dim   | Power BI value | Holistics value | Δ     | Δ %   | Status |
+| ----------------- | -------------- | -------------- | --------------- | ----- | ----- | ------ |
+| Total Sales       | (none)         | 29,358,677.22  | 29,358,677.22   | 0.00  | 0.00% | ✅     |
+| Total Sales       | Year=2024      | 9,127,442.10   | 9,127,442.10    | 0.00  | 0.00% | ✅     |
+| Sales YoY %       | Year=2024      | 12.3%          | 12.3%           | 0.0pp | —     | ✅     |
+| Sales by Due Date | Year=2024      | 8,994,107.55   | 8,994,107.55    | 0.00  | 0.00% | ✅     |
+| Margin %          | Category=Bikes | 12.7%          | 12.7%           | 0.0pp | —     | ✅     |
 
 Keep this sheet in the migration tracker (Linear, Notion, or the repo).
 
@@ -83,18 +83,18 @@ Automate this with a CSV of `measure, filter_json, expected_pbi_value` and a sma
 
 ## Common failure modes (and where they originate)
 
-| Symptom | Likely cause | Fix |
-|---------|--------------|-----|
-| Holistics value is ~0 | Wrong relationship alias used | Check `relationships { … }` and the metric's `with_relationships(...)`. |
-| Holistics value is too high | Fan-out from a many-to-many join | Inspect the compiled SQL; restrict the join or use `count_distinct`. |
-| Holistics value is off by a date shift | Time zone or week-start mismatch | Confirm the warehouse timezone and the Holistics dataset timezone; check the `relative_period` unit. |
-| YoY denominator is null | `safe_divide` denominator is empty for the current period | Reproduce the prior-period metric in isolation and verify date coverage. |
-| Calculated-column mismatch | Dimension references the wrong field after a rename | Confirm that `definition: @sql {{ … }}` paths match the warehouse column names. |
-| Running total is flat | Missing date axis in the dashboard | Add a date dimension to the chart; `running_total` needs an ordering field. |
+| Symptom                                | Likely cause                                              | Fix                                                                                                  |
+| -------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Holistics value is ~0                  | Wrong relationship alias used                             | Check `relationships { }` and the metric's `with_relationships(...)`.                                |
+| Holistics value is too high            | Fan-out from a many-to-many join                          | Inspect the compiled SQL; restrict the join or use `count_distinct`.                                 |
+| Holistics value is off by a date shift | Time zone or week-start mismatch                          | Confirm the warehouse timezone and the Holistics dataset timezone; check the `relative_period` unit. |
+| YoY denominator is null                | `safe_divide` denominator is empty for the current period | Reproduce the prior-period metric in isolation and verify date coverage.                             |
+| Calculated-column mismatch             | Dimension references the wrong field after a rename       | Confirm that `definition: @sql {{ … }}` paths match the warehouse column names.                      |
+| Running total is flat                  | Missing date axis in the dashboard                        | Add a date dimension to the chart; `running_total` needs an ordering field.                          |
 
 ## Final acceptance criteria
 
-* 100% of sampled measure-parity rows pass (within tolerance).
-* 100% of rebuilt pages have sign-off.
-* All `holistics aml validate` runs are green in CI.
-* Manual-migration items (alerts, subscriptions, embeds, share links) are confirmed in Holistics by their owner.
+- 100% of sampled measure-parity rows pass (within tolerance).
+- 100% of rebuilt pages have sign-off.
+- All `holistics aml validate` runs are green in CI.
+- Manual-migration items (alerts, subscriptions, embeds, share links) are confirmed in Holistics by their owner.
