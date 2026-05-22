@@ -26,7 +26,7 @@ This skill orchestrates a migration. It does **not** author AML/AQL by hand. All
 
 ## High-level workflow
 
-Each phase calls out the **skills** and **CLI/MCP tools** to use.
+Each phase calls out the **skills** and **CLI tools** to use.
 
 | Phase        | Goal                                                                | Tools / Skills                                                                                                        |
 | ------------ | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
