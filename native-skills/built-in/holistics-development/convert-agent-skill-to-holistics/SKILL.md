@@ -38,7 +38,7 @@ For the principles that govern *how* a good Holistics skill is written — descr
 
 ## Handling incompatibilities
 
-Most source-side agent runtimes carry features that AML doesn't express — common examples include bundled `scripts/*` or `references/*` directories, `allowed-tools` restrictions, `model` selection, Codex function definitions, and plugin packaging metadata. The exact list grows over time; treat any feature in the source skill that isn't covered by the mapping tables above as an incompatibility.
+Agent skills and Holistics skills cover different sets of functionalities — agent skills can bundle `references/*` documents and `scripts/*` executables; Holistics skills can be parameterized via `Slot[...]`. The exact list of differences may change over time; treat any feature in the source skill not covered by the mapping tables above as an incompatibility.
 
 When the source skill uses an incompatible feature, do not silently drop, inline, or translate it. The right move depends on how that feature is being used in the source skill, and only the user can tell you.
 
