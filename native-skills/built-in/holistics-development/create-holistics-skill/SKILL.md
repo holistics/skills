@@ -98,10 +98,6 @@ Input: Added user authentication with JWT tokens
 Output: feat(auth): implement JWT-based authentication
 ```
 
-### "When to use" lives in the description, not the body
-
-The description handles triggering. The body is loaded only *after* the triggering decision is made — duplicating "use this when..." in the body wastes tokens and goes unread.
-
 ## Creation process
 
 Walk through the seven steps below in order. The [principles](#core-principles) and [writing style](#writing-style) above apply throughout; the steps just tell you when each one matters most.
@@ -235,7 +231,7 @@ Place at `settings/ai/<skill_name>/skill.aml`. The directory name should match t
 
 ### Step 6 — Validate
 
-- Run `holistics aml validate` if the Holistics CLI is installed (see the `setup-holistics-cli` skill). If not, reload the Holistics workspace and confirm the skill appears in the agent's skill list.
+- Run `holistics aml validate` if the Holistics CLI is installed.
 - Read the skill back as a stranger. Does the description make trigger conditions obvious? Does the body explain "why" wherever the agent will need to apply judgment? If either is unclear, fix it now before iterating.
 
 ### Step 7 — Iterate
