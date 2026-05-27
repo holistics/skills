@@ -9,11 +9,7 @@ Use this skill when porting an agent skill between Holistics AML and another run
 
 For the principles that govern *how* a good Holistics skill is written — description triggers, concise body, explain-the-why — see the `create-holistics-skill` skill. Apply those after the mechanical conversion below.
 
-## Compatibility overview
-
-Most fields map mechanically. A few features have no equivalent in the other format and require the user's input — see [Handling incompatibilities](#handling-incompatibilities).
-
-### Features that map directly
+## Features that map directly
 
 | Holistics AML | Claude / OpenAI Markdown `SKILL.md` |
 |---|---|
@@ -23,30 +19,6 @@ Most fields map mechanically. A few features have no equivalent in the other for
 | `invocation` field | see invocation tables below |
 | `disabled: true` | delete the file (or the equivalent field if the host runtime supports it) |
 | Placed at `settings/ai/<name>/skill.aml` | Placed at the consuming tool's project-skill path (commonly `.claude/skills/<name>/SKILL.md`) |
-
-### Holistics-only features (no equivalent in Claude / Codex)
-
-When converting *out of* Holistics, each row below triggers a halt — the agent cannot decide unilaterally how to drop or rewrite the feature.
-
-| AML feature | What's missing on the other side |
-|---|---|
-| `Slot[String]` / `Slot[Heredoc[Any]]` parameterization | No template substitution surface |
-| `@Skill:other_skill` reference | No automatic skill-to-skill resolution at invocation |
-| `H.current_user.<...>` runtime gating | No per-user runtime context exposed to the skill |
-| `allow_switching_invocation` | No user-toggleable invocation mode |
-
-### Source-only features (no equivalent in Holistics AML)
-
-When converting *into* Holistics, each row below triggers a halt.
-
-| Source feature | Why it doesn't map |
-|---|---|
-| `scripts/*.py`, `scripts/*.sh` bundled executables | AML `Skill` is text-only; no runtime to execute |
-| `references/*` supplementary docs (multi-file disclosure) | AML has only one `content` field |
-| `allowed-tools: [...]` restrictions | Tool surface is fixed by the Holistics agent, not the skill |
-| `model: ...` | Model choice is Holistics-controlled |
-| Codex function/tool definitions | Tools come from MCP servers, not from skills |
-| Plugin packaging metadata (`.claude-plugin/`, manifest fields) | No equivalent concept |
 
 ## Invocation mapping — from Claude
 
@@ -66,7 +38,9 @@ When converting *into* Holistics, each row below triggers a halt.
 
 ## Handling incompatibilities
 
-When the source skill uses a feature listed in [Holistics-only features](#holistics-only-features-no-equivalent-in-claude--codex) or [Source-only features](#source-only-features-no-equivalent-in-holistics-aml), do not silently drop, inline, or translate it. The right move depends on how that feature is being used in the source skill, and only the user can tell you.
+Most source-side agent runtimes carry features that AML doesn't express — common examples include bundled `scripts/*` or `references/*` directories, `allowed-tools` restrictions, `model` selection, Codex function definitions, and plugin packaging metadata. The exact list grows over time; treat any feature in the source skill that isn't covered by the mapping tables above as an incompatibility.
+
+When the source skill uses an incompatible feature, do not silently drop, inline, or translate it. The right move depends on how that feature is being used in the source skill, and only the user can tell you.
 
 For each incompatible feature found:
 
@@ -83,5 +57,5 @@ If the user opts to defer, emit the converted skill *without* the incompatible f
 2. Rewrite the description for Holistics AI's triggering surface — concrete phrasings, what + when. Don't paste the original verbatim; trigger surfaces differ between agents.
 3. Move the body content into `content: @md ... ;;`. Strip any "when to use" lines that have migrated into the body (in Holistics, those belong in `description`).
 4. Map invocation fields using the tables above.
-5. Scan the source skill for any feature appearing in the Holistics-only or Source-only tables. For each one found, halt and ask the user — see [Handling incompatibilities](#handling-incompatibilities). Resume the workflow with their decisions applied.
+5. Scan the source skill for any feature that isn't covered by the mapping tables above. For each one found, halt and ask the user — see [Handling incompatibilities](#handling-incompatibilities). Resume the workflow with their decisions applied.
 6. Place at `settings/ai/<name>/skill.aml` (or the target tool's project-skill path if going the other direction).
