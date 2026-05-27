@@ -38,13 +38,18 @@ For the principles that govern *how* a good Holistics skill is written — descr
 
 ## Handling incompatibilities
 
-Agent skills and Holistics skills cover different sets of functionalities — agent skills can bundle `references/*` documents and `scripts/*` executables; Holistics skills can be parameterized via `Slot[...]`. The exact list of differences may change over time; treat any feature in the source skill not covered by the mapping tables above as an incompatibility.
+Agent skills and Holistics skills cover different sets of functionalities. For example:
+
+- Agent skills can bundle `references/*` documents and `scripts/*` executables; Holistics skills currently cannot.
+- Holistics skills can be parameterized via the programmatic AML `Slot[...]` mechanism; agent skills cannot.
+
+The exact list of differences may change over time; treat any feature in the source skill not covered by the mapping tables above as an incompatibility.
 
 When the source skill uses an incompatible feature, do not silently drop, inline, or translate it. The right move depends on how that feature is being used in the source skill, and only the user can tell you.
 
 For each incompatible feature found:
 
-1. State which feature it is and which row of the compatibility table it falls under.
+1. State which feature it is and why it has no equivalent in the target.
 2. Quote or describe what the feature is doing in the source skill (the `Slot`'s purpose, the script's behavior, the role-gate's condition).
 3. Ask the user how to handle it in the target. Don't suggest a specific answer; let them decide.
 4. Apply the user's answer and continue. If multiple incompatibilities exist, ask about each separately — they may want different treatment.
