@@ -1,13 +1,13 @@
 ---
 name: create-holistics-skill
-description: Author a Holistics skill. Use whenever the user wants to write, edit, refine, or migrate a skill that gives Holistics AI specific knowledge, workflows, or guardrails — including phrasings like "add a skill for X", "convert this Claude skill to AML", "create a workspace glossary skill", "turn this prompt into a reusable skill", or "make this Holistics AI smarter about Y".
+description: Author a Holistics skill. Use whenever the user wants to write, edit, or refine a skill that gives Holistics AI specific knowledge, workflows, or guardrails — including phrasings like "add a skill for X", "create a workspace glossary skill", "turn this prompt into a reusable skill", or "make this Holistics AI smarter about Y". For converting a skill written for another runtime (Claude, OpenAI/Codex) into AML, use `convert-agent-skill-to-holistics` instead.
 ---
 
 # Creating a Holistics skill
 
 A skill is a persistent, named bundle of instructions and knowledge that Holistics AI loads when invoked. This guide walks you through authoring one as an AML `Skill` block placed at `settings/ai/<skill_name>/skill.aml`.
 
-If the user is migrating a Claude or OpenAI/Codex skill into Holistics — or vice versa — see [Converting between formats](#converting-between-holistics-claude-and-openaicodex-skill-formats) at the end.
+If the user is porting an existing Claude or OpenAI/Codex skill into Holistics — or vice versa — use the `convert-agent-skill-to-holistics` skill instead.
 
 A skill is the **wrong** tool when:
 
@@ -254,49 +254,6 @@ Each one below is a common mistake and the reason it fails:
 - **Conflating skill with dataset/model knowledge.** The skill contains schema details, column definitions, or metric formulae that belong in the AML dataset or model. → The dataset is the source of truth; skill drift becomes inevitable.
 - **Auto-invoke for an irreversible action.** A skill that sends an email, writes to production, or deletes a file is auto. → The user cannot intercept a mistaken invocation.
 - **One mega-skill instead of two composed skills.** A single skill covers multiple unrelated triggers (glossary + query rules + summary template). → Harder to trigger reliably; description becomes incoherent; harder to maintain.
-
-## Converting between Holistics, Claude, and OpenAI/Codex skill formats
-
-The principles and patterns above are universal across formats — concise body, explain the why, descriptions that name the trigger surface. When converting, what changes is the wrapper, the file path, and a handful of field semantics.
-
-### Field mapping
-
-| Holistics AML | Claude / OpenAI Markdown `SKILL.md` |
-|---|---|
-| `Skill <name> { ... }` block | YAML frontmatter + Markdown body |
-| `description: "..."` | frontmatter `description:` |
-| `content: @md ... ;;` | Markdown body below the frontmatter |
-| `invocation` field | see invocation table below |
-| `disabled: true` | delete the file, or the equivalent field if the host runtime supports it |
-| `Slot[...]` parameters | no direct equivalent — inline the resolved values, or split into multiple skills |
-| `@Skill:other_skill` reference | reference by name in prose; the consuming agent navigates via its own skill tool |
-| `H.current_user.<...>` gating | no direct equivalent — split into separate skills or inline conditions in the body |
-| Placed at `settings/ai/<name>/skill.aml` | Placed at the consuming tool's project-skill path (commonly `.claude/skills/<name>/SKILL.md`) |
-
-### Invocation mapping — from Claude
-
-| `disable-model-invocation` | `user-invocable` | AML Skill |
-|---|---|---|
-| false *(default)* | false | `invocation: 'auto'` |
-| false *(default)* | true *(default)* | `invocation: 'auto'` |
-| true | true *(default)* | `invocation: 'manual'` |
-| true | false | `disabled: true, invocation: 'manual'` |
-
-### Invocation mapping — from OpenAI/Codex
-
-| `allow_implicit_invocation` | AML Skill |
-|---|---|
-| true *(default)* | `invocation: 'auto'` |
-| false | `invocation: 'manual'` |
-
-### Conversion workflow
-
-1. Capture the source skill's name and description.
-2. Rewrite the description for Holistics AI's triggering surface — concrete phrasings, what + when. Don't paste the original verbatim; trigger surfaces differ between agents.
-3. Move the body content into `content: @md ... ;;`. Strip any "when to use" lines that have migrated into the body.
-4. Map invocation fields using the tables above.
-5. For each AML-only feature the source can't express (Slots, `@Skill:`, role-gating), decide whether to use it now (going to AML) or how to inline it (going to Markdown).
-6. Place at `settings/ai/<name>/skill.aml` (or the target tool's project-skill path if going the other direction).
 
 ## Quick reference
 
