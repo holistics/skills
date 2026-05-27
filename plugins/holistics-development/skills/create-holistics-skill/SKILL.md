@@ -21,7 +21,7 @@ A Holistics skill is a single AML `Skill` block — no directory structure, no b
 
 Every skill has four parts:
 
-1. **Name** — the identifier in `Skill <name> { ... }`. User-visible in Holistics AI's skill list, and the handle for manual invocation.
+1. **Name** — the identifier in `Skill <name> { ... }`. User-visible in Holistics AI's skill list, and the handle for manual invocation. Use an imperative verb phrase in `kebab-case` — e.g., `create-holistics-skill`, `define-company-metrics`.
 2. **Description** (`description`) — what Holistics AI reads *before* loading the body to decide whether to invoke. The single highest-leverage line in the skill.
 3. **Body** (`content`) — the instructions, knowledge, and examples loaded into the conversation when the skill triggers.
 4. **Invocation controls** (`invocation`, `allow_switching_invocation`, `disabled`) — govern whether the agent or the user activates the skill, and whether it's hidden at all.
