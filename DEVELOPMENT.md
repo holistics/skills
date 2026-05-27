@@ -10,6 +10,21 @@ pnpm install
 
 This installs dependencies and sets up git hooks via husky.
 
+## Commit conventions
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and are enforced by commitlint (the `commit-msg` git hook). The format is `<type>(<scope>): <subject>`, e.g. `chore(plugins.development): add naming convention to create-holistics-skill`. Multiple scopes are allowed, comma-separated.
+
+The allowed `type` and `scope` values live in `.commitlintrc.ts` — update that file when adding a plugin.
+
+Which commits show up in a release's `CHANGELOG.md` is decided separately by `conventional-changelog.config.mjs`: types marked `hidden: true` there (e.g. `chore`, `docs`, `refactor`) are committed but omitted from the changelog, while types like `feat`, `fix`, and `security` are surfaced under their sections.
+
+Quick guidance on picking a `type`:
+- `feat` — introducing a new plugin, skill, or feature - included in CHANGELOG.
+- `fix` — fixing a bug in something that already exists - included in CHANGELOG.
+- `chore` — small adjustments or tweaks to existing plugins/skills that aren't a fix.
+- `docs` — changes to docs only (e.g. `README.md`, this guide).
+- `release` — version bumps produced by `pnpm bump`.
+
 ## Repository structure
 
 ```
