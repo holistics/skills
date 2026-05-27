@@ -1,3 +1,10 @@
+## [0.4.0](https://github.com/holistics/skills/compare/holistics-development-v0.3.0...holistics-development-v0.4.0) (2026-05-27)
+
+### Features
+
+* **plugins.development:** rewrite create-holistics-skill SKILL.md ([7f6c4cc](https://github.com/holistics/skills/commit/7f6c4ccbef0271104cea32ecb347e7db3a698dc7))
+* **plugins.development:** split conversion guidance into its own skill ([88e2628](https://github.com/holistics/skills/commit/88e262885aa10666525e44afea1028edeec3a4c1))
+
 ## [0.3.0](https://github.com/holistics/skills/compare/holistics-development-v0.2.0...holistics-development-v0.3.0) (2026-05-21)
 
 ### Features
