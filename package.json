@@ -11,7 +11,8 @@
     "sync-links": "bash scripts/sync-links.sh",
     "create-link": "bash scripts/create-link.sh",
     "validate-links": "bash scripts/validate-links.sh",
-    "validate-frontmatter": "node scripts/validate-frontmatter.js"
+    "validate-frontmatter": "node scripts/validate-frontmatter.js",
+    "test": "bash scripts/test.sh"
   },
   "config": {
     "commitizen": {
