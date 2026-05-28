@@ -1,3 +1,10 @@
+## [0.5.0](https://github.com/holistics/skills/compare/holistics-development-v0.4.0...holistics-development-v0.5.0) (2026-05-28)
+
+### Features
+
+* **plugins.development:** add hook to validate after editing aml files ([15485af](https://github.com/holistics/skills/commit/15485aff89d0f3fd3c1325845673301273e21d83))
+* **plugins.development:** guide the agent to update CLAUDE.md ([860cdb3](https://github.com/holistics/skills/commit/860cdb35cf1f5acf8c051c82b5c9bd6680312375))
+
 ## [0.4.0](https://github.com/holistics/skills/compare/holistics-development-v0.3.0...holistics-development-v0.4.0) (2026-05-27)
 
 ### Features
