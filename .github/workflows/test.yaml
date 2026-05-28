@@ -40,3 +40,4 @@ jobs:
 
       - run: pnpm validate-links --ignore-removals
       - run: pnpm validate-frontmatter
+      - run: pnpm test
