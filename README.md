@@ -100,5 +100,12 @@ To get started, see [DEVELOPMENT.md](./DEVELOPMENT.md) for the repository struct
 
 For bug reports or ideas, please [open an issue](https://github.com/holistics/skills/issues).
 
+## Contributors
+Thanks to everyone who has contributed to this repository:
+
+<a href="https://github.com/holistics/skills/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=holistics/skills" alt="Contributors" />
+</a>
+
 # License
 This repository is licensed under the [Apache License 2.0](./LICENSE). By contributing, you agree that your contributions will be licensed under the same terms.
