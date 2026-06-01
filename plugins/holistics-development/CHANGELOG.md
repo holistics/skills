@@ -1,3 +1,9 @@
+## [0.5.1](https://github.com/holistics/skills/compare/holistics-development-v0.5.0...holistics-development-v0.5.1) (2026-06-01)
+
+### Bug Fixes
+
+* **plugins.development:** place skills under settings/ai/skills/ ([7f905be](https://github.com/holistics/skills/commit/7f905be043cc7a3a18567dcafbc06c2c9acecf52))
+
 ## [0.5.0](https://github.com/holistics/skills/compare/holistics-development-v0.4.0...holistics-development-v0.5.0) (2026-05-28)
 
 ### Features
