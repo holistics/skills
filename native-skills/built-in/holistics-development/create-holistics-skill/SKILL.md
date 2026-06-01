@@ -5,7 +5,7 @@ description: Author a Holistics skill. Use whenever the user wants to write, edi
 
 # Creating a Holistics skill
 
-A skill is a persistent, named bundle of instructions and knowledge that Holistics AI loads when invoked. This guide walks you through authoring one as an AML `Skill` block placed at `settings/ai/<skill_name>/skill.aml`.
+A skill is a persistent, named bundle of instructions and knowledge that Holistics AI loads when invoked. This guide walks you through authoring one as an AML `Skill` block placed at `settings/ai/skills/<skill_name>/skill.aml`.
 
 If the user is porting an existing Claude or OpenAI/Codex skill into Holistics — or vice versa — use the `convert-agent-skill-to-holistics` skill instead.
 
@@ -227,7 +227,7 @@ Skill <skill_name> {
 }
 ```
 
-Place at `settings/ai/<skill_name>/skill.aml`. The directory name should match the identifier inside the `Skill` block.
+Place at `settings/ai/skills/<skill_name>/skill.aml`. The directory name should match the identifier inside the `Skill` block.
 
 ### Step 6 — Validate
 
@@ -284,4 +284,4 @@ Field semantics:
 
 - AML skills must live under `settings/ai/` to be discovered by Holistics AI.
 - Skills are available only to the Agentic chat model, not the Quick generation model.
-- Best practice: one skill per directory at `settings/ai/<skill_name>/skill.aml`. Keep the directory name in sync with the `Skill` block's identifier.
+- Best practice: one skill per directory at `settings/ai/skills/<skill_name>/skill.aml`. Keep the directory name in sync with the `Skill` block's identifier.
