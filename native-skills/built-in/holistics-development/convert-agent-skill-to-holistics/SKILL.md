@@ -18,7 +18,7 @@ For the principles that govern *how* a good Holistics skill is written — descr
 | `content: @md ... ;;` | Markdown body below the frontmatter |
 | `invocation` field | see invocation tables below |
 | `disabled: true` | delete the file (or the equivalent field if the host runtime supports it) |
-| Placed at `settings/ai/<name>/skill.aml` | Placed at the consuming tool's project-skill path (commonly `.claude/skills/<name>/SKILL.md`) |
+| Placed at `settings/ai/skills/<name>/skill.aml` | Placed at the consuming tool's project-skill path (commonly `.claude/skills/<name>/SKILL.md`) |
 
 ## Invocation mapping — from Claude
 
@@ -63,4 +63,4 @@ If the user opts to defer, emit the converted skill *without* the incompatible f
 3. Move the body content into `content: @md ... ;;`. Strip any "when to use" lines that have migrated into the body (in Holistics, those belong in `description`).
 4. Map invocation fields using the tables above.
 5. Scan the source skill for any feature that isn't covered by the mapping tables above. For each one found, halt and ask the user — see [Handling incompatibilities](#handling-incompatibilities). Resume the workflow with their decisions applied.
-6. Place at `settings/ai/<name>/skill.aml` (or the target tool's project-skill path if going the other direction).
+6. Place at `settings/ai/skills/<name>/skill.aml` (or the target tool's project-skill path if going the other direction).
