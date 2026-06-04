@@ -1,3 +1,9 @@
+## [0.5.2](https://github.com-holistics/holistics/skills/compare/holistics-development-v0.5.1...holistics-development-v0.5.2) (2026-06-04)
+
+### Bug Fixes
+
+* **plugins.common,plugins.development,plugins.reporting:** document search_docs question param ([8350777](https://github.com-holistics/holistics/skills/commit/8350777b5275be0e6f0f09c8605a2d184b5396be))
+
 ## [0.5.1](https://github.com/holistics/skills/compare/holistics-development-v0.5.0...holistics-development-v0.5.1) (2026-06-01)
 
 ### Bug Fixes
