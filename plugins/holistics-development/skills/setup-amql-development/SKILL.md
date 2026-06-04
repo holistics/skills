@@ -46,5 +46,5 @@ Use [](../setup-holistics-cli/) skill
 **Never guess `holistics mcp <tool>` parameter names.** A wrong key (e.g. `query` instead of `question` for `search_docs`) fails the entire call.
 
 Before the first call of any unfamiliar tool in a session:
-1. Run `holistics mcp <tool> --help` to read its `input_schema`.
+1. Run `holistics mcp <tool> --help` or native MCP to read its input schema.
 2. Construct the payload using exactly the documented property names.
