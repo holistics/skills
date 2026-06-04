@@ -17,6 +17,12 @@ description: Search Holistics documentation to answer questions about features, 
 ## Tool: `search_docs`
 Use `search_docs` to look up Holistics knowledge. Do **NOT** use `search_docs` for how to use your tools — you are already provided with enough information for that.
 
+### Invocation
+Example payload:
+```json
+{"question": "how to define a relationship in a dataset?"}
+```
+
 ## Other references
 * See [](../../references/)
 * You can also check out https://docs.holistics.io when `search_docs` doesn't work well.

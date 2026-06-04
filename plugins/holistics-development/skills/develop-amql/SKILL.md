@@ -7,7 +7,7 @@ description: Write and edit AML/AQL code for Holistics models, datasets, dashboa
 * Use [](../setup-amql-development/) skill to prepare for the development
 * **NEVER** assume any AML/AQL syntax, functions, or references.
 * Use Holistics knowledge and tools
-  * Refer to [](../../references/) and use `search_docs` to learn about code syntax.
+  * Refer to [](../../references/) and use `search_docs` to learn about code syntax. See [](../search-docs/) for invocation details.
   * Use `fetch_dataset` to learn about the dataset (e.g. all available models and fields within that dataset), in order to make accurate edits.
   * Use `generate_aql` to write AQL (e.g. AQL metrics).
   * Use `generate_viz` to define Viz.

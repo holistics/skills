@@ -41,3 +41,10 @@ Use [](../setup-holistics-cli/) skill
   * `holistics mcp`: List available tools
   * `holistics mcp <tool> --help`: Learn more about a tool and its inputs, outputs
   * `holistics mcp <tool> '<json_payload>'`: Call a tool
+
+## Tool invocation discipline
+**Never guess `holistics mcp <tool>` parameter names.** A wrong key (e.g. `query` instead of `question` for `search_docs`) fails the entire call.
+
+Before the first call of any unfamiliar tool in a session:
+1. Run `holistics mcp <tool> --help` or native MCP to read its input schema.
+2. Construct the payload using exactly the documented property names.

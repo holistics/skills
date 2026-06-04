@@ -1,3 +1,9 @@
+## [0.1.1](https://github.com-holistics/holistics/skills/compare/holistics-reporting-v0.1.0...holistics-reporting-v0.1.1) (2026-06-04)
+
+### Bug Fixes
+
+* **plugins.common,plugins.development,plugins.reporting:** document search_docs question param ([8350777](https://github.com-holistics/holistics/skills/commit/8350777b5275be0e6f0f09c8605a2d184b5396be))
+
 ## [0.1.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.0.4...holistics-reporting-v0.1.0) (2026-05-13)
 
 ### Features
