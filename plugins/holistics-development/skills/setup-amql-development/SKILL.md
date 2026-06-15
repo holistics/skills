@@ -34,6 +34,7 @@ Use [](../setup-holistics-cli/) skill
 
 ### Usage
 * Use `holistics sync-code --background` to synchronize local codes with Holistics backend, enabling and making sure tools run on latest codes
+  * Conflicts (with conflict markers) are normal. Resolve them in place — do **not** stop `sync-code --background` to resolve them; your local fix syncs to cloud, and stopping/restarting just re-triggers the conflict in a loop.
 * Use `holistics aml validate <files...>` to validate AML files after making every new change. For example:
   * `holistics aml validate "new file.model.aml" "new_file2.dataset.aml"`
   * `holistics aml validate **/*.aml`
