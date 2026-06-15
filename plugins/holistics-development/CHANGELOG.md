@@ -1,3 +1,9 @@
+## [0.5.3](https://github.com/holistics/skills/compare/holistics-development-v0.5.2...holistics-development-v0.5.3) (2026-06-15)
+
+### Bug Fixes
+
+* **plugins.development:** setup-amql-development - do not to stop sync code on conflict ([c62c2bd](https://github.com/holistics/skills/commit/c62c2bd7e8deb2b50614169464d045120153ee11))
+
 ## [0.5.2](https://github.com-holistics/holistics/skills/compare/holistics-development-v0.5.1...holistics-development-v0.5.2) (2026-06-04)
 
 ### Bug Fixes
