@@ -113,8 +113,47 @@ Type FieldRef {
   field: String
 }
 
+// r is the new syntax for building a FieldRef. Prefer using r instead of ref.
+//
+// Unlike ref, which takes model/field as strings (e.g. ref('users', 'id')) and is only
+// validated at runtime on the Holistics side, r takes an access expression (e.g. r(users.id))
+// that the AML compiler statically typechecks at compile time — surfacing invalid references
+// as compile-time diagnostics rather than runtime errors.
+//
+// Field kinds (what is being referenced):
+//   - dimension : a MODEL field (defined on the model). May also be defined in a dataset,
+//                 in which case it is tied to a specific model.
+//   - measure   : a MODEL field, defined on the model.
+//   - metric    : a DATASET field, defined on the dataset itself (not on any model).
+//   - adhoc calculation : a measure/metric defined inline inside a viz block.
+//
+// How to reference each:
+//   Func r(expr: AccessExpression) => FieldRef
+//     model dimension : r(model_name.dimension_name)     e.g. r(users.country)
+//     model measure   : r(model_name.measure_name)       e.g. r(orders.total_amount)
+//     dataset metric  : r(dataset_name.metric_name)      e.g. r(ecommerce.revenue)
+//
+//   Func r(dataset: Dataset, expr: AccessExpression) => FieldRef
+//     dataset dimension : r(dataset_name, model_name.dimension_name)
+//                         e.g. r(ecommerce, users.user_acquired_at)
+//     (For a dimension defined in the dataset; the model must be specified. The compiler first
+//      checks the model is included in the dataset, otherwise it raises a typecheck error.)
+//
+//   adhoc calculation : referenced by its BARE name as a String, NOT r() — e.g. ref: 'avg_payment'
+//
+// Func r(expr: AccessExpression) {
+//   // resolve the expr, get model/dataset name and field/metric name
+//   FieldRef { model: model_name, field: field_name }
+// }
+//
+// Func r(dataset: Dataset, expr: AccessExpression) {
+//   // resolve the expr, lookup model in dataset, get model_name and field_name
+//   // if model not found in dataset, generate diagnostics
+//   FieldRef { model: model_name, field: field_name }
+// }
+Func r() {}
+
+// Legacy. Prefer the r(...) syntax instead — see the r usage comment above for how to use it.
 Func ref(model_name: String, field_name: String) {
   FieldRef { model: model_name, field: field_name }
 }
-
-Func r() {}

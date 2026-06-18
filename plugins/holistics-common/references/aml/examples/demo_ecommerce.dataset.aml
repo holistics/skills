@@ -79,19 +79,19 @@ Dataset demo_ecommerce {
   ]
 
   permission vendor_access {
-    field: ref('ecommerce_merchants', 'id')
+    field: r(ecommerce_merchants.id)
     operator: 'matches_user_attribute'
     value: 'vendor_id'
   }
 
   permission country_access {
-    field: ref('ecommerce_countries', 'name')
+    field: r(ecommerce_countries.name)
     operator: 'matches_user_attribute'
     value: 'country'
   }
 
   permission city_access {
-    field: ref('ecommerce_cities', 'name')
+    field: r(ecommerce_cities.name)
     operator: 'matches_user_attribute'
     value: 'city'
   }

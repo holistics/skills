@@ -30,6 +30,7 @@ Type AnalysisInteractions {
   }
 }
 
+// A dimension exposed at the dataset level (names its model). To reference it, see Func r() in data_model.aml.
 Type DatasetDimension (elem_name_as: 'name') {
   model                          : Model
   label                          : String
@@ -40,6 +41,7 @@ Type DatasetDimension (elem_name_as: 'name') {
   format        (optional)       : Format
 }
 
+// A dataset-level field (metric). To reference it, see Func r() in data_model.aml.
 Type Metric (elem_name_as: 'name') {
   label                          : String
   type                           : MeasureType
