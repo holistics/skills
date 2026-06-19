@@ -1,3 +1,9 @@
+## [0.1.2](https://github.com/holistics/skills/compare/holistics-reporting-v0.1.1...holistics-reporting-v0.1.2) (2026-06-19)
+
+### Bug Fixes
+
+* **plugins.common:** default AML field references to the new r() syntax ([f51b538](https://github.com/holistics/skills/commit/f51b5381595bea97cbd885663595cfcbf83ebce4))
+
 ## [0.1.1](https://github.com-holistics/holistics/skills/compare/holistics-reporting-v0.1.0...holistics-reporting-v0.1.1) (2026-06-04)
 
 ### Bug Fixes
