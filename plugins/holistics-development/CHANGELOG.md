@@ -1,3 +1,9 @@
+## [0.5.4](https://github.com/holistics/skills/compare/holistics-development-v0.5.3...holistics-development-v0.5.4) (2026-06-19)
+
+### Bug Fixes
+
+* **plugins.common:** default AML field references to the new r() syntax ([f51b538](https://github.com/holistics/skills/commit/f51b5381595bea97cbd885663595cfcbf83ebce4))
+
 ## [0.5.3](https://github.com/holistics/skills/compare/holistics-development-v0.5.2...holistics-development-v0.5.3) (2026-06-15)
 
 ### Bug Fixes
