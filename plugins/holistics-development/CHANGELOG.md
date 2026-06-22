@@ -1,3 +1,9 @@
+## [0.5.5](https://github.com/holistics/skills/compare/holistics-development-v0.5.4...holistics-development-v0.5.5) (2026-06-22)
+
+### Bug Fixes
+
+* **plugins.development:** make hooks compatible with codex ([02e97a3](https://github.com/holistics/skills/commit/02e97a3fa47efad98f226738c7c8bb2b2b7d0081))
+
 ## [0.5.4](https://github.com/holistics/skills/compare/holistics-development-v0.5.3...holistics-development-v0.5.4) (2026-06-19)
 
 ### Bug Fixes
