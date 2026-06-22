@@ -1,5 +1,4 @@
 {
-  "description": "Validate AML files with the Holistics CLI after Claude writes or edits them",
   "hooks": {
     "PostToolUse": [
       {
