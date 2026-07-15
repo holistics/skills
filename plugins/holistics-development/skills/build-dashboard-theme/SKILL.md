@@ -23,11 +23,11 @@ A theme task is fully specified when you can answer:
 6. **Target** — which dashboard(s) to apply it to.
 
 ## What a bare minimum output looks like
-Every run delivers ALL of, regardless of prompt depth:
-- a `const <slug>_theme_tokens` object with ALL 19 keys present (the single source of truth — no key is ever omitted; `font_display` = `font_body` when there's no display/body split),
-- a complete `ColorPalette` (8 categorical colors — see Palette construction),
-- a complete `PageTheme` covering page, canvas, block, table (general incl. `cell_padding` + `borders`, header, sub_header, sub_title, sparkline), and KPI surfaces plus `custom_css` for text blocks, reading every color through `<slug>_theme_tokens(...)` — every section is mandatory on every run,
-- the theme actually applied to the target dashboard,
+Every run delivers ALL of, regardless of prompt depth. These are *structural* invariants — which pieces appear; the *values* inside are yours to derive (see Conventions → Design principles), not fixed by this skill.
+- a `const <slug>_theme_tokens` object — the single source of truth; declare every repeated color / font / design decision once. The Schema lists a recommended baseline token set; it is extensible (add a token when the design needs one, e.g. a page gradient or a second accent), not a fixed key count.
+- a complete `ColorPalette` (8 categorical colors — see Palette construction).
+- a complete `PageTheme` that reads tokens through `<slug>_theme_tokens("key")` accessors and emits EVERY section: `color`, `background`, `canvas`, `block`, `viz.table` (general, header, sub_header, sub_title, sparkline), `viz.metric_kpi` (alignment, label, value, progress, trend — trend including its `background`), and `custom_css`.
+- the theme actually applied to the target dashboard.
 - clean diagnostics on every touched file.
 Never deliver a palette without a PageTheme, an unapplied theme, or a dangling `theme:` reference to a file that wasn't written.
 
@@ -37,35 +37,25 @@ Never deliver a palette without a PageTheme, an unapplied theme, or a dangling `
    - **From the project** — check `library/themes/`; an existing theme may be the intended starting point (extend, don't duplicate).
    - **From defaults** — with no signal, build a clean professional light theme (near-white warm-neutral page, one restrained accent pair, comfortable density, hairline borders). Never reply that you need brand input to proceed.
    Ask at most one short round, and only when mode or a locked anchor is both unstated and unguessable AND the user clearly has a specific brand in mind; decide everything else.
-2. **Write** `library/themes/<slug>.theme.aml` — the `const <slug>_theme_tokens`, then the `ColorPalette`, then the `PageTheme` (per Schema).
+2. **Write** `library/themes/<slug>.theme.aml` — the `const <slug>_theme_tokens`, then the `ColorPalette`, then the `PageTheme`. Use the Schema's property surface for the exact property names, and derive every value (surfaces, type sizes, padding, elevation) from Conventions → Design principles — the Schema no longer dictates values.
 3. **Verify the file** — read it back: non-empty; tokens + palette + theme present; names slug-consistent; PageTheme colors are `<slug>_theme_tokens(...)` accessors (only hover/banding inline) and `custom_css` inlines the token values. Check code diagnostics and fix every error — an unknown-property/name error means invented vocabulary.
 4. **Apply** — set `theme: <slug>_theme` on the target dashboard(s); check their diagnostics too.
 5. **Deliver** — close with: slug, mode, the anchor colors used and where they came from (given vs assumed), files touched, warnings.
 
 ## Schema
-A theme file has three parts in order — a `const <slug>_theme_tokens` object (the single source of truth for every design decision), a `ColorPalette`, and a `PageTheme` that reads the tokens through `<slug>_theme_tokens("key")` accessors. This is the complete vocabulary; nothing outside it exists.
+A theme file has three parts in order — a `const <slug>_theme_tokens` object (the single source of truth for every design decision), a `ColorPalette`, and a `PageTheme` that reads the tokens through `<slug>_theme_tokens("key")` accessors. Follow the concrete shape below — it is the complete vocabulary and the exact forms that compile; fill each `"..."` slot with a value derived per Conventions → Design principles. The `const {…}` object and its `<slug>_theme_tokens("key")` accessor are valid AML; there is no `.key` or `["key"]` form.
 
-    // 1. Design decisions — declare each once here, reference everywhere else
+    // 1. Design tokens — the single source of truth. Declare each decision once; reference it everywhere.
+    //    Recommended baseline below; extend when a design needs it (e.g. add page_gradient, accent_2).
+    //    Values (the oklch literals) are yours to derive — see Conventions → Design principles.
     const <slug>_theme_tokens = {
-      primary: "oklch(L C H)",            // brand anchor — locked if the user gave a hex
-      secondary: "oklch(L C H)",          // second brand color
-      mode: "light|dark",
-      background: "oklch(...)",           // page bg — light L 0.95-0.975 (near-white); dark L 0.25-0.30 (soft dark gray, NOT near-black — never below 0.24)
-      canvas_bg: "oklch(...)",            // background.L +0.02 light / +0.03 dark
-      block_bg: "oklch(...)",             // background.L +0.06 light / +0.07 dark — card surface (a touch brighter than the page)
-      text_primary: "oklch(...)",         // L 0.20 light / 0.95 dark, near-neutral C
-      text_muted: "oklch(...)",           // L 0.45 light / 0.70 dark
-      text_subtle: "oklch(...)",          // L 0.60 light / 0.55 dark
-      border: "oklch(...)",               // block_bg.L -0.10 light / +0.06 dark
-      focus_ring: "oklch(...)",           // from primary hue, C 0.10-0.18
-      semantic_success: "oklch(...)",
-      semantic_warning: "oklch(...)",
-      semantic_danger: "oklch(...)",
-      font_body: "<body family>",         // font_family for body/table/KPI text; may fold in CSS fallbacks
-      font_display: "<title family>",     // font_family for block titles; = font_body when there's no display/body split
-      corner_style: "sharp|rounded|soft",
-      density: "compact|comfortable|spacious",
-      elevation: "hairline|flat|shadow"
+      primary: "oklch(...)",  secondary: "oklch(...)",  mode: "light|dark",              // brand anchors (locked if the user gave a hex)
+      background: "oklch(...)",  canvas_bg: "oklch(...)",  block_bg: "oklch(...)",        // page -> canvas -> card, stepping up in lightness
+      text_primary: "oklch(...)",  text_muted: "oklch(...)",  text_subtle: "oklch(...)",  // descending contrast
+      border: "oklch(...)",  focus_ring: "oklch(...)",
+      semantic_success: "oklch(...)",  semantic_warning: "oklch(...)",  semantic_danger: "oklch(...)",
+      font_body: "<body family>",  font_display: "<title family>",   // font_display = font_body when there's no display/body split; fold CSS fallbacks into the value
+      corner_style: "sharp|rounded|soft",  density: "compact|comfortable|spacious",  elevation: "hairline|flat|shadow"
     }
 
     // 2. Chart palette — 8 OKLCH literals (see Conventions → Palette)
@@ -76,32 +66,32 @@ A theme file has three parts in order — a `const <slug>_theme_tokens` object (
       }
     }
 
-    // 3. Theme — reads decisions via <slug>_theme_tokens("key"); only derived hover/banding are inline OKLCH
+    // 3. Theme — reads tokens via <slug>_theme_tokens("key"); fill each "..." with a value derived per Conventions → Design principles. Only the derived hover/banding tints are inline oklch (no token).
     PageTheme <slug>_theme {
       title: "<Human Name>"
-      color { data: <slug>_palette }
-      background { bg_color: <slug>_theme_tokens("background") }
+      color { data: <slug>_palette }                // a ColorPalette IDENTIFIER (bare name), never an accessor or string
+      background { bg_color: <slug>_theme_tokens("background") }   // experimental: bg_image: "linear-gradient(...)" instead, for a page gradient (see Modes)
       canvas {                                        // frame between page and blocks
-        background { bg_color: <slug>_theme_tokens("canvas_bg") }
+        background { bg_color: <slug>_theme_tokens("canvas_bg") }  // may take bg_image instead (experimental gradient)
         border {
           border_width: 0
           border_radius: "..."                        // derived from corner_style: "sharp" -> 4 | "rounded" -> 12 | "soft" -> 20
           border_color: <slug>_theme_tokens("border")
           border_style: "none"                        // "none" | "solid"
         }
-        shadow: "none"                                // "none" | "sm"
+        shadow: "none"                                // "none" | "sm" | "md" | "lg"
         opacity: 1
       }
       block {                                         // every dashboard block/card
-        background { bg_color: <slug>_theme_tokens("block_bg") }
+        background { bg_color: <slug>_theme_tokens("block_bg") }   // may take bg_image instead (experimental gradient)
         border {
           border_width: "..."                         // derived from elevation: "hairline" -> 1 | "flat" -> 0 | "shadow" -> 0
           border_style: "..."                         // derived from elevation: "hairline" -> "solid" | "flat" -> "none" | "shadow" -> "none"
           border_radius: "..."                        // derived from corner_style: "sharp" -> 4 | "rounded" -> 12 | "soft" -> 20
           border_color: <slug>_theme_tokens("border")
         }
-        shadow: "..."                                 // derived from elevation: "hairline" -> "none" | "flat" -> "none" | "shadow" -> "sm"
-        padding: "..."                                // derived from density: "compact" -> 12 | "comfortable" -> 16 | "spacious" -> 20
+        shadow: "..."                                 // derived from elevation: "hairline" -> "none" | "flat" -> "none" | "shadow" -> "sm"  (md/lg for more depth)
+        padding: "..."                                // derived from density: "compact" -> 12 | "comfortable" -> 16 | "spacious" -> 20   (a number = all sides; or DetailedSpacing { top:.. right:.. bottom:.. left:.. } per-side — keep the keyword)
         opacity: 1
         label {                                       // block titles
           font_family: <slug>_theme_tokens("font_display")
@@ -157,7 +147,7 @@ A theme file has three parts in order — a `const <slug>_theme_tokens` object (
           }
         }
         metric_kpi {
-          alignment: "left|center|right"
+          alignment: "left"                            // "left" | "center" | "right"
           label {
             font_family: <slug>_theme_tokens("font_body")
             font_size: "..."                          // derived from density: "compact" -> 18 | "comfortable" -> 20 | "spacious" -> 22
@@ -171,15 +161,16 @@ A theme file has three parts in order — a `const <slug>_theme_tokens` object (
           progress {
             indicator { bg_color: <slug>_theme_tokens("primary") }
             track { bg_color: <slug>_theme_tokens("border") }
+            text { font_color: <slug>_theme_tokens("text_muted") }   // progress caption
           }
-          trend {
-            positive { text { font_color: <slug>_theme_tokens("semantic_success") font_weight: "medium" } }
-            negative { text { font_color: <slug>_theme_tokens("semantic_danger") font_weight: "medium" } }
-            neutral { text { font_color: <slug>_theme_tokens("text_muted") font_weight: "normal" } }
+          trend {                                                    // each badge background = a faint wash of its trend hue — derived inline, no token (light: high L ~0.92, low C; dark: low L ~0.40, low C)
+            positive { text { font_color: <slug>_theme_tokens("semantic_success") font_weight: "medium" }  background { bg_color: "oklch(...)" } }
+            negative { text { font_color: <slug>_theme_tokens("semantic_danger") font_weight: "medium" }  background { bg_color: "oklch(...)" } }
+            neutral  { text { font_color: <slug>_theme_tokens("text_muted") font_weight: "normal" }  background { bg_color: "oklch(...)" } }
           }
         }
       }
-      // custom_css — inline each token's literal value (copy from the const; NOT the accessor). The .dac-text-block rules are FIXED (emit verbatim, always). The three commented selectors after them are the ONLY targets experimental mode may decorate; leave them commented (omit) in default mode. No selector outside this block may ever be styled.
+      // custom_css — the FIXED verbatim block below, always emitted as-is. It styles .dac-text-block (+ h1-h6), the one surface PageTheme's structured properties don't reach. Inline each token's literal value (copy from the const; NOT the accessor). Never add any other selector or rule — this is the whole custom_css.
       custom_css: @css
         .dac-text-block {
           font-family: <font_body>;
@@ -187,12 +178,7 @@ A theme file has three parts in order — a `const <slug>_theme_tokens` object (
           color: <text_muted>;
           line-height: 1.6;
         }
-        .dac-text-block h1,
-        .dac-text-block h2,
-        .dac-text-block h3,
-        .dac-text-block h4,
-        .dac-text-block h5,
-        .dac-text-block h6 {
+        .dac-text-block h1, .dac-text-block h2, .dac-text-block h3, .dac-text-block h4, .dac-text-block h5, .dac-text-block h6 {
           font-family: <font_display>;
           color: <text_primary>;
           line-height: 1.3;
@@ -200,10 +186,6 @@ A theme file has three parts in order — a `const <slug>_theme_tokens` object (
           margin-bottom: 0.5em;
           font-weight: 600;
         }
-        /* experimental mode ONLY (see Conventions → Custom CSS): decorative, token-derived CSS may go inside these three — properties are open, but leave them commented (omit) in default mode. These are the ONLY selectors decoration may ever target. */
-        /* .dac-canvas      { … } */
-        /* .dac-block       { … } */
-        /* .dac-block-label { … } */
       ;;
     }
 
@@ -218,18 +200,25 @@ Fill the 8 categorical `colors: []` — identity by hue. Categorical color encod
 
 Derive a fresh palette every time — run these same four steps for both light and dark mode (dark just uses the tighter band from step 2, built against the dark surface).
 
+### Design principles
+The Schema's tree carries sensible defaults (the `// derived from ...` comments) — treat them as a coherent starting point, not a mandate. Pick the actual numbers with judgment and keep them consistent across the whole theme.
+- **Surfaces step up in lightness** page → canvas → block, so cards read as raised above the page. Light mode: near-white page (L ~0.95-0.975), each surface a touch brighter. Dark mode: soft dark-gray page (L ~0.25-0.30, never near-black), each surface a touch brighter. Text tiers descend in contrast: `text_primary` (strongest) → `text_muted` → `text_subtle`; `border` sits just off the block surface; the two derived table tints (`hover_color`, `banding_color`) are a hair above the surface.
+- **One type scale.** Set a body size and a consistent step, and sit every text slot on it — block title ≥ body, table text ≈ body, sub-title < body, KPI value much larger, KPI label small. Bigger where emphasis belongs, smaller for secondary text; don't pick sizes ad hoc.
+- **Density is one coherent choice.** `compact` / `comfortable` / `spacious` moves block `padding`, table `cell_padding`, and every `font_size` *together* — tighter density means smaller padding and slightly smaller type; spacious the reverse. Never pair tight padding with loose type.
+- **Elevation & corners** from the enum tokens: `elevation` → `hairline` = 1px border + no shadow · `flat` = no border + no shadow · `shadow` = no border + a soft shadow (`sm`, or `md`/`lg` for more depth). `corner_style` → `sharp` ≈ small radius · `rounded` ≈ medium · `soft` ≈ large, applied consistently to canvas and block.
+
 ### Modes
-- The default is **conservative**: strictly follow the Schema and Conventions, invent no new properties, and emit deterministically (single-source tokens, verbatim `custom_css`, solid surfaces). This runs unless the user asks otherwise.
-- **Experimental mode** applies only when the user explicitly asks for a creative / experimental / expressive theme. It relaxes exactly one thing — you may add decorative `custom_css` (gradients, glows, subtle effects, all built from token colors) on the frame surfaces only (which selectors: see Custom CSS). Everything else stays conservative (closed vocabulary, single-source tokens). Decorate the frame, not the data; content stays legible.
+- **Conservative (default).** Solid surfaces; restrained palette; `custom_css` is the verbatim `.dac-text-block` block only. Runs unless the user asks otherwise.
+- **Experimental (opt-in).** Only when the user explicitly asks for a creative / experimental / expressive theme — and only through **native properties**, never raw CSS decoration. Reach for `bg_image` gradients/imagery on `background` / `canvas.background` / `block.background` (`"linear-gradient(...)"` built from token colors, which the renderer themes and resizes for you), bolder palette chroma, and `md` / `lg` shadows for depth. `custom_css` still stays the verbatim block. Push the look on the frame surfaces (page, canvas, cards); keep the data legible.
 
 ### Custom CSS
-- **Verbatim block (conservative, always).** Emit the `custom_css` block exactly as shown in the Schema tree — it styles `.dac-text-block` (+ its `h1`–`h6`), the only surface PageTheme's structured properties don't reach. Every selector and property is fixed and closes with `;;` on its own line; only the inlined token *values* vary (never the accessor). Never add, drop, reorder, or restyle a rule.
-- **Decoration targets (experimental only).** The Schema's `custom_css` block shows the three decoration selectors as commented placeholders — `.dac-canvas`, `.dac-block`, `.dac-block-label`. In experimental mode, uncomment and fill them with decorative CSS: **properties are open** (gradients, glows, shadows, …) as long as they build from token colors and decorate the frame, not the data. These three are the ONLY selectors decoration may target; the data/content surfaces `.dac-viz-block`, `.dac-text-block`, and `.dac-ic-block` are never styled decoratively. (Styling `.dac-text-block` through the verbatim rules above is the conservative baseline, not decoration.)
+`custom_css` is the single verbatim block, the same in every theme — nothing else ever goes in it.
+- **Verbatim block (always).** Emit exactly the `.dac-text-block` (+ `h1`–`h6`) block the Schema shows — that text surface is the one PageTheme's structured properties don't reach. Only the inlined token *values* vary (copy them from the const, never the accessor); the block closes with `;;` on its own line. Never add, drop, reorder, or restyle a rule, and never introduce another selector — `custom_css` is injected unsanitized and `!important`, so a stray rule would silently override the structured theme.
 - **Font `@import`.** Prepend one `@import url(...)` line above the first rule ONLY when `font_body` or `font_display` names a font Holistics doesn't bundle (bundled, no import: Inter, Arial, Verdana, Tahoma, Trebuchet MS, Times New Roman, Georgia, Garamond, Courier New).
 
 ### Others
 - **One source of truth.** Declare every color and font once in `const <slug>_theme_tokens`; the PageTheme reads them via `<slug>_theme_tokens("key")`. Only exceptions: the derived `hover_color` / `banding_color` (and `sub_header.bg_color`, which equals banding) have no token; and `custom_css` inlines each token's *value* (CSS can't call the accessor).
 - **Colors & fonts.** Colors are `"oklch(L C H)"` (L 0-1, C 0-0.4, H 0-360); convert user hex to OKLCH. `font_family` reads `font_body` (body/table/KPI) or `font_display` (titles) via the accessor; fold any CSS fallbacks into the token value itself.
-- **Enums resolve to fixed values.** Each enum token holds only its options (e.g. `"sharp|rounded|soft"`); the per-option mapping lives inline on each derived property in the Schema tree — `corner_style`→`border_radius`, `elevation`→border + block shadow, `density`→`padding` / `cell_padding` / every `font_size`.
-- **Vocabulary is closed.** Use only the properties, token keys, and `custom_css` selectors the Schema shows: never style a selector the Schema doesn't list, and never add a property it doesn't show — the three experimental `custom_css` blocks are the sole place properties are open (see Custom CSS). If you think you need another name, confirm with search_docs first — never guess.
+- **Filters/controls have no theme section** — they auto-derive from `block.background` / `block.text` / `block.border`, so keep those block colors legible against each other. And `viz` themes only `table` + `metric_kpi`; there is no `bar`/`line`/`pie` viz theming to add.
+- **Vocabulary is closed.** Use only the properties, token keys, and the one `custom_css` block the Schema shows — never style a selector it doesn't list, never add a property it doesn't show. Unsure of a name? `search_docs` it — never guess.
 - **File.** Write `library/themes/<slug>.theme.aml`; the dashboard references it with `theme: <slug>_theme`.
