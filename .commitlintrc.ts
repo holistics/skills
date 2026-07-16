@@ -14,8 +14,10 @@ const Configuration: UserConfig = {
         'plugins.analytics',
         'plugins.analytics-finance',
         'plugins.holistics-migrate-power-bi',
-        'native.built-in',
-        'native.optional',
+        'native',
+        'native.default',
+        'native.template',
+        'native.system',
       ]
     ],
     'type-enum': [
