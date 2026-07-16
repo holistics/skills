@@ -88,10 +88,11 @@ Browse the linked `skills/` folders to see the actual skill files for each plugi
 ## For Holistics native agent
 Skills under [`native-skills/`](./native-skills/) can be used by Holistics App to extend **Holistics native AI agent**. They run inside Holistics and have access to native web UI and backend features. Browse the folder to see what's available.
 
-* [`optional`](./native-skills/optional/): Optional skills that **can be imported** based on your Holistics organisation's needs.
-* [`built-in`](./native-skills/built-in/): Built-in skills that are **already included** in the base skillset of Holistics native AI agent.
-
-To import or override: in the Skill creation UI inside Holistics, select skills on the **From library** tab.
+| Native skill type | Path | Availability | Customizable |
+| --- | --- | --- | --- |
+| System | [`native-skills/system/`](./native-skills/system/) | 📦 Always available | 🔒 No |
+| Default | [`native-skills/default/`](./native-skills/default/) | 📦 Available by default | ✏️ Yes |
+| Template | [`native-skills/template/`](./native-skills/template/) | 📥 Import on demand | ✏️ Yes |
 
 # Contributions are welcomed
 We welcome contributions of new skills, improvements to existing ones, and bug fixes — for the generic Analytics plugins, the Holistics-specific plugins, and the native skills used by Holistics' built-in AI agent.
