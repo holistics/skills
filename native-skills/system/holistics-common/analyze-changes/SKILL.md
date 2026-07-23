@@ -1,6 +1,6 @@
 ---
-name: change-analysis
-label: Change Analysis
+name: analyze-changes
+label: Analyze Changes
 description: |-
   Orchestrates a guided investigation when the user sees a metric change (drop or increase) and wants to understand it. Runs an anomaly check first to confirm whether the change is real, then offers dimensional breakdown (key driver) or metric decomposition.
 
