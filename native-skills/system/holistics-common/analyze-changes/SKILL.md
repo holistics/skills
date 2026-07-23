@@ -12,7 +12,7 @@ description: |-
     • "What happened to conversions last week?"
 
   Do NOT trigger for:
-    • Direct dimension breakdown requests ("break revenue down by region") — contribution_analysis handles those
+    • Direct dimension breakdown requests ("break revenue down by region") — analyze_contribution handles those
     • Anomaly scanning with no specific change in mind ("detect anomalies in revenue") — detect_anomaly handles those
     • Forecasts or future projections
 ---
@@ -41,7 +41,7 @@ Work through Steps 1–3 in order. Do not skip ahead.
 **Stage 1 constraints — enforced until the Stage 1 Summary Block is output:**
 - Do NOT call `search_viz_blocks`, `search_dashboards`, or any tool that searches for existing visualizations.
 - Do NOT execute or reuse any existing visualization artifact, even if one appears relevant.
-- Do NOT run a dimensional breakdown or load `contribution_analysis` — that belongs to Stage 2 only.
+- Do NOT run a dimensional breakdown or load `analyze_contribution` — that belongs to Stage 2 only.
 - Do NOT perform metric decomposition — even when the metric formula is obvious or available in the dataset. Decomposition belongs after the anomaly verdict or after the user explicitly chooses that path.
 - Do NOT give any direct explanation, analysis, or conclusion about why the metric changed — that belongs to Stage 2.
 - Existing or pinned viz data may be used only to identify `metric`, `direction`, and `time_reference`. It must not replace the required anomaly check.
@@ -123,7 +123,7 @@ Act on the user's choice:
 
 ### If the user picks option 1 — Break down by dimensions
 
-Call `load_skill("contribution_analysis")`.
+Call `load_skill("analyze_contribution")`.
 
 Announce the handoff:
 > "Analyzing what drove the [drop/increase] in **[metric]** [time_reference]..."
