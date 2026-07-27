@@ -55,79 +55,22 @@ Produce one detection spec `{ dataset, M, T, granularity, filters, timeframe }`.
 Confirm only fields you **guessed** (a ranked search: *"I'll use `sales_orders` (measure `total_revenue`). Confirm, or name another."* — then wait); silently accept fields **read** from the chart or stated by the user. Validate that `M` exists as a measure (or is a carried viz calculation); if a typed metric matches none, show the top-3 closest measures and ask. Echo the resolved slice back, including the lead-in context: *"Analyzing GMV for Region = West over Jul 2023 – Aug 2024 (your view); the chart also shows earlier months as lead-in to establish the trend."*
 
 ### Step 2 — Detect (write AQL → execute_aql)
-Write the anomaly AQL from Output → *Method* and *Anomaly query*, substituting `M`, `T`, `<grain>`, `W`, `k`, folding in the dimensional filters, and widening the timeframe by `W` buckets for warm-up. Then `execute_aql` (title per Conventions → *Titles*) — it validates the AQL on execution and errors loudly on a bad query. The result is the **anomaly results** — the summary's source of truth and the exact AQL you hand to `generate_viz` in Step 3.
+1. Write the anomaly detection AQL with `generate_aql`, providing `M`, `T`, `<grain>`, `W`, `k`, folding in the dimensional filters, and widening the timeframe by `W` buckets for warm-up. Prompt structure:
+  ```
+  /detect-anomaly-aql
+
+  M: ...
+  T: ...
+  grain: ...
+  W: ...
+  k: ...
+  ```
+2. Call `execute_aql` (title per Conventions → *Titles*) — it validates the AQL on execution and errors loudly on a bad query. The result is the **anomaly results** — the summary's source of truth and the exact AQL you hand to `generate_viz` in Step 3.
 
 ### Step 3 — Present (generate_viz → execute_viz → summarize)
 Feed the Step 2 AQL to `generate_viz` per Output → *Anomaly chart*, adjust only decoration, then `execute_viz` (title per Conventions → *Titles*). Then write the prose per Output → *Summary*, reading only the buckets inside the reporting timeframe. On a failure, Conventions → *On an error*.
 
 ## Output
-
-### Method
-The expected band **follows the trend**. For each bucket `t` (`T` truncated to `<grain>`):
-- `actual` = `M`; `Δ` = the change from the previous bucket.
-- `expected` = previous actual **+ drift**, where drift = the trailing mean of `Δ` over the `W` buckets before `t`. This is the band's centre; it tilts with the trend.
-- `spread` = the trailing **stddev of `Δ`** over those `W` buckets.
-- `lower/upper_bound` = `expected ∓ k · spread`.
-- `z_score` = `(actual − expected) / spread` — is *this bucket's change* unusual versus the recent distribution of changes (stationary even when the level trends).
-- `is_anomaly` = `1` when `abs(z_score) > k`, else `0`. `k` default 3 (looser 2, stricter 4).
-
-**Warm-up gate (required).** A bucket is only banded/flagged once it has a **full `W`-bucket window** of prior history. Partial-frame window stats return values (not null), so gate explicitly on `n_prior = window_count(...) ≥ W`: buckets with `n_prior < W` get **no band** and are **never flagged** — the leading `W` lead-in buckets are exactly these, shown as context.
-
-Window `W` by grain — a whole number of cycles:
-
-| Grain | `W` |
-|---|---|
-| day | 28 (4 weeks) |
-| week | 13 (a quarter) |
-| month | 12 (a year) |
-| quarter | 8 (two years) |
-
-If the series is shorter than `W + 1`, shrink `W` to about half the available history (minimum 4) and say so. With fewer than 8 points total, stop: *"Not enough history (n=X) to detect anomalies."*
-
-### Anomaly query (AQL template — Step 2)
-Write this yourself. `M`, `T`, `<grain>`, `W`, `k` are placeholders; the `-1..-1` range (previous bucket) is literal; every `window_*` call takes `order: T | <grain>() | asc(), partition: []`. Widen the timeframe filter by `W` buckets, and add any dimensional filters. (Validated against `demo_bigquery_ecommerce`/`gmv`.)
-
-```aql
-metric m_prev   = window_avg(M, -1..-1,  order: T | <grain>() | asc(), partition: []);
-metric m_delta  = M - m_prev;
-metric m_n      = window_count(M, -W..-1, order: T | <grain>() | asc(), partition: []);
-metric m_drift  = window_avg(m_delta, -W..-1,  order: T | <grain>() | asc(), partition: []);
-metric m_spread = window_stdev(m_delta, -W..-1, order: T | <grain>() | asc(), partition: []);
-metric m_expected = m_prev + m_drift;
-metric m_z      = safe_divide(M - m_expected, m_spread);
-metric m_lower  = case(when: m_n >= W, then: m_expected - k * m_spread, else: null);
-metric m_upper  = case(when: m_n >= W, then: m_expected + k * m_spread, else: null);
-metric m_anom   = case(when: and(m_n >= W, abs(m_z) > k), then: 1, else: 0);
-explore {
-  dimensions {
-    bucket: T | <grain>()
-  }
-  measures {
-    actual: M,
-    expected: m_expected,
-    lower_bound: m_lower,
-    upper_bound: m_upper,
-    z_score: m_z,
-    is_anomaly: m_anom
-  }
-  filters {
-    // reporting window WIDENED by W buckets for warm-up; the @( … ) parentheses are REQUIRED.
-    T matches @(last <reporting + W> <grain>s)
-    // + any dimensional filters carried from the chart, e.g. bq_fct_order_items.merchant_country_code == "US"
-  }
-  sorts {
-    bucket asc nulls last
-  }
-}
-```
-
-**Do not regress these (spike-validated):**
-- Count prior buckets with `window_count(M, -W..-1, …)` — **never** `window_sum(1, …)` (SQL-generation error).
-- The `n_prior ≥ W` gate is mandatory (partial windows return values, not null, and would false-flag the first `W` buckets).
-- `case(when: …, else: null)` is valid and is how the band is hidden in the lead-in.
-- The nested window (`window_stdev(m_delta, …)` where `m_delta` contains a window) compiles directly — one explore, no two-stage query.
-
-**Reference `M` bare.** A dataset metric (one defined in the dataset's `metric { … }` block — e.g. `gmv`, `count_users`) is referenced by its **bare name** in the AQL, never qualified as `<dataset>.<metric>` or `<model>.<metric>`. Qualifying it errors — *"Field `<metric>` … is referencing Model `<dataset>`, but the Model does not exist in Dataset"*. (If `M` is a viz-level `calculation` rather than a dataset metric, inline its `@aql` formula as `metric M = <formula>;` first, per Step 1.)
 
 ### Anomaly chart (generate_viz — Step 3)
 Don't hand-write the `CombinationChart` — pass the Step 2 explore (verbatim) to `generate_viz` and **state the decoration explicitly in the `query`** (generate_viz defaults its palette and `pattern: 'inherited'` unless told otherwise, so name the colours):
@@ -170,11 +113,8 @@ Closing pointer (N ≥ 1): why an anomaly happened or which dimension drove it i
 Post-run override (offer last): *"Want me to re-run with a stricter or looser threshold? Looser flags more <grain>s (milder deviations); stricter flags only the most extreme. A seasonality-aware version (for weekly/annual patterns) is also available."* The threshold is `k` (looser = 2, stricter = 4; default 3) — the only sensitivity control, never asked upfront. On accept, re-run Steps 2–3 with the new `k`.
 
 ## Conventions
-- **Hand-write the AQL; let `generate_viz` author the chart.** The Step 2 AQL is deterministic and encodes the method exactly — write it yourself and run it with `execute_aql` (which validates it on execution). The chart is the opposite: hand-written viz grammar is the top source of invalid output, so pass your AQL to `generate_viz` and adjust only decoration. (Don't use `generate_aql` — the method must be exact, so the AQL is authored by hand.)
-- **On an error, retry once, then fall back.** If the AQL errors, `search_docs` for the fix and re-run `execute_aql` once. If the chart errors on `execute_viz`, feed the error text back into `generate_viz`'s `query` and re-run once. If a retry still fails: Step 2 → surface the error (don't pretend detection completed); Step 3 → fall back to the Step 2 table + prose. Never loop more than one retry per step.
+- **On an error, retry once, then fall back.** If a retry still fails: Step 2 → surface the error (don't pretend detection completed); Step 3 → fall back to the Step 2 table + prose. Never loop more than one retry per step.
 - **Titles.** `execute_aql` / `execute_viz` require a `title` (under ~60 chars; avoid "query 1"/"untitled"): the Step 2 anomaly results `execute_aql` → `<metric> anomaly results (<reporting timeframe>)`; the Step 3 anomaly chart `execute_viz` → `Anomaly detection: <metric> (<reporting timeframe>)`.
-- **Handling truncated results.** If the MCP returns `@TruncatedContext:<chunk_id>` placeholders, call `fetch_context(chunk_id=<id>)` for each before reasoning over the data. Daily metrics over multi-year timeframes are the typical trigger.
-- **Don't persist the rolling fields as model fields.** `m_drift` / `m_spread` / `z_score` / `is_anomaly` depend on windowed (post-aggregation) results; as `dimension`/`measure` fields on the model they evaluate in the wrong semantic layer. Keep them in the ad-hoc query / viz.
 
 ### Numeric formatting
 - Currency-like measures (label/name contains `revenue`, `cost`, `price`, `arr`, `mrr`, `gmv`, `amount`): `$` prefix, short suffix (`$500K`, `$1.2M`); use the dataset's stated currency symbol if metadata provides it.
@@ -191,8 +131,6 @@ Post-run override (offer last): *"Want me to re-run with a stricter or looser th
 | Series too short even with the lead-in (starts inside the window) | Earliest buckets show without a band (`n_prior < W`); if < 8 usable points, stop with the insufficient-history message. |
 | Flat series (spread = 0) | `safe_divide` → `z_score` null; not flagged (never divide by zero). |
 | Non-negative metric, band dips below 0 | Rare (the band is around the trend, not the level), but clamp the *displayed* lower bound at 0 for non-negative metrics. |
-| Step 2 `execute_aql` errors | `search_docs` for the fix, re-run once; a transient rollup `UNION types text and numeric cannot be matched (SQLSTATE 42804)` usually clears on a re-run. If it still fails, stop and surface the error. |
-| Step 3 chart errors on `execute_viz` | Feed the error text back into `generate_viz`'s `query` and re-run once. If it still fails, fall back to the Step 2 `execute_aql` table + prose. Don't hand-write the viz grammar. |
 | `list_datasets()` unsupported (dev mode) or no chart + unparseable metric | Ask the user to name the dataset/metric explicitly. Do not proceed. |
 | User asks "why did this happen?" or "what dimension drove it?" | Reply: "I can flag which points broke from the trend, but identifying which dimension drove an anomaly — or its business cause — is outside this skill. Break the metric down by relevant dimensions in a dashboard, or check your marketing calendar / CRM / news for that window." |
 | User asks to "show the raw numbers" | Show the `execute_aql` anomaly results directly — `bucket`, `actual`, `expected`, `lower_bound`, `upper_bound`, `z_score`, `is_anomaly`. Never group/pivot rows by `is_anomaly`. |

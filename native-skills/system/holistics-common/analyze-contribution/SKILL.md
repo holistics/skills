@@ -41,21 +41,11 @@ Combined contribution of a group of segments = `sum(their delta_values) / overal
 
 `overall_delta_value` must be computed as a separate query without the segment dimension. Do not derive it by summing segment deltas.
 
-### 4. Null safety first
-
-- `where()` in AQL returns null when no rows match — always wrap with `coalesce(..., 0)`
-- `safe_divide` returns null when denominator is zero or either operand is null — always wrap with outer `coalesce(..., 0)`
-- **Coalesce each additive component individually before any arithmetic.** Never add or subtract potentially-null values directly — `1 + null = null`, which silently nullifies the entire expression. For any metric with multiple components (e.g. numerator = A, denominator = A + B), always write `coalesce(A, 0) + coalesce(B, 0)`, not `A + B`. The outer `coalesce(safe_divide(...), 0)` is not sufficient on its own if any component feeding the denominator is null.
-- Never compute `delta_value` from raw nullable values
-- New segment detection: if `comparison_value_raw IS NULL` and `base_value_raw IS NOT NULL`, the segment is new in the base period — flag it in prose
-- Disappeared segment detection: if `base_value_raw IS NULL` and `comparison_value_raw IS NOT NULL`, the segment disappeared in the base period — flag it in prose
-- **Never omit any segment from the output.** Every segment that exists in either the base or comparison period must appear in the output (chart or table), regardless of whether its metric value is null, 0, or has data. A null or zero metric in one period is valid data — do not filter it out.
-
-### 5. Period consistency
+### 4. Period consistency
 
 All period-specific fields, labels, and filters must refer consistently to the same period throughout.
 
-### 6. Prioritize top 3 dimensions before analysis
+### 5. Prioritize top 3 dimensions before analysis
 
 1. Enumerate eligible low-to-medium cardinality, business-relevant dimensions from the dataset schema
 2. Rank by semantic relevance to the target metric — prefer dimensions where the metric is likely to vary meaningfully, prefer business-actionable dimensions, avoid high-cardinality or technical fields
@@ -63,7 +53,7 @@ All period-specific fields, labels, and filters must refer consistently to the s
 
 Do not ask the user to pick dimensions before the list is shown.
 
-### 7. Sequential execution — one dimension at a time
+### 6. Sequential execution — one dimension at a time
 
 Analyze one dimension per step. Show output for that dimension, then immediately proceed to the next confirmed dimension. Do not batch or union multiple dimensions in one query.
 
@@ -71,12 +61,11 @@ If a dimension fails (query error, no data, schema mismatch, or any other issue)
 
 ---
 
-## change_analysis Context Detection
+## analyze_changes Context Detection
 
-Before running any phase, check the conversation history for a **Change Analysis — Stage 1 complete** block.
+Before running any phase, look for `metric`, `direction`, `time_reference`, and `anomaly_verdict` from the conversation history or task input.
 
-**If found** — this skill was triggered from the `change_analysis` orchestrator:
-- Load `metric`, `direction`, `time_reference`, and `anomaly_verdict` from the block.
+**If found** — this skill was triggered from the `analyze_changes` orchestrator:
 - In Phase 1:
   - Assign periods as follows (this logic applies only in the change_analysis flow):
     - `base_period` = `time_reference` from the Stage 1 block (the period the user referred to)
@@ -224,7 +213,7 @@ Before running Phase 3, check the conversation history:
 
 - **If a Stage 1 Summary Block is present** (contains confirmed metric, periods, overall delta, and dimension list):
   - Check the user's most recent reply:
-    - **Affirmative** (e.g. "yes", "proceed", "go ahead", "sure", "looks good") → load metric, `base_period_literal`, `comparison_period_literal`, `overall_delta_value`, and confirmed dimension list from the block. Do NOT re-run Phases 1 or 2. Proceed directly to Phase 3 with dimension #1.
+    - **Affirmative** (e.g. "yes", "proceed", "looks good") → load `metric`, `base_period_literal`, `comparison_period_literal`, `overall_delta_value`, and confirmed dimension list from the block. Do NOT re-run Phases 1 or 2. Proceed directly to Phase 3 with dimension #1.
     - **Requests changes** (e.g. "remove X", "swap Y for Z", "add Y", "use X instead") → update the dimension list based on the feedback, output a new Stage 1 Summary Block with the updated list, then proceed directly to Phase 3. Do not stop for another confirmation.
     - **Negative** (e.g. "no", "stop", "that's enough", "skip it") → stop. Output a single closing sentence: "Got it — stopping here. Let me know if you'd like to explore any dimension further." Do not proceed to Phase 3.
 
@@ -234,150 +223,58 @@ Before running Phase 3, check the conversation history:
 
 ### Phase 3 — Analyze one dimension (repeat for each confirmed dimension)
 
-Execute this phase once per dimension, in confirmed order. Complete the full phase — compute, show, wait — before moving to the next dimension.
+**Plan (once, before starting any dimension analysis):**
 
-**Show (once, before starting any dimension analysis):**
-
-Display the confirmed dimension list as a section header so the user can see exactly what will be analyzed:
-
+Post an update about the confirmed dimension list:
 > # Analyzing these dimensions
 > 1. [dim1]
 > 2. [dim2]
 > 3. [dim3]
 
-Always show this, even when the user accepted the proposed list without changes.
+(Always show this update, even when the user accepted the proposed list without changes.)
+
+Then add new tasks to analyze the dimensions.
+
+NOTE: If you are going to delegate, make sure to reference `/analyze-contribution` in the brief, so that sub-agent can follow the prompt structures correctly.
 
 **Compute:**
+Execute this once per dimension, in confirmed order. Complete the full phase — compute, show, wait — before moving to the next dimension.
 
 1. Resolve the sort direction from `overall_delta_value` — use this value when filling in the AML template below:
    - `overall_delta_value < 0` (drop) → `sort_direction = 'asc'` (most negative first)
    - `overall_delta_value > 0` (increase) → `sort_direction = 'desc'` (most positive first)
 
-2. Write the per-dimension `CombinationChart` AML block using the template below. Fill in every placeholder before calling `execute_viz`:
+2. Generate the query (`generate_aql`) using this prompt structure:
+  ```
+  Calculate [metric] and its delta change (between [base_period] and [comparison_period]), broken down by [dimension].
+  Expected output:
+  - dimensions: [dimension]
+  - measures: base_period_metric, comparison_period metric, delta change
+  - filters: base period
+  - sorts: delta change [sort_direction]
 
-   - `[dataset_uname]` — dataset identifier from Phase 2
-   - `[date_field]` — the date field used for period filtering (e.g., `orders.created_at`)
-   - `[base_period_literal]` and `[comparison_period_literal]` — confirmed literals from Phase 1
-   - `[base_period_name]` and `[comparison_period_name]` — human-readable period names
-   - `[metric_name]` — display name for the Y-axis label
-   - `[metric_formula]` — for additive metrics: the raw field reference (e.g., `revenue_won`). For ratio metrics: rebuild inline with coalesced components — `safe_divide(coalesce(num, 0), coalesce(den_A, 0) + coalesce(den_B, 0) + ...)` — applied before the `where()` filter
-   - `[dimension_label]` — display name of the dimension
-   - `[dimension_field_ref]` — field ref from dataset schema in `table.field` format (e.g., `owners_csv.owner`), used inside `r(...)` in the AML
-   - `[sort_direction]` — `'asc'` for drops, `'desc'` for increases. Always fill in the actual value — never leave as a placeholder
+  NOTE: use /analyze-contribution-null-safety skill. Make sure to coalesce(metric, 0) on every metric.
+  ```
 
-   **Note:** In the template below, each `formula:` line ends with `[END]` as a placeholder. Replace every `[END]` with two semicolons (`; ;` without the space) when writing the actual AML block. (Literal double-semicolons cannot appear in this skill file as they are the AML content terminator.)
+3. Generate the viz (`generate_viz`) using this prompt structure:
+  ```
+  /analyze-contribution-generate-viz
 
-       CombinationChart {
-         dataset: [dataset_uname]
-         calculation base_value_raw {
-           label: 'Base Value Raw'
-           formula: @aql [metric_formula] | where([date_field] is [base_period_literal])[END]
-           calc_type: 'measure'
-           data_type: 'number'
-         }
-         calculation comparison_value_raw {
-           label: 'Comparison Value Raw'
-           formula: @aql [metric_formula] | where([date_field] is [comparison_period_literal])[END]
-           calc_type: 'measure'
-           data_type: 'number'
-         }
-         calculation base_value {
-           label: '[base_period_name]'
-           formula: @aql coalesce(base_value_raw, 0)[END]
-           calc_type: 'measure'
-           data_type: 'number'
-         }
-         calculation comparison_value {
-           label: '[comparison_period_name]'
-           formula: @aql coalesce(comparison_value_raw, 0)[END]
-           calc_type: 'measure'
-           data_type: 'number'
-         }
-         calculation delta_value {
-           label: 'Δ Change'
-           formula: @aql base_value - comparison_value[END]
-           calc_type: 'measure'
-           data_type: 'number'
-         }
-         x_axis: VizFieldFull {
-           label: '[dimension_label]'
-           ref: r([dimension_field_ref])
-           format {
-             type: 'text'
-           }
-         }
-         y_axis {
-           label: '[metric_name]'
-           series {
-             mark_type: 'column'
-             field: VizFieldFull {
-               label: '[base_period_name]'
-               ref: 'base_value'
-               format {
-                 type: 'number'
-               }
-             }
-             settings {
-               color: '#255DD4'
-             }
-           }
-           series {
-             mark_type: 'column'
-             field: VizFieldFull {
-               label: '[comparison_period_name]'
-               ref: 'comparison_value'
-               format {
-                 type: 'number'
-               }
-             }
-             settings {
-               color: '#92AEEA'
-             }
-           }
-         }
-         y_axis {
-           label: 'Δ Change'
-           settings {
-             alignment: 'right'
-           }
-           series {
-             mark_type: 'line'
-             field: VizFieldFull {
-               label: 'Δ Change'
-               ref: 'delta_value'
-               format {
-                 type: 'number'
-               }
-             }
-             settings {
-               color: '#1F3864'
-               line_interpolation: 'smooth'
-             }
-           }
-         }
-         settings {
-           sort {
-             field_index: 2
-             direction: '[sort_direction]'
-             type: 'series'
-           }
-           legend_label: 'top'
-           x_axis_label: '[dimension_label]'
-         }
-       }
+  sort_direction: [sort_direction]
+  ```
 
-3. Call `execute_viz` with the completed AML block, `dataset_uname`, and a title (e.g., `"[Metric] by [Dimension] — [base_period_name] vs [comparison_period_name]"`). The result data returned by `execute_viz` contains all calculation values including `base_value_raw`, `comparison_value_raw`, and `delta_value` — use this for segment classification in step 4 and `contribution_pct` in step 5.
+4. Call `execute_viz` with the generated viz. The result data returned by `execute_viz` contains all calculation values including `base_value_raw`, `comparison_value_raw`, and `delta_value` — use this for segment classification in step 4 and `contribution_pct` in step 6.
 
-4. From the chart result data, classify each segment's `impact_direction` (post-query):
+5. From the chart result data, classify each segment's `impact_direction` (post-query):
    - `overall_delta_value < 0` and `delta_value < 0` → driver_of_change
    - `overall_delta_value < 0` and `delta_value > 0` → offset_to_change
    - `overall_delta_value > 0` and `delta_value > 0` → driver_of_change
    - `overall_delta_value > 0` and `delta_value < 0` → offset_to_change
    - `delta_value = 0` → neutral
 
-5. Compute `contribution_pct = delta_value / overall_delta_value × 100` for each segment using the scalar `overall_delta_value` from Phase 2.
+6. Compute `contribution_pct = delta_value / overall_delta_value × 100` for each segment using the scalar `overall_delta_value` from Phase 2.
 
-6. Compute and store `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100` — used to rank dimensions in Phase 4.
+7. Compute and store `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100` — used to rank dimensions in Phase 4.
 
 **Show:**
 
@@ -472,18 +369,7 @@ For the **Contribution to change** column, apply the same threshold rule as the 
 ## Implementation Notes for Holistics / AQL
 
 - `base_period_literal` and `comparison_period_literal` are resolved and confirmed in Phase 1 — every query must use these exact values for period filtering, with no exceptions
-- Never use `relative_period()` for period filtering — it does not reliably resolve ratio metrics across all dimensions and can produce NULL measures. Always filter with explicit `where(date_field is @(literal))` using the confirmed literals
 - `@()` literals must match the period granularity: `@(YYYY-MM-DD)` for days, `@(YYYY-WNN)` for weeks, `@(YYYY-MM)` for months, `@(YYYY-QN)` for quarters, `@(YYYY)` for years. Never use a day literal `@(YYYY-MM-DD)` for a month or quarter period — it filters only a 2-day window, not the full period.
-- Before generating any query, define `base_period_name`, `comparison_period_name`, `base_period_literal`, `comparison_period_literal` — reuse these exact aliases throughout
-- Reuse existing dataset metric definitions whenever possible; inspect before deciding how to compute segment values. Exception: for ratio metrics, do not reference the pre-built ratio field directly in the query — pre-built ratios often lack per-component null handling and will silently return null when any component is null. Instead, inspect the metric definition to identify its numerator and denominator components, then rebuild the formula inline using `coalesce(safe_divide(coalesce(num_component, 0), coalesce(den_A, 0) + coalesce(den_B, 0) + ...), 0)`
-- Always wrap `where()` aggregations with `coalesce(..., 0)` — `where()` returns null, not 0, when nothing matches
-- Always wrap ratio metrics with outer `coalesce`: `coalesce(safe_divide(num, den), 0)` — `safe_divide` returns null for any null operand or zero denominator; the outer coalesce is sufficient to guarantee a non-null result
-- `contribution_pct` is computed post-query from chart result data: divide each segment's `delta_value` by the scalar `overall_delta_value` — do not attempt to express this as a single AQL formula within the segment-grouped query
-- Never apply any filter that excludes null or zero metric values. All segments must be visible regardless of their metric value in either period
 - Run one AQL query per dimension — never union or batch dimensions
 - Do not introduce volume weighting of any kind
-- For ratio metrics, note in output that combined contribution % across multiple segments is an approximation
-- Never call `execute_aql` during Phase 3 — it renders a visible result table to the user. Use `execute_viz` with a hand-written AML block instead.
-- For Phase 3 combo charts, do not call `generate_viz` — write the `CombinationChart` AML block directly using the template in step 2, then call `execute_viz`. Sort is controlled by the `settings { sort { field_index: 2, direction: '...', type: 'series' } }` block — `field_index: 2` always refers to `delta_value` (series index 0 = base_value column, 1 = comparison_value column, 2 = delta_value line). Fill in `direction` with the pre-resolved value (`'asc'` or `'desc'`) — never leave it as a placeholder.
-
-;;
+- Make sure to mention `/analyze-contribution-null-safety` and `/analyze-contribution-generate-viz` when writing AQL and Viz in Phase 3. They ensure that the generation is accurate and efficient.
