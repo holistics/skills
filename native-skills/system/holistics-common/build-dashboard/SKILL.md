@@ -1,5 +1,5 @@
 ---
-name: write-dashboard
+name: build-dashboard
 description: Build or edit a Holistics canvas dashboard in AML (a `page.aml` file / `Dashboard {}` object) — assemble viz, text, and control blocks, lay them out, wire filter interactions, and set the theme. Use whenever you need to build a dashboard or report page, add or arrange blocks, edit a dashboard's text or section structure, or add dashboard-level filters. Typical phrasings: build a dashboard for X, create a new report page, make a dashboard showing X, add a chart or KPI or table to a dashboard, add a filter or date control, add a title or section header, edit the dashboard's intro text. Do NOT trigger for answering a data question on its own — a one-off query, chart, or analysis with no dashboard to put it on — or for editing models, datasets, or metric definitions, authoring a reusable custom chart type or a theme object, or restyling an existing dashboard's look.
 ---
 
