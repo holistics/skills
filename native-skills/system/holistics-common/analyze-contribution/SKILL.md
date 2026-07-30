@@ -163,7 +163,7 @@ Run only Steps 1 and 2, then proceed directly to Phase 3 using `user_specified_d
 
 **If `user_specified_dimensions` is empty — standard path:**
 
-Execute these five steps in the exact order below. Do not reorder, skip, or batch any step.
+Execute these four steps in the exact order below. Do not reorder, skip, or batch any step.
 
 **Step 1 — Output the overview sentence as plain text:**
 
@@ -175,11 +175,11 @@ Execute these five steps in the exact order below. Do not reorder, skip, or batc
 
 The table must include these columns: Comparison Value, Base Value, Delta Value, Pct Change.
 
-**Step 3 — Output the transition sentence as plain text:**
+**Step 3 — Post this update**
 
 > **There are multiple ways to explain what drove this change. In this analysis, I'll break it down by dimensions to identify which segments moved the most.** Here are my top [N] proposed dimensions:
 
-**Step 4 — Output the dimension list as plain text.** This is a text output step, not a tool call. Write the numbered list directly in your response. Each item must include a short reason — **5–8 words max, business-focused, no technical jargon**:
+**Step 4 — Output the dimension list as plain text, then proceed directly to Phase 3.** This is a text output step, not a tool call. Write the numbered list directly in your response. Each item must include a short, business-meaningful reason — **1 sentence max, focused on why this dimension is relevant to the metric change**:
 
 > **1. Dimension Name** — short business reason (e.g. "varies most by sales team", "differs by product line")
 >
@@ -187,37 +187,7 @@ The table must include these columns: Comparison Value, Base Value, Delta Value,
 >
 > **3. Dimension Name** — short business reason
 
-**Step 5 — Output the Stage 1 Summary Block as plain text, then STOP:**
-
-> ---
-> Here's a summary of what we're going to analyze:
->
-> - **Metric**: [metric name]
-> - **Comparison period**: [comparison_period_literal] ([comparison_period_name])
-> - **Base period**: [base_period_literal] ([base_period_name])
-> - **Overall change**: [metric] [dropped/increased] [pct_change]%, from [comparison_value] to [base_value] (Δ [±overall_delta_value])
-> - **Dimension 1**: [dim1]
-> - **Dimension 2**: [dim2]
-> - **Dimension 3**: [dim3]
->
-> Shall I proceed to break down **[metric]** by each of these dimensions to see where the [drop/increase] happened the most?
-> ---
-
-**Do NOT call `ask_user` here.** Stop after outputting this block and wait for the user to reply in the chat.
-
----
-
-### Stage 2 Detection — check before Phase 3
-
-Before running Phase 3, check the conversation history:
-
-- **If a Stage 1 Summary Block is present** (contains confirmed metric, periods, overall delta, and dimension list):
-  - Check the user's most recent reply:
-    - **Affirmative** (e.g. "yes", "proceed", "looks good") → load `metric`, `base_period_literal`, `comparison_period_literal`, `overall_delta_value`, and confirmed dimension list from the block. Do NOT re-run Phases 1 or 2. Proceed directly to Phase 3 with dimension #1.
-    - **Requests changes** (e.g. "remove X", "swap Y for Z", "add Y", "use X instead") → update the dimension list based on the feedback, output a new Stage 1 Summary Block with the updated list, then proceed directly to Phase 3. Do not stop for another confirmation.
-    - **Negative** (e.g. "no", "stop", "that's enough", "skip it") → stop. Output a single closing sentence: "Got it — stopping here. Let me know if you'd like to explore any dimension further." Do not proceed to Phase 3.
-
-- **If no Stage 1 Summary Block is present**: this is a fresh invocation — run from Phase 1.
+After outputting the dimension list, proceed immediately to Phase 3. Do NOT stop or wait for user input.
 
 ---
 
@@ -225,15 +195,7 @@ Before running Phase 3, check the conversation history:
 
 **Plan (once, before starting any dimension analysis):**
 
-Post an update about the confirmed dimension list:
-> # Analyzing these dimensions
-> 1. [dim1]
-> 2. [dim2]
-> 3. [dim3]
-
-(Always show this update, even when the user accepted the proposed list without changes.)
-
-Then add new tasks to analyze the dimensions.
+Add new tasks to analyze the dimensions.
 
 NOTE: If you are going to delegate, make sure to reference `/analyze-contribution` in the brief, so that sub-agent can follow the prompt structures correctly.
 
