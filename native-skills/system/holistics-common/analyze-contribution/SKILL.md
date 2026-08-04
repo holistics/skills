@@ -1,8 +1,8 @@
 ---
 name: analyze-contribution
-label: Analyze Contribution
 description: |-
   Identify which segments drove a metric change between two periods by ranking raw delta change per segment — no volume weighting. Requires two periods and change/delta intent. Trigger when the user asks to explain an increase or decrease, OR when the user's phrasing requests a breakdown or attribution with delta intent — e.g. "what drove the GMV increase from Nov to Dec?", "which regions contributed most to the MoM drop?", "break down the revenue change by continent", "which regions drove the revenue drop?", "where did the drop come from?", "was it churn or contraction?", "is it Enterprise or SMB?". Do NOT trigger for single-period breakdowns like "GMV Dec 2024 by continent" or "show revenue by category for 2024" — those are simple grouped queries with no delta. Do NOT trigger for open-ended "why did X change?" questions with no explicit breakdown intent — change_analysis handles those.
+user-invocable: false
 ---
 
 ## Inputs

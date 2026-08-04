@@ -1,6 +1,5 @@
 ---
 name: detect-anomaly
-label: Detect anomaly
 description: |-
   Detect statistical anomalies across a metric's history and visualize them — unusual spikes, drops, and deviations flagged against an expected range built from the metric's own recent history.
 
@@ -9,6 +8,7 @@ description: |-
   Typical phrasings: detect anomalies in revenue, any outliers in daily signups, has anything looked unusual in MRR lately, were there spikes or drops in active users this quarter, is revenue on May 20 unusual (a focus date — still scans the full series), or /detect_anomaly with no args (the skill asks for the metric).
 
   Do NOT trigger for: dimensional attribution (which segment or dimension drove an anomaly), explaining the business cause, or ongoing/scheduled monitoring & alerting. This skill flags which points are statistically unusual and shows them; it does not explain why.
+user-invocable: false
 ---
 
 Flag which points in a metric's time series moved unusually against its own recent trend, and show them: build a trend-following expected band from recent history, flag the buckets that break out of it, and visualize the result. This skill flags *which* points are unusual, never *why* — deflect causal or dimensional-attribution asks (Conventions → *Edge cases*).

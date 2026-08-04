@@ -1,6 +1,5 @@
 ---
 name: analyze-changes
-label: Analyze Changes
 description: |-
   Orchestrates a guided investigation when the user sees a metric change (drop or increase) and wants to understand it. Runs an anomaly check first to confirm whether the change is real, then offers dimensional breakdown (key driver) or metric decomposition.
 
@@ -15,6 +14,7 @@ description: |-
     • Direct dimension breakdown requests ("break revenue down by region") — analyze_contribution handles those
     • Anomaly scanning with no specific change in mind ("detect anomalies in revenue") — detect_anomaly handles those
     • Forecasts or future projections
+user-invocable: false
 ---
 
 # Change Analysis Orchestrator
