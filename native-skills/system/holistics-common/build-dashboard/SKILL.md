@@ -1,6 +1,14 @@
 ---
 name: build-dashboard
-description: Build or edit a Holistics canvas dashboard (`page.aml` / a `Dashboard {}` object) — its blocks, layout, filter interactions, and theme. Use when building a dashboard or report page, adding or arranging blocks, or adding dashboard-level filters. Typical phrasings: build a dashboard for X, make a dashboard showing X, add a chart or KPI or table to a dashboard, add a filter or date control, add or edit a title or section header. Do NOT trigger for answering a data question on its own — a one-off query, chart, or analysis with no dashboard to put it on — or for editing models, datasets, or metric definitions, authoring a reusable custom chart type or theme object, or restyling a dashboard's look.
+label: Build Dashboard
+description: |-
+  Build or edit a Holistics canvas dashboard (`page.aml` / a `Dashboard {}` object) — its blocks, layout, filter interactions, and theme.
+
+  Use when building a dashboard or report page, adding or arranging blocks, or adding dashboard-level filters.
+
+  Typical phrasings: build a dashboard for X, make a dashboard showing X, add a chart or KPI or table to a dashboard, add a filter or date control, add or edit a title or section header.
+
+  Do NOT trigger for answering a data question on its own — a one-off query, chart, or analysis with no dashboard to put it on — or for editing models, datasets, or metric definitions, authoring a reusable custom chart type or theme object, or restyling a dashboard's look.
 ---
 
 # Building a Dashboard (canvas dashboard / `page.aml`)
@@ -40,7 +48,7 @@ When the user is specific ("just one chart of X"), their scope wins — build th
 ## Workflow
 
 1. **Derive the spec, then the sections** (fill "What a good input looks like", in this order): from the prompt → from the dataset (call `fetch_dataset` — predefined metrics first, then date fields, then low-cardinality descriptive dimensions as breakdown/filter candidates). Name **what the reader is doing** and **rank their questions** before you think about blocks — those two answers decide the dashboard's opening and its order, and skipping them is what makes every dashboard come out the same. Then turn the ranked questions into **sections**, using the dataset's subjects/metrics as the material that answers them (see *What a bare minimum output looks like*), and set each section's depth by the ask's breadth. Ask at most one short round, and only for what is genuinely undecidable; decide everything else and state every assumption.
-2. **Propose and confirm (text).** Present a short text plan and get the user's OK before building — group blocks by role, name the dataset with its `@Dataset:` reference, list each control in plain terms (what viewers can slice by), and describe the layout at a high level (the sections top-to-bottom, and any tabs). Proceed on approval or no objection; if the response is ambiguous, ask once.
+2. **Propose and confirm.** Present a short text plan — group blocks by role, name the dataset with its `@Dataset:` reference, list each control in plain terms (what viewers can slice by), and describe the layout at a high level (the sections top-to-bottom, and any tabs).
 
    ```
    ## What's in the dashboard
@@ -53,6 +61,18 @@ When the user is specific ("just one chart of X"), their scope wins — build th
    - <Filter label> — <what it filters, in plain words>
    **Layout** — the sections top-to-bottom by importance (and any tabs)
    ```
+
+   Then get the user's OK before building — never build straight off the plan. Do NOT call `ask_user`. Close the message with an **option link** — `[text](#opt)`, which renders as a clickable chip:
+
+   ```
+   Build this dashboard? 
+   [Yes — build it as planned](#opt) 
+   [<another way to build it — as an instruction>](#opt)
+   ```
+
+   The first link is always the approval; what follows depends on the plan — the calls you made that this reader might want made differently. Clicking a chip sends its text **verbatim** as the user's next message, so write every label as the instruction they'd otherwise have typed.
+
+   **Then end your turn and wait** — the link is only markdown, not a tool call, so nothing pauses you. Build on approval; if the reply names a change, revise the plan and confirm again.
 
 3. **Build the dashboard** per Schema. Author the **static text** blocks yourself (titles, section intros, how-to-read notes). For each **data** block, generate the viz and put the returned AML in the block; hand-write a `viz: <Type> { … }` body only as a last resort, because hand-written viz AML is the single biggest source of invalid output (if you must, the `ref:` forms in the Schema are where it breaks). Then lay everything out — the view is always a TabLayout: one tab for a single-page dashboard, or blocks partitioned across tabs, each tab's canvas built the same way with a control row reserved at the top.
 4. **Wire the controls and the `interactions: []` array.** Every dashboard needs it — not only to connect the controls but because viz blocks cross-filter each other by default. Build the control set the job needs (a date range + 1–2 dimension filters at minimum; add a date drill or Period Comparison when the questions call for one), then wire each control to every block it can affect, disable filter→filter cross-linking, and disable everything that would cross a tab boundary.
