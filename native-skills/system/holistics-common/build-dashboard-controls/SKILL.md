@@ -20,27 +20,26 @@ Add controls to a dashboard and declare their interactions explicitly.
 
 A controls task is fully specified when you can answer:
 
-1. **Slicing needs** — which questions viewers answer *themselves* by filtering (by time window, by segment, by category, ...).
-2. **Filter fields** — for each need, the concrete field: the primary date field, plus low-cardinality business dimensions actually used by the dashboard's blocks.
-3. **Defaults** — **a filter never carries a `default`**: it opens showing all data, and an arbitrary default (like a date window) silently hides rows. (Only DateDrillBlock's starting granularity and PopBlock's comparison period take a default — those constructs require one.)
-4. **Grain switching** — should viewers change the trend's granularity (date drill)? Compare against a prior period (PoP)?
-5. **Scope** — exactly which blocks each control affects, and which it must not (other tabs, unrelated charts, other filters).
+1. **Intentions** — what viewers should be able to answer for themselves, in their words ("show me just last quarter", "just the EU", "by week instead of month", "how does that compare to last year?"). Each one becomes a control; which construct carries it is Workflow → *step 2*.
+2. **Field** — which field each filter reads. Not strictly required — you can derive it from the blocks — but ask or state it whenever the choice isn't obvious, because the wrong field filters the right-looking chart.
+3. **Scope** — which blocks each control affects, and which it must not (other tabs, unrelated charts, other filters). Fields say what a control reads; scope says what it changes.
+4. **Defaults** — every control opens neutral. Copy the `default` blocks from Schema → *Control blocks* as written; put a real value in only where the user named a starting point.
 
 ## What a bare minimum output looks like
 
-* A dashboard with a time axis gets a date-range filter; one with dimensional breakdowns gets 1–3 dimension filters. Fewer only if the user explicitly wants none.
-* **The control set follows the dashboard's job.** A date-range filter + 1–3 dimension filters suit an overview. A lean scorecard or an operational "what's happening now" view usually wants fewer controls and **no date drill or period comparison** — add a drill only when the job wants time-grain switching, and a PoP only when it wants period comparison, not by default.
+* **A time axis earns a date-range filter.** That one is near-automatic: a dashboard that trends over time and can't be re-windowed is missing its most-asked control.
+* **A dimension earns a filter when all three hold** — it actually breaks down a block on this dashboard; it's low-cardinality and business-meaningful; and slicing by it answers something the layout doesn't already answer. Fail any one and the filter is a control the reader has to read past. That test, not a target count, sets the number.
+* **Two filters that segment the same way count as one.** Region and country, plan and tier — pick the level the reader thinks in.
+* **The job caps the set.** An overview supports the widest control row. A lean scorecard or an operational "what's happening now" view wants fewer; a lookup view wants its filters and its table and little else. Add a drill only when the job wants time-grain switching, a PoP only when it wants period comparison — neither by default.
 * Every control is fully wired the moment it exists — a declared-but-unwired control is worse than none, because it looks functional.
-* **A FilterBlock never gets a `default`** — it always opens showing all data (an arbitrary default silently hides rows). This does not touch DateDrillBlock/PopBlock defaults, which those constructs require.
 
 ## Workflow
 
-1. **Read the dashboard's `page.aml` first** (even if a summary exists in the conversation) — extract real block names, viz types, date field references `r(<model>.<field>)`, and tab membership. Wire against real names only.
-2. **Derive the control set** from the blocks — the date field the trend uses → date-range filter; breakdown dimensions → dimension filter candidates (low-cardinality, business-meaningful); a time-series chart → date drill; period comparison if asked. The prompt sets priorities and additions but does not cap the set. Ask only when a scoping decision is genuinely ambiguous AND consequential; otherwise decide and state it.
-3. **Add each control with its interaction** (per Schema) — a FilterBlock / DateDrillBlock / PopBlock is incomplete without its wired interaction; **never give a FilterBlock a `default`**.
-4. **Wire each control to every block it can affect, then turn off the exceptions** (see Conventions → *Declaring scope well*) — a filter can affect **every block on its dataset** (map each with the right field), the drill re-grains **every time-series block**, and **Period Comparison affects every KPI and the trend — not just the trend**. Then disable what you don't want: parent-child filter cross-linking, and cross-tab reach. Build the list by starting from every block the control can affect and removing exceptions — not by listing the ones that seem related, which is how the trend or a KPI gets missed. When editing an existing dashboard, redo this so new blocks aren't left on platform defaults.
-5. **Verify — walk the matrix.** Confirm the construction was total: every source (each control, and on tabbed dashboards every viz block) × every block has a *deliberate* fate — mapped (with the right field) or `disabled`. A block a control neither maps nor disables is the failure (it silently falls to platform defaults); the usual miss is a trend or a cross-dimension KPI that a dimension filter or the period control forgot. Then check code diagnostics and fix every error.
-6. **Deliver** — summarize which controls affect which blocks, their defaults, and what was deliberately excluded.
+1. **Read the dashboard's `page.aml` first**, even if the conversation summarises it — real block names, viz types, date field refs `r(<model>.<field>)`, tab membership. Wire against real names only.
+2. **Derive the control set** from those blocks and the intentions. Decide and state it; ask only when a scoping call is both ambiguous and consequential.
+3. **Declare each control with its interaction** (per Schema) — a control without its wired interaction is incomplete. Map the edges that are dead until mapped, disable the ones that are live (Conventions → *How interactions work*). Editing an existing dashboard means redoing this, or new blocks sit on platform defaults.
+4. **Verify — walk the matrix.** Every source (each control; on tabbed dashboards every viz block too) × every block has a deliberate fate: mapped with the right field, or `disabled`. Neither one means it falls silently to platform defaults — usually a trend or a cross-dimension KPI. Then check the one hard limit: **no viz block appears in more than one drill mapping, or more than one pop mapping.** Then fix every code diagnostic.
+5. **Deliver** — which controls reach which blocks, their defaults, and what you deliberately excluded.
 
 ## Schema
 
@@ -48,17 +47,26 @@ These are the ONLY control constructs in AML — do not invent others. Declare t
 
 ### Control blocks
 
+Every `default` below is the **neutral opening** — copy it as written. Replace a value only where the user named a starting point (then: a filter takes a real `operator`/`value`, the drill a grain like `'month'`, the PoP a `duration`/`granularity`).
+
+**Prefer a field filter.** It's backed by a model field, so it takes that field's data type, auto-maps to same-tab blocks on its dataset, and supports drill-through. Reach for a manual filter (`type:` `'date'` / `'text'` / `'number'` / `'truefalse'`, no field behind it) only when the blocks it must reach span **different datasets** — and then map every block by hand, because a manual filter with no mapping filters nothing.
+
 ```aml
-block <filter>: FilterBlock {
+block <filter>: FilterBlock {                         // field filter — the default choice
   label: 'Filter Label'
-  type: 'field'
+  type: 'field'                                       // takes its data type from the field
   source: FieldFilterSource { dataset: <dataset_name> field: r(<model>.<field>) }
-  // NEVER add a `default` — a FilterBlock opens showing all data
+  default { operator: 'matches' value: '$H_NIL$' }
 }
-block <drill>: DateDrillBlock { label: 'Drill by' default: 'month' }   // 'year' | 'quarter' | 'month' | 'week' | 'day'
-block <pop>: PopBlock {                                                 // the ONLY period-comparison construct — no PeriodComparisonBlock exists
-  label: 'Period Comparison'
-  default { type: 'relative' duration: 1 granularity: 'year' }         // granularity: 'year' | 'quarter' | 'month' | 'week' | 'day'
+block <date_filter>: FilterBlock {                    // manual filter — only across datasets
+  label: 'Date Range'
+  type: 'date'                                        // or 'text' | 'number' | 'truefalse'
+  default { operator: 'matches' value: '$H_NIL$' }
+}
+block <drill>: DateDrillBlock { label: 'Date Drill' default: 'default' }
+block <pop>: PopBlock {                               // the ONLY period-comparison construct — no PeriodComparisonBlock exists
+  label: 'Compare To'
+  default { type: 'relative' duration: [] }
 }
 ```
 
@@ -66,32 +74,30 @@ block <pop>: PopBlock {                                                 // the O
 
 ```aml
 interactions: [
-  // This array carries two kinds of disable:
-  //   • ALWAYS (single-page included): parent-child filter→filter — each filter disables every OTHER filter block, so choosing a value in one doesn't narrow another's options.
-  //   • TABBED only: nothing crosses a tab boundary — each filter / drill / pop / viz also disables every block on the other tab(s). Omit these lines on a single-page dashboard.
+  // ── MAP: these do nothing until declared. One CustomMapping per block, each naming that block's own field.
   FilterInteraction {
-    from: '<filter>'
+    from: '<date_filter>'                                                                   // manual filter — unmapped, it filters nothing
+    to: [ CustomMapping { block: '<viz_block>' field: r(<model>.<date_field>) } ]           // repeat per block it should slice
+  },
+  DateDrillInteraction {
+    from: '<drill>'                                                                         // every time-series block; a block takes at most ONE drill
+    to: [ CustomMapping { block: '<viz_block>' field: r(<model>.<date_field>) } ]
+  },
+  PopInteraction {
+    from: '<pop>'                                                                           // every KPI *and* the trend; a block takes at most ONE pop
+    to: [ CustomMapping { block: '<viz_block>' field: r(<model>.<date_field>) } ]
+  },
+
+  // ── DISABLE: these are live until switched off.
+  FilterInteraction {
+    from: '<filter>'                                                                        // field filter — already auto-maps to same-tab blocks on its dataset
     to: [
-      CustomMapping { block: '<viz_block>' field: r(<model>.<field>) },                     // affect this viz block (same tab) through this field
+      CustomMapping { block: '<viz_block>' field: r(<model>.<other_field>) },               // only to override the auto-mapped field, or to reach past that set
       CustomMapping { block: ['<other_filter>', '<other_filter2>'] disabled: true },        // parent-child: every OTHER filter block — ALWAYS, single-page too
       CustomMapping { block: ['<other_tab_viz_1>', '<other_tab_viz_2>'] disabled: true }    // TABBED: every viz block on the other tab(s)
     ]
   },
-  DateDrillInteraction {
-    from: '<drill>'
-    to: [
-      CustomMapping { block: '<viz_block>' field: r(<model>.<date_field>) },
-      CustomMapping { block: ['<other_tab_viz_1>', '<other_tab_viz_2>'] disabled: true }    // TABBED: every viz block on the other tab(s)
-    ]
-  },
-  PopInteraction {
-    from: '<pop>'
-    to: [
-      CustomMapping { block: '<viz_block>' field: r(<model>.<date_field>) },
-      CustomMapping { block: ['<other_tab_viz_1>', '<other_tab_viz_2>'] disabled: true }    // TABBED: every viz block on the other tab(s)
-    ]
-  },
-  // TABBED viz cross-filtering off too: for EVERY viz block, a FilterInteraction disabling EVERY viz block on the other tab(s). Symmetric — repeat per viz block.
+  // TABBED: viz→viz cross-filtering across tabs. For EVERY viz block, disable EVERY viz block on the other tab(s). Symmetric — repeat per viz block.
   FilterInteraction {
     from: '<tab_a_viz>'
     to: [ CustomMapping { block: ['<other_tab_viz_1>', '<other_tab_viz_2>'] disabled: true } ]
@@ -103,19 +109,26 @@ interactions: [
 
 ### How interactions work — every edge is explicit
 
-An interaction is a directed edge `from → to` in the `interactions: []` array. What you don't declare falls back to Holistics' **implicit defaults** — it compiles cleanly but behaves wrong, silently. So declare every edge that matters, and disable the ones you don't want.
+An interaction is a directed edge `from → to` in the `interactions: []` array. What you don't declare falls back to Holistics' **implicit defaults**. Six edges exist, and they split into two opposite failure modes: some are **live until you disable them**, the rest do **nothing until you map them**.
 
-* **DateDrillInteraction / PopInteraction** have one shape: control **→ the viz blocks** it affects. The drill re-grains **every time-series block**; Period Comparison compares **every KPI and the trend — not just the trend** (a KPI's "vs previous period" comes from here, not from a period baked into the KPI). Control → viz only.
-* **FilterInteraction** is the general cross-filter edge, and its `from` may be a filter **or** a viz — three kinds:
-  * **filter → viz** — the filter slices the viz (map the semantically right field per block).
-  * **filter → filter** — parent-child cross-linking: picking a value in one filter narrows another's options. Usually unwanted → `disabled: true`.
-  * **viz → viz** — clicking a viz cross-filters the others. Within a tab it's often fine; disable where unwanted.
-* **With tabs, nothing crosses a tab boundary.** Every interaction that would reach a block on another tab — filter → viz, **drill → viz, pop → viz**, filter → filter, and viz → viz — gets a `disabled: true` mapping for those blocks, symmetrically (if A disables B, B disables A). Each control and each viz affects only its own tab; cross-tab interaction is never intended.
+Live by default — declare a mapping to *change* or `disabled: true` to *stop*:
 
-### Declaring scope well
+* **field filter → viz** — auto-maps to same-tab blocks on its dataset. Map a block only to name a different field or to reach past that set; disable what shouldn't be sliced.
+* **filter → filter** — parent-child: a value picked in one filter narrows another's options. Usually unwanted → `disabled: true`.
+* **viz → viz** — clicking a data point cross-filters the others. Fine within a tab; disable where unwanted.
 
-* **Wire a control to every block it can affect, then disable the exceptions.** A filter can affect every block on its dataset — map each one (with the right field). Period Comparison affects every KPI and the trend. The drill affects every time-series block. Start from that full set and turn OFF the ones you don't want (parent-child filter links, cross-tab reach). Don't build the list by guessing which blocks "go with" the control — that's how the trend or a KPI gets silently missed and left on platform defaults.
-* When one filter feeds blocks built on different models, map the semantically right field per block — e.g. a global date filter maps `r(users.sign_up_date)` on customer blocks and `r(orders.created_date)` on order blocks. Never force one field onto every block.
-* When the user scopes a control ("only the Orders tab"), map exactly those blocks and add `disabled: true` mappings for everything else — including blocks on other tabs, which are otherwise still subject to platform defaults.
-* When adding a control to a dashboard that already has interactions, update the existing declarations so the picture stays complete — new blocks are otherwise silently back on defaults.
-* Layout ownership: when invoked **standalone** (adding controls to an existing dashboard), place controls at the top of the canvas above the charts they affect, shift existing blocks down, and recompute the canvas height. When **build-dashboard is driving a fresh build**, it owns all positions — supply only the control blocks and their interaction wiring, not the layout.
+Dead until mapped — one `CustomMapping` per block, naming that block's own field:
+
+* **manual filter → viz** — carries no field of its own, so an unmapped manual filter filters nothing.
+* **date drill → viz** — re-grains only the blocks it's mapped to. Map every time-series block. **A viz block takes at most one date drill.**
+* **pop → viz** — applies the comparison only to the blocks it's mapped to. Map **every KPI and the trend**, not just the trend — a KPI's "vs previous period" comes from here, never baked into the KPI. **A viz block takes at most one PoP.**
+
+`FilterInteraction`'s `from` may be a filter or a viz; `DateDrillInteraction` and `PopInteraction` are control → viz only.
+
+**With tabs, nothing crosses a tab boundary** — and which edges need work follows the same split. The three live-by-default edges (**field filter → viz**, **filter → filter**, **viz → viz**) each need a `disabled: true` mapping for every block on the other tab(s), symmetrically: if A disables B, B disables A. The dead-until-mapped edges need nothing — a manual filter, drill, or pop reaches only what it's mapped to, so leaving other-tab blocks unmapped already excludes them.
+
+### Others
+
+* **One control, blocks on different models → name the right field per block.** A global date filter maps `r(users.sign_up_date)` on customer blocks and `r(orders.created_date)` on order blocks.
+* **When the user narrows a control's reach** — "this filter should only affect the Orders tab", "don't let this one touch the KPIs", "apply the date range to the trend only" — what that takes depends on the control. A manual filter, a drill, or a pop reaches only what you map it to, so map the blocks they named and you're done. A **field filter** already reaches every same-tab block on its dataset, so narrowing it means adding `disabled: true` for the blocks being excluded; mapping the ones they want achieves nothing on its own.
+* **Adding a control is three tasks, not one** — declare the block, wire its interactions, place it in the layout. Miss the second and it renders as a working control that changes nothing; miss the third and it doesn't render at all. The third one changes hands: **standalone** (adding to an existing dashboard) you own it. Place a control so its position advertises its reach — one that affects the whole page belongs in a row at the top, one scoped to a section sits with that section, one that belongs to a tab goes on that tab. Then make room for it rather than overlapping anything, and keep the canvas height right. When **build-dashboard drives a fresh build**, it owns every position — supply the block and its wiring only.
