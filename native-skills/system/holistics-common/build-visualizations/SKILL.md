@@ -30,7 +30,7 @@ Static text with no live data isn't a VizBlock — that's a TextBlock.
 
 * Every block renders real data on real dataset fields — never a placeholder or invented field.
 * A KPI's comparison context comes from the dashboard's Period Comparison control, not a period baked into the KPI.
-* A dynamic content block is valid HTML/CSS/Markdown (**no JavaScript**), every `{{ … }}` bound to a declared query field.
+* A dynamic content block shows something a built-in can't, and shows live values — not a static card that happens to be styled.
 * Prose that may contain apostrophes or span lines (labels, descriptions, DCB text) uses an `@md … ;;` heredoc, not single quotes.
 
 ## Workflow
@@ -77,25 +77,9 @@ generate_viz writes the built-in types (Authoring); their per-type field roles a
 
 ### Authoring — never hand-write a viz body
 
-Every built-in viz is written by **generate_viz**, never by hand — hand-written viz grammar is the top source of invalid output. generate_viz consumes an **AQL explore**, so the flow is **generate_aql → generate_viz → execute_viz** (execute validates it). Then wrap the result — `block <x>: VizBlock { label: '…' viz: <generate_viz output> }` — and give a `MetricKpi` block-level `settings { hide_label: true }` (Conventions → *MetricKpi*). You hand-write only the `VizBlock` wrapper and block-level settings — never a viz body; verify any unknown construct with search_docs.
+Every viz — built-in or dynamic content block — is written by **generate_viz**, never by hand; hand-written viz grammar is the top source of invalid output. It consumes an **AQL explore**, so the flow is **generate_aql → generate_viz → execute_viz** (execute validates it). Wrap what comes back — `block <x>: VizBlock { label: '…' viz: <generate_viz output> }` — and give a `MetricKpi` block-level `settings { hide_label: true }` (Conventions → *MetricKpi*). You hand-write only the `VizBlock` wrapper and block-level settings; verify any unknown construct with search_docs.
 
-**Dynamic content block (`MarkdownViz`) — a data-bound HTML/Markdown template.** It pairs a **dataset query** (bound to fields) with a **`content:` template** that references those fields with `{{ … }}` placeholders (`{% … %}` for loops); Holistics injects live values on render. generate_viz writes the whole block, template included — so describe in its `query` what the card should **say and look like**, not just the data it needs. Shape it returns:
-
-```aml
-block <card>: VizBlock {
-  label: 'Card Title'
-  viz: MarkdownViz {
-    dataset: <dataset_name>
-    rows: [ VizFieldFull { ref: r(<model>.<dimension>) label: 'Product' } ]                       // dimensions (generate_viz fills these)
-    values: [ VizFieldFull { ref: r(<model>.<measure>) label: 'Revenue' aggregation: 'sum' } ]    // measures
-    content: @md
-      <div class="card"><h3>{{ rows[0].`Product` }}</h3><p>{{ rows[0].values.`Revenue` }}</p></div>
-    ;;
-  }
-}
-```
-
-One constraint to state in the `query`, because it bounds what you can ask for: the block renders **HTML / CSS / Markdown only — no JavaScript**. The template syntax itself (loops, negative indexing, pivot nesting, `.raw` vs `.formatted`, the bare-value cross-filter drill) is in the docs — **charts → dynamic-content-blocks → syntax reference**.
+Only the `query` differs by type. A built-in needs the data and the viz type; a `MarkdownViz` card also needs **what it should say** — the sentence or layout, which value goes where, what to emphasize. Describe the finished card, not the fields. A card renders HTML/CSS/Markdown and never JavaScript, so nothing in it can be interactive.
 
 **Custom chart.** Use the **build-custom-chart** skill if available, else `search_docs` for `CustomChartDef` (reusable Vega/Vega-Lite).
 
