@@ -165,21 +165,22 @@ Run only Steps 1 and 2, then proceed directly to Phase 3 using `user_specified_d
 
 Execute these five steps in the exact order below. Do not reorder, skip, or batch any step.
 
-**Step 1 — Output the overview sentence as plain text:**
+**Step 1 — post_update the overview:**
 
 > [Metric] [dropped/increased] [pct_change]%, from [comparison_value] to [base_value] between [comparison period] and [base period].
 
-**Step 2 — Call `execute_aql`** with the overall delta query from the Compute step. This renders the overall metric change table immediately after the overview sentence. Title it:
+**Step 2 — post_update the overall metric change:**
 
 > Overall [Metric] Change: [base_period_name] vs [comparison_period_name]
+> ```artifact
+>    <artifact_id_result_from_compute_step>
+> ```
 
-The table must include these columns: Comparison Value, Base Value, Delta Value, Pct Change.
-
-**Step 3 — Output the transition sentence as plain text:**
+**Step 3 — post_update introducing the approach:**
 
 > **There are multiple ways to explain what drove this change. In this analysis, I'll break it down by dimensions to identify which segments moved the most.** Here are my top [N] proposed dimensions:
 
-**Step 4 — Output the dimension list as plain text.** This is a text output step, not a tool call. Write the numbered list directly in your response. Each item must include a short reason — **5–8 words max, business-focused, no technical jargon**:
+(Each item must include a short reason — **5–8 words max, business-focused, no technical jargon**)
 
 > **1. Dimension Name** — short business reason (e.g. "varies most by sales team", "differs by product line")
 >
@@ -235,46 +236,34 @@ Post an update about the confirmed dimension list:
 
 Then add new tasks to analyze the dimensions.
 
-NOTE: If you are going to delegate, make sure to reference `/analyze-contribution` in the brief, so that sub-agent can follow the prompt structures correctly.
+NOTE: If you are going to delegate, always include `/analyze-contribution` in the `brief`, so that sub-agent can follow the prompt structures correctly.
 
 **Compute:**
 Execute this once per dimension, in confirmed order. Complete the full phase — compute, show, wait — before moving to the next dimension.
 
-1. Resolve the sort direction from `overall_delta_value` — use this value when filling in the AML template below:
-   - `overall_delta_value < 0` (drop) → `sort_direction = 'asc'` (most negative first)
-   - `overall_delta_value > 0` (increase) → `sort_direction = 'desc'` (most positive first)
-
-2. Generate the query (`generate_aql`) using this prompt structure:
+1. Run the query and viz for this dimension by following `/analyze-contribution-query`. You MUST use this input structure:
   ```
-  Calculate [metric] and its delta change (between [base_period] and [comparison_period]), broken down by [dimension].
-  Expected output:
-  - dimensions: [dimension]
-  - measures: base_period_metric, comparison_period metric, delta change
-  - filters: base period
-  - sorts: delta change [sort_direction]
+  /analyze-contribution-query
 
-  NOTE: use /analyze-contribution-null-safety skill. Make sure to coalesce(metric, 0) on every metric.
+  metric: [metric]
+  dimension: [dimension]
+  base_period_literal: [base_period_literal]
+  comparison_period_literal: [comparison_period_literal]
+  overall_delta_value: [overall_delta_value]
   ```
 
-3. Generate the viz (`generate_viz`) using this prompt structure:
-  ```
-  /analyze-contribution-generate-viz
+  It generates the AQL and combo chart, and executes the viz. The result data contains all calculation values including `base_value_raw`, `comparison_value_raw`, and `delta_value` — use this for segment classification in step 2 and `contribution_pct` in step 3.
 
-  sort_direction: [sort_direction]
-  ```
-
-4. Call `execute_viz` with the generated viz. The result data returned by `execute_viz` contains all calculation values including `base_value_raw`, `comparison_value_raw`, and `delta_value` — use this for segment classification in step 4 and `contribution_pct` in step 6.
-
-5. From the chart result data, classify each segment's `impact_direction` (post-query):
+2. From the chart result data, classify each segment's `impact_direction` (post-query):
    - `overall_delta_value < 0` and `delta_value < 0` → driver_of_change
    - `overall_delta_value < 0` and `delta_value > 0` → offset_to_change
    - `overall_delta_value > 0` and `delta_value > 0` → driver_of_change
    - `overall_delta_value > 0` and `delta_value < 0` → offset_to_change
    - `delta_value = 0` → neutral
 
-6. Compute `contribution_pct = delta_value / overall_delta_value × 100` for each segment using the scalar `overall_delta_value` from Phase 2.
+3. Compute `contribution_pct = delta_value / overall_delta_value × 100` for each segment using the scalar `overall_delta_value` from Phase 2.
 
-7. Compute and store `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100` — used to rank dimensions in Phase 4.
+4. Compute and store `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100` — used to rank dimensions in Phase 4.
 
 **Show:**
 
@@ -372,4 +361,4 @@ For the **Contribution to change** column, apply the same threshold rule as the 
 - `@()` literals must match the period granularity: `@(YYYY-MM-DD)` for days, `@(YYYY-WNN)` for weeks, `@(YYYY-MM)` for months, `@(YYYY-QN)` for quarters, `@(YYYY)` for years. Never use a day literal `@(YYYY-MM-DD)` for a month or quarter period — it filters only a 2-day window, not the full period.
 - Run one AQL query per dimension — never union or batch dimensions
 - Do not introduce volume weighting of any kind
-- Make sure to mention `/analyze-contribution-null-safety` and `/analyze-contribution-generate-viz` when writing AQL and Viz in Phase 3. They ensure that the generation is accurate and efficient.
+- All Phase 3 query and viz generation goes through `/analyze-contribution-query` — do not hand-write the AQL or the chart AML here.
