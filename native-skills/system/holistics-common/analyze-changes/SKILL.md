@@ -57,13 +57,23 @@ Brief:
 Parse the user's message for:
 - `metric` — the metric that changed (e.g., "revenue", "close rate", "daily signups")
 - `direction` — drop or increase
-- `time_reference` — when the change occurred (e.g., "in 2026", "last quarter", "since January")
+- `base_period` — the period where the change occurred (e.g., "May 2025")
+- `comparison_period` — the reference period (e.g., "April 2025")
 
 If `metric` is not clearly named, ask before proceeding:
 > "Which metric are you looking at?"
 
-Once the metric is confirmed, echo a one-line summary:
-> "Got it — you're seeing a [drop/increase] in **[metric]** [time_reference]."
+Fetch `current_value` (value in `base_period`) and `comparison_value` (value in `comparison_period`)
+from the dataset. Compute `delta` = current_value − comparison_value.
+
+Post an update to confirm the actual values:
+> "Got it — you're seeing a [drop/increase] in **[metric]** from **[comparison_value]**
+> ([comparison_period]) to **[current_value]** ([base_period]), [formatted delta]."
+
+Delta formatting:
+- Percentage metric (rate, %, ratio): "down/up **[|delta|] percentage points**"
+- Currency: "down/up **$[|delta|]** ([relative%]%)"
+- Count or other: "down/up **[|delta|]** ([relative%]%)"
 ```
 
 Execution: Do this yourself, no delegation.
