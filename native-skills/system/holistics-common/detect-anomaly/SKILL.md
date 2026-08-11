@@ -26,7 +26,7 @@ An anomaly task scans one metric's time series against a trend-following band bu
 Fill these with **one prioritized-fill pass**, not a chart-vs-typed branch (Workflow → *Step 1*). Confirm only fields you had to **guess**; silently accept fields **read** from the chart or stated by the user.
 
 ## What a bare minimum output looks like
-The deliverable is a trend-anomaly chart plus a short prose summary — nothing else by default.
+**The chart is required output. Do not skip it.** The deliverable is a trend-anomaly chart plus a short prose summary — the chart must always be attempted first.
 - **The chart** (Step 3): `actual` as a solid blue line, the `lower_bound`/`upper_bound` trend band dashed grey, and `is_anomaly` as red columns on a secondary 0..1 axis, with tooltips.
 - **The prose summary** (Step 3): for a business reader — defines an anomaly (a break from the recent trend), then lists each flagged bucket (date, value, above/below the trend, how far out in plain terms).
 - **The anomaly results** (the Step 2 AQL) stay internal — the source of truth for the summary, not shown as a table unless the user asks for the raw numbers.
@@ -79,7 +79,7 @@ Don't hand-write the `CombinationChart` — pass the Step 2 explore (verbatim) t
 2. Keep the structure `generate_viz` produced (axes, series, calculations); adjust only decoration. Keep 6-digit hex (an 8-digit alpha hex can be rejected).
 3. `execute_viz(dataset_uname: <dataset>, viz: <the adjusted viz>, title: …)` — pass only these three, no `aql` property.
 
-If `execute_viz` errors, feed the error text back into `generate_viz`'s `query` (it self-corrects from prior errors) and retry once; if it still fails, fall back to the Step 2 `execute_aql` table + prose.
+If `execute_viz` errors, feed the error text back into `generate_viz`'s `query` (it self-corrects from prior errors) and retry once; if it still fails, fall back to the Step 2 `execute_aql` table + prose — **this is the only permitted reason to omit the chart.**
 
 ### Summary (prose — Step 3)
 For a business reader: plain and professional, no raw notation (no bare "σ", "z = 3.4", "3σ"). Read the anomaly results; don't render them as a table (the user sees the chart) unless asked.
