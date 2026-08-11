@@ -84,7 +84,7 @@ Dependency: Step 1
 
 Brief:
 ```
-/detect_anomoly
+/detect_anomaly
 ```
 
 Execution:
@@ -96,7 +96,7 @@ Execution:
 
 ### Step 3 — Output the Stage 1 Summary Block
 
-Depdendency: Step 2
+Dependency: Step 2
 
 Brief:
 ```
