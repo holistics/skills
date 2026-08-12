@@ -32,7 +32,7 @@ if (!/^\d+\.\d+\.\d+/.test(version)) {
 
 const pluginName = basename(path)
 
-execSync('git fetch --tags', { stdio: 'inherit' })
+execSync('git fetch --tags --force', { stdio: 'inherit' })
 
 // Bump each ecosystem's plugin manifest and its own marketplace in lockstep.
 // A plugin version only affects its own marketplace — Claude and Cursor evolve independently.
