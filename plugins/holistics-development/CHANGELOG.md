@@ -1,3 +1,16 @@
+## [0.6.0](https://github.com/holistics/skills/compare/holistics-development-v0.5.5...holistics-development-v0.6.0) (2026-08-12)
+
+### Features
+
+* **plugins.development:** add build-dashboard skill
+* **plugins.development:** add build-custom-chart and build-dashboard-theme skills ([06e49db](https://github.com/holistics/skills/commit/06e49db39dab3994432a2d8e2c06b56d6d5e54fd))
+* **plugins.development:** update build-custom-chart with render-safety fixes ([d361d99](https://github.com/holistics/skills/commit/d361d99e952f61616d9ff1eb6cf25344a924a1b5))
+* **plugins.development:** update build-dashboard-theme to 5.0.0 ([fadebfb](https://github.com/holistics/skills/commit/fadebfb41930ac82e64b416dc1a3903a9d14f67e))
+
+### Bug Fixes
+
+* **native:** write library files under .holistics/library ([765dd8e](https://github.com/holistics/skills/commit/765dd8e9f6f53ffce0d4c07c7eede6e8835737c0))
+
 ## [0.5.5](https://github.com/holistics/skills/compare/holistics-development-v0.5.4...holistics-development-v0.5.5) (2026-06-22)
 
 ### Bug Fixes
