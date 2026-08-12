@@ -48,19 +48,54 @@ When the user is specific ("just one chart of X"), their scope wins — build th
 ## Workflow
 
 1. **Derive the spec, then the sections** (fill "What a good input looks like", in this order): from the prompt → from the dataset (call `fetch_dataset` — predefined metrics first, then date fields, then low-cardinality descriptive dimensions as breakdown/filter candidates). Name **what the reader is doing** and **rank their questions** before you think about blocks — those two answers decide the dashboard's opening and its order, and skipping them is what makes every dashboard come out the same. Then turn the ranked questions into **sections**, using the dataset's subjects/metrics as the material that answers them (see *What a bare minimum output looks like*), and set each section's depth by the ask's breadth. Ask at most one short round, and only for what is genuinely undecidable; decide everything else and state every assumption.
-2. **Propose and confirm.** Present a short text plan — group blocks by role, name the dataset with its `@Dataset:` reference, list each control in plain terms (what viewers can slice by), and describe the layout at a high level (the sections top-to-bottom, and any tabs).
+2. **Propose and confirm.** Present a short text plan, then draw the layout as a wireframe — name the dataset with its `@Dataset:` reference, give each section the question it answers in the reader's words, and list each control in plain terms (what viewers can slice by).
 
-   ```
+   ````
    ## What's in the dashboard
    **For** — <who reads it> **doing** <monitoring | diagnosing | comparing | planning | looking something up>
    **Dataset** — @Dataset:<dataset_name>
    **Sections** — in the order the reader asks them; each answers one question
    - **<section>** — <the question this section answers, in the reader's words>
-     - <block name> — <VizType> — <its role in the section>
    **Controls** — a date range plus 1–2 things viewers can slice by
    - <Filter label> — <what it filters, in plain words>
-   **Layout** — the sections top-to-bottom by importance (and any tabs)
+
+   ```mermaid
+   ---
+   config:
+     fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+     htmlLabels: false
+   ---
+   block-beta
+   columns 1
+   block:frame
+     columns 12
+     b_title["Sales Overview"]:12
+     f_date["Date Range"]:3 f_country["Office Country"]:3 c_pop["Compare To"]:3 space:3
+     k_sales["Total Sales · KPI"]:3 k_orders["Orders · KPI"]:3 k_cust["Customers · KPI"]:3 space:3
+     h_trend["How sales are moving"]:12
+     v_trend["Monthly Sales Trend · Line"]:12
+     h_where["Where it comes from"]:12
+     v_country["Sales by Country · Bar"]:6 v_detail["Order Detail · Table"]:6
+   end
+   classDef board fill:none,stroke:#e3e7ed
+   classDef sect fill:#ffffff,fill-opacity:0.6,stroke:none
+   classDef ctrl fill:#f5f8fa,stroke:#cbd0d7
+   classDef viz fill:#d1e5fa,stroke:#1b7ce4
+   class frame board
+   class b_title,h_trend,h_where sect
+   class f_date,f_country,c_pop ctrl
+   class k_sales,k_orders,k_cust,v_trend,v_country,v_detail viz
    ```
+   ````
+
+   **The wireframe is the layout, not a sketch** — every block you'll declare, in view order, at the width you'll build it, on the same 12-column grid as the canvas. What the user approves here is what step 3 builds.
+
+   * Everything sits inside the `block:frame … end` wrapper — that is the border that separates the wireframe from the message around it. `columns 12` inside it; spans are the canvas spans: ¼ `3` · ⅓ `4` · ½ `6` · full `12`.
+   * **Every row must total exactly 12** — pad a short row with `space:<n>`. Boxes fill left to right and wrap on their own, so a row that doesn't add up shifts every block after it. `space` is a keyword, not a block id: write it bare every time, however often you need it, and never number it to make it unique — `space1:3` is a real block and draws an empty lavender box labelled "space1".
+   * One box per declared block, in view order: the control row first, then the blocks top-to-bottom. A full-width heading TextBlock is what separates one section from the next.
+   * **Copy the three `classDef` lines character for character** — they are design-system values, not choices — and put every block on the matching `class` line: `sect` for TextBlocks, `ctrl` for FilterBlock / PopBlock / DateDrillBlock, `viz` for every VizBlock. A block on no `class` line reads as none of them.
+   * Label a box `<block name> · <VizType>`; a heading gets its heading text. Keep labels short — no `:`, no markdown, no emoji.
+   * Tabbed: one diagram per tab, each headed by `**Tab: <label>**`.
 
    Then get the user's OK before building — never build straight off the plan. Do NOT call `ask_user`. Close the message with an **option link** — `[text](#opt)`, which renders as a clickable chip:
 
@@ -74,9 +109,9 @@ When the user is specific ("just one chart of X"), their scope wins — build th
 
    **Then end your turn and wait** — the link is only markdown, not a tool call, so nothing pauses you. Build on approval; if the reply names a change, revise the plan and confirm again.
 
-3. **Build the dashboard** per Schema. Author the **static text** blocks yourself (titles, section intros, how-to-read notes). For each **data** block, generate the viz and put the returned AML in the block; hand-write a `viz: <Type> { … }` body only as a last resort, because hand-written viz AML is the single biggest source of invalid output (if you must, the `ref:` forms in the Schema are where it breaks). Then lay everything out — the view is always a TabLayout: one tab for a single-page dashboard, or blocks partitioned across tabs, each tab's canvas built the same way with a control row reserved at the top.
+3. **Build the dashboard** per Schema. Author the **static text** blocks yourself (titles, section intros, how-to-read notes). For each **data** block, generate the viz and put the returned AML in the block; hand-write a `viz: <Type> { … }` body only as a last resort, because hand-written viz AML is the single biggest source of invalid output (if you must, the `ref:` forms in the Schema are where it breaks). Then lay everything out **to the wireframe you confirmed** — same blocks, same rows, same order, span → width `3` = 280 · `4` = 380 · `6` = 580 · `12` = 1180. The view is always a TabLayout: one tab for a single-page dashboard, or blocks partitioned across tabs, each tab's canvas built the same way with a control row reserved at the top.
 4. **Wire the controls and the `interactions: []` array.** Every dashboard needs it — not only to connect the controls but because viz blocks cross-filter each other by default. Build the control set the job needs (a date range + 1–2 dimension filters at minimum; add a date drill or Period Comparison when the questions call for one), then wire each control to every block it can affect, disable filter→filter cross-linking, and disable everything that would cross a tab boundary.
-5. **Verify against the minimum output.** Every block answers a ranked question (cut any that can't); the opening block matches what the reader is doing, and you can say why this dashboard's shape would be wrong for a different reader — if you can't, you defaulted; each KPI's comparison comes from the dashboard's Period Comparison control, not a period baked into the KPI; block bodies are sound, styling-free, and **carry no hard-coded time window or comparison period** — the date filter and Period Comparison provide those; every block declared is placed in the view; the `interactions: []` array is present and complete — every control wired to every block it can affect (each filter to every block on its dataset or disabled; Period Comparison to the KPIs, not just the trend), cross-tab cross-filtering disabled; then check code diagnostics and fix every error.
+5. **Verify against the minimum output.** Every block answers a ranked question (cut any that can't); the opening block matches what the reader is doing, and you can say why this dashboard's shape would be wrong for a different reader — if you can't, you defaulted; each KPI's comparison comes from the dashboard's Period Comparison control, not a period baked into the KPI; block bodies are sound, styling-free, and **carry no hard-coded time window or comparison period** — the date filter and Period Comparison provide those; every block declared is placed in the view, and the canvas matches the wireframe the user confirmed — same blocks, same rows, same spans (if the build had to deviate, say which row and why at handoff); the `interactions: []` array is present and complete — every control wired to every block it can affect (each filter to every block on its dataset or disabled; Period Comparison to the KPIs, not just the trend), cross-tab cross-filtering disabled; then check code diagnostics and fix every error.
 6. **Deliver** with a handoff note — dataset used; each block name + viz type + the question it answers; which blocks carry date fields (with the field reference); tab membership if tabbed; and the assumptions you made.
 
 ## Schema
