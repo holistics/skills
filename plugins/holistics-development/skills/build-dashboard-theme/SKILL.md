@@ -2,7 +2,7 @@
 name: build-dashboard-theme
 label: Build Dashboard Theme
 description: |-
-  Create, update, or apply a Holistics dashboard theme (library/themes/) from any input: a brand name, website, screenshot, brand guidelines, explicit colors, or a mood description.
+  Create, update, or apply a Holistics dashboard theme (.holistics/library/themes/) from any input: a brand name, website, screenshot, brand guidelines, explicit colors, or a mood description.
 
   Use when the user wants to theme, brand, restyle, or change a dashboard's look and feel.
 
@@ -34,10 +34,10 @@ Never deliver a palette without a PageTheme, an unapplied theme, or a dangling `
 ## Workflow
 1. **Derive the design decisions** (fill the token set), in order:
    - **From the input** — given hex codes / named roles are locked anchors: convert to OKLCH, never adjust them aesthetically. A brand name → reason from its design language; a URL/screenshot → inspect it; mood words → translate ("minimal" = restrained chroma + hairline borders; "warm" = cream surfaces, H near 60-90; "premium/editorial" = display serif + spacious density).
-   - **From the project** — check `library/themes/`; an existing theme may be the intended starting point (extend, don't duplicate).
+   - **From the project** — check `.holistics/library/themes/`; an existing theme may be the intended starting point (extend, don't duplicate).
    - **From defaults** — with no signal, build a clean professional light theme (near-white warm-neutral page, one restrained accent pair, comfortable density, hairline borders). Never reply that you need brand input to proceed.
    Ask at most one short round, and only when mode or a locked anchor is both unstated and unguessable AND the user clearly has a specific brand in mind; decide everything else.
-2. **Write** `library/themes/<slug>.theme.aml` — the `const <slug>_theme_tokens`, then the `ColorPalette`, then the `PageTheme`. Use the Schema's property surface for the exact property names, and derive every value (surfaces, type sizes, padding, elevation) from Conventions → Design principles — the Schema no longer dictates values.
+2. **Write** `.holistics/library/themes/<slug>.theme.aml` — the `const <slug>_theme_tokens`, then the `ColorPalette`, then the `PageTheme`. Use the Schema's property surface for the exact property names, and derive every value (surfaces, type sizes, padding, elevation) from Conventions → Design principles — the Schema no longer dictates values.
 3. **Verify the file** — read it back: non-empty; tokens + palette + theme present; names slug-consistent; PageTheme colors are `<slug>_theme_tokens(...)` accessors (only hover/banding inline) and `custom_css` inlines the token values. Check code diagnostics and fix every error — an unknown-property/name error means invented vocabulary.
 4. **Apply** — set `theme: <slug>_theme` on the target dashboard(s); check their diagnostics too.
 5. **Deliver** — close with: slug, mode, the anchor colors used and where they came from (given vs assumed), files touched, warnings.
@@ -221,4 +221,4 @@ The Schema's tree carries sensible defaults (the `// derived from ...` comments)
 - **Colors & fonts.** Colors are `"oklch(L C H)"` (L 0-1, C 0-0.4, H 0-360); convert user hex to OKLCH. `font_family` reads `font_body` (body/table/KPI) or `font_display` (titles) via the accessor; fold any CSS fallbacks into the token value itself.
 - **Filters/controls have no theme section** — they auto-derive from `block.background` / `block.text` / `block.border`, so keep those block colors legible against each other. And `viz` themes only `table` + `metric_kpi`; there is no `bar`/`line`/`pie` viz theming to add.
 - **Vocabulary is closed.** Use only the properties, token keys, and the one `custom_css` block the Schema shows — never style a selector it doesn't list, never add a property it doesn't show. Unsure of a name? `search_docs` it — never guess.
-- **File.** Write `library/themes/<slug>.theme.aml`; the dashboard references it with `theme: <slug>_theme`.
+- **File.** Write `.holistics/library/themes/<slug>.theme.aml`; the dashboard references it with `theme: <slug>_theme`.

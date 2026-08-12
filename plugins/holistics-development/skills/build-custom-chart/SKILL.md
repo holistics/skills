@@ -2,7 +2,7 @@
 name: build-custom-chart
 label: Build Custom Chart
 description: |-
-  Create or refine a Holistics custom chart (CustomChartDef in library/custom_charts/) for a chart type the built-in viz can't cover.
+  Create or refine a Holistics custom chart (CustomChartDef in .holistics/library/custom_charts/) for a chart type the built-in viz can't cover.
 
   Use when the user wants to create a custom chart, convert a Vega/Vega-Lite spec into Holistics AML, or scaffold or refine a chart template — or when a dashboard needs a chart form with no built-in equivalent (heatmap matrix, sankey, waterfall, box plot, ...).
 
@@ -11,7 +11,7 @@ description: |-
   Do NOT trigger for a standard built-in chart or a dynamic content block.
 ---
 
-Create or refine a `CustomChartDef` at `library/custom_charts/<chart_name>.chart.aml`.
+Create or refine a `CustomChartDef` at `.holistics/library/custom_charts/<chart_name>.chart.aml`.
 
 ## What a good input looks like
 A custom-chart task is fully specified when you can answer:
@@ -28,9 +28,9 @@ A custom-chart task is fully specified when you can answer:
 
 ## Workflow
 1. **Derive intent & data shape** — from the request and, in a dashboard context, from the actual dataset fields involved. Note if it's interactive, layered, or multi-view — those are the ones that break; Schema → Interactivity and → Responsiveness cover them. Decide the option set yourself from the reuse surface — don't ask the user to enumerate knobs; ask only for details that materially change the definition (field roles, whether raw Vega is truly needed).
-2. **Look for something to start from** (see Conventions → Reuse before building) — check `library/custom_charts/` in this project, then `search_docs` for the chart type. State what you found: a complete matching template → copy it; something close → adapt it; nothing → build fresh (`@vgl`).
+2. **Look for something to start from** (see Conventions → Reuse before building) — check `.holistics/library/custom_charts/` in this project, then `search_docs` for the chart type. State what you found: a complete matching template → copy it; something close → adapt it; nothing → build fresh (`@vgl`).
 3. **Name it** — keep the user's chart name; if none, derive a short snake_case uname from the chart's purpose; on collision append a short suffix (`_chart`, `_v2`) rather than inventing a new name.
-4. **Write / refine** `library/custom_charts/<chart_name>.chart.aml` per Schema — fields and options declared by name, every option with a `default_value`, and data/fields/options bound through the runtime `@{...}` interpolations (never hardcode dataset field names). For refines, see Conventions → Refining an existing chart.
+4. **Write / refine** `.holistics/library/custom_charts/<chart_name>.chart.aml` per Schema — fields and options declared by name, every option with a `default_value`, and data/fields/options bound through the runtime `@{...}` interpolations (never hardcode dataset field names). For refines, see Conventions → Refining an existing chart.
 5. **Verify** — check code diagnostics on the chart file and any dashboard using it; fix every error.
 6. **Deliver** — reply briefly: what you reused vs built, required fields and their roles, options if any, and what the chart is good for, plus 2-3 concrete next steps. If the chart is multi-view (`facet`/`concat`/`repeat`), lead with the responsiveness caveat from Schema → Responsiveness.
 
@@ -94,7 +94,7 @@ Interactions are Vega-Lite `params` (selections) wired to Holistics through a to
 ## Conventions
 
 ### Reuse before building — check first
-You can't browse the web — your sources are `library/custom_charts/` in this project and `search_docs` (which reaches Holistics' official chart library and AML reference). Check both and **state what you found before drafting**. Unsure of a token or syntax? `search_docs` it — don't guess.
+You can't browse the web — your sources are `.holistics/library/custom_charts/` in this project and `search_docs` (which reaches Holistics' official chart library and AML reference). Check both and **state what you found before drafting**. Unsure of a token or syntax? `search_docs` it — don't guess.
 
 Classify by how complete your source is: **Exact** (you have the full template for a matching type), **Similar** (right field shape, different layout/options, or you only got a snippet), or **None**. A request with constraints beyond the chart type ("but...", "with...", "except...") is at most Similar.
 
