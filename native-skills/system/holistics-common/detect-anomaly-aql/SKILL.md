@@ -16,6 +16,8 @@ The expected band **follows the trend**. For each bucket `t` (`T` truncated to `
 
 **Warm-up gate (required).** A bucket is only banded/flagged once it has a **full `W`-bucket window** of prior history. Partial-frame window stats return values (not null), so gate explicitly on `n_prior = window_count(...) ≥ W`: buckets with `n_prior < W` get **no band** and are **never flagged** — the leading `W` lead-in buckets are exactly these, shown as context.
 
+**Use these W values exactly.** Only shrink W if the total available history is shorter than W+1 — and if you do, state the reason explicitly in your response. Never silently use a smaller W.
+
 Window `W` by grain — a whole number of cycles:
 
 | Grain | `W` |
@@ -73,3 +75,4 @@ explore {
 - The `n_prior ≥ W` gate is mandatory (partial windows return values, not null, and would false-flag the first `W` buckets).
 - `case(when: …, else: null)` is valid and is how the band is hidden in the lead-in.
 - The nested window (`window_stdev(m_delta, …)` where `m_delta` contains a window) compiles directly — one explore, no two-stage query.
+- `is_anomaly` must always return `0` or `1`, **never `null`** — the `else: 0` in the case expression is mandatory. It is plotted as a column on a 0..1 axis; nulls cause rendering gaps instead of clean zeros.
