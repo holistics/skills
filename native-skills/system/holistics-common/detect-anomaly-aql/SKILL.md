@@ -43,7 +43,7 @@ metric m_n      = window_count(M, -W..-1, order: T | <grain>() | asc(), partitio
 metric m_drift  = window_avg(m_delta, -W..-1,  order: T | <grain>() | asc(), partition: []);
 metric m_spread = window_stdev(m_delta, -W..-1, order: T | <grain>() | asc(), partition: []);
 metric m_expected = m_prev + m_drift;
-metric m_z      = safe_divide(M - m_expected, m_spread);
+metric m_z      = case(when: m_n >= W, then: safe_divide(M - m_expected, m_spread), else: null);
 metric m_lower  = case(when: m_n >= W, then: m_expected - k * m_spread, else: null);
 metric m_upper  = case(when: m_n >= W, then: m_expected + k * m_spread, else: null);
 metric m_anom   = case(when: and(m_n >= W, abs(m_z) > k), then: 1, else: 0);
