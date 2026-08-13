@@ -84,7 +84,7 @@ If `execute_viz` errors, feed the error text back into `generate_viz`'s `query` 
 ### Summary (prose — Step 3)
 For a business reader: plain and professional, no raw notation (no bare "σ", "z = 3.4", "3σ"). Read the anomaly results; don't render them as a table (the user sees the chart) unless asked.
 
-Open with one sentence defining an anomaly under this method, then the findings:
+Post an update with one sentence defining an anomaly under this method, then the findings:
 
 > *An anomaly is any <grain> whose value departs sharply from where its recent trend was heading — a change much larger or smaller than the metric's normal <grain>-to-<grain> movement over the prior <W> <grain>s.*
 
