@@ -88,10 +88,10 @@ Post an update with one sentence defining an anomaly under this method, then the
 
 > *An anomaly is any <grain> whose value departs sharply from where its recent trend was heading — a change much larger or smaller than the metric's normal <grain>-to-<grain> movement over the prior <W> <grain>s.*
 
-Classify each bucket in the reporting window:
-- **Unusual** — `is_anomaly = 1`: above the trend (`actual > expected`) or below it.
-- **Normal** — `is_anomaly = 0`, `z_score` non-null: moved in line with the trend.
-- **Not enough history** — `z_score`/band null (a lead-in bucket, `n_prior < W`): shown as context without a band; not assessed.
+Classify each bucket in the reporting window — **check in this exact order**:
+1. **Not enough history** — `z_score` is null (a lead-in bucket, `n_prior < W`): shown as context without a band; not assessed. `is_anomaly` returns `0` for these too — always check `z_score` nullness first, or you will misclassify lead-in buckets as normal.
+2. **Unusual** — `z_score` non-null AND `is_anomaly = 1`: actual broke above or below the expected trend band.
+3. **Normal** — `z_score` non-null AND `is_anomaly = 0`: moved in line with the trend.
 
 Translate the statistics — describe the size of the surprise in plain terms (*"about <z> times its normal monthly swing"*), z only as a parenthetical.
 
