@@ -1,136 +1,198 @@
 ---
 name: detect-anomaly
 description: |-
-  Detect statistical anomalies across a metric's history and visualize them — unusual spikes, drops, and deviations flagged against an expected range built from the metric's own recent history.
+  Detect statistical anomalies across a metric's history and visualize them: unusual spikes, drops, and deviations flagged against an expected range built from the metric's own recent history.
 
-  Use when the user wants to find or check for unusual values in a metric — words like anomaly, unusual, spike, drop, dip, outlier, "out of the ordinary", "anything weird". A specific date is optional; the skill always scans the whole series.
+  Use when the user wants to find or check for unusual values in a metric. Trigger words include anomaly, unusual, spike, drop, dip, outlier, "out of the ordinary", "anything weird". A specific date is optional; the skill always scans the whole series.
 
-  Typical phrasings: detect anomalies in revenue, any outliers in daily signups, has anything looked unusual in MRR lately, were there spikes or drops in active users this quarter, is revenue on May 20 unusual (a focus date — still scans the full series), or /detect_anomaly with no args (the skill asks for the metric).
+  Typical phrasings: detect anomalies in revenue, any outliers in daily signups, has anything looked unusual in MRR lately, were there spikes or drops in active users this quarter, is revenue on May 20 unusual (a focus date; still scans the full series), or /detect_anomaly with no args (the skill asks for the metric).
 
   Do NOT trigger for: dimensional attribution (which segment or dimension drove an anomaly), explaining the business cause, or ongoing/scheduled monitoring & alerting. This skill flags which points are statistically unusual and shows them; it does not explain why.
 user-invocable: false
 ---
 
-Flag which points in a metric's time series moved unusually against its own recent trend, and show them: build a trend-following expected band from recent history, flag the buckets that break out of it, and visualize the result. This skill flags *which* points are unusual, never *why* — deflect causal or dimensional-attribution asks (Conventions → *Edge cases*).
+Build an expected band from a metric's recent history, flag the buckets that break out of it, and chart the result. This skill identifies which points are unusual, not why they moved (Conventions → *Out of scope*).
+
+Two sub-skills carry the mechanics: **`detect-anomaly-aql`** owns the method and the query, **`detect-anomaly-viz`** owns both charts.
 
 ## What a good input looks like
-An anomaly task scans one metric's time series against a trend-following band built from its own recent history. The primary path is **chart-anchored**: the user is viewing a chart and asks whether its movement is normal, so the fields below are read from that chart's Viz AML. Only `metric` is truly required — derive or default the rest, then echo everything back (with the resolved timeframe as an absolute range) so the user can correct a mis-parse.
 
-- **`metric` (`M`)** — *required*. From the viewed chart's y-axis measure; else the user's words. If missing, ask — don't guess. If the chart carries **more than one** y-axis measure, ask which one to analyze (don't default to the first).
-- **`dataset`** — *required*. From the chart's `dataset:`; else a ranked measure search. If missing, ask.
-- **`time axis` (`T`) + `granularity`** — inferred from the chart's x-axis field and its `datetrunc` transformation. If the x-axis isn't a time field, ask for the metric + time grain.
-- **`filters`** — optional. The chart's dimensional filters (not its time range).
-- **`focus_date`** — optional. From the user's words; changes only the closing prose.
-- **`timeframe`** — optional. The chart's timeframe; else default by grain (`day`→90d, `week`→26w, `month`→24m, `quarter`→12q).
+Anomaly detection compares a metric against its own recent history to determine whether a value is far from what the preceding periods would suggest. The analysis needs one measure, the date field and grain it is measured on, and enough prior history to establish what normal movement looks like.
 
-Fill these with **one prioritized-fill pass**, not a chart-vs-typed branch (Workflow → *Step 1*). Confirm only fields you had to **guess**; silently accept fields **read** from the chart or stated by the user.
+A task is fully specified when you can answer:
+
+1. **Which measure, and which dataset.** The method compares a series against itself, so it runs on exactly one measure; two measures are two analyses. When a chart offers several, ask which one, because choosing for the user wastes the whole run.
+2. **Which date field, and at what grain.** Day, week, month, or quarter. The grain sets what can be found: a spike lasting two days does not show up in monthly buckets, and a metric recorded monthly cannot be read daily.
+3. **Which slice of the data.** The segment in view, if any. The result describes the series you selected, not the business as a whole: one region collapsing can leave the company total flat, and a flat total can hide two segments moving in opposite directions. One slice per analysis; breaking the metric down by a dimension is a different question.
+4. **Which period the findings cover.** Flagged buckets are reported only inside this period. Earlier buckets are shown as context, because the method needs prior history before it can judge a bucket.
+5. **Whether the user has a specific date in question.** A named date does not narrow the analysis; the whole series is always scanned. It changes only what the answer leads with.
+
+The user rarely supplies all five, and often has not asked for anomaly detection by name.
+
+- **Read before asking.** A chart in view already carries the measure, date field, grain, slice and window; take them from there (*Resolving the spec*).
+- **Ask only where a wrong guess wastes the run**: the measure, and with no chart its dataset. Derive the rest and state it back in one line with real dates, so a misread is cheap to correct.
 
 ## What a bare minimum output looks like
-**The chart is required output. Do not skip it.** The deliverable is a trend-anomaly chart plus a short prose summary — the chart must always be attempted first.
-- **The chart** (Step 3): `actual` as a solid blue line, the `lower_bound`/`upper_bound` trend band dashed grey, and `is_anomaly` as red columns on a secondary 0..1 axis, with tooltips.
-- **The prose summary** (Step 3): for a business reader — defines an anomaly (a break from the recent trend), then lists each flagged bucket (date, value, above/below the trend, how far out in plain terms).
-- **The anomaly results** (the Step 2 AQL) stay internal — the source of truth for the summary, not shown as a table unless the user asks for the raw numbers.
-- If `execute_viz` ultimately fails, fall back to the Step 2 table + prose (Conventions → *On an error*).
+Two charts and a prose summary.
+- **The series chart** (Step 1) and **the anomaly chart** (Step 3), both per `detect-anomaly-viz`. The anomaly chart is required output. The series chart is not: a failure there is noted and the run continues.
+- **The prose summary** (Step 4), for a business reader: what an anomaly means here, then each flagged bucket with its date, value, direction, and how far outside the band it fell.
+- **The anomaly results** (Step 2) stay internal. They are the summary's source of truth, not a table to show, unless the user asks for the raw numbers.
 
 ## Workflow
-Three steps, in order. Hand-write the AQL yourself (Step 2) — the method must be exact — but author the chart with `generate_viz` (Step 3): hand-written viz grammar is the top source of invalid output. `execute_aql` runs the AQL (and validates it on execution); `execute_viz` runs the chart.
 
-Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the window for the grain, `k` = the sensitivity threshold (default 3), `<dataset>` = the dataset name, `<metric label>` = a readable label.
+Four steps. Each is a move an analyst makes, and each closes with a `post_update` so the user follows the reasoning as it happens instead of receiving a verdict at the end. **Narrating is not pausing**: post and keep working. The only stop in the run is the measure question in Step 1.
 
-### Step 1 — Resolve the input
-Produce one detection spec `{ dataset, M, T, granularity, filters, timeframe }`. Fill each field from the strongest available source, in precedence order — there is **no chart-path-vs-typed-path branch**:
-1. **The active chart's Viz AML** (the runtime hands the AI the AML of the chart the user is viewing) — fills `dataset`, `M`, `T`, `granularity`, `filters`, and the chart's timeframe.
-2. **The user's words** — fill or *override* any field they spoke to ("…but over the last 3 years", "…just the West region", or, with no chart, the metric name itself).
-3. **Dataset metadata + defaults** — `granularity` from `T`; timeframe default per grain.
-4. **Ask the user** — only for a field still empty (realistically `M`/`dataset` with no chart and no parseable metric).
+Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the window for the grain, `k` = the sensitivity threshold, `<dataset>` = the dataset name, `<metric label>` = a readable label.
 
-**Reading the chart's Viz AML** (source 1) — pull each field out of the attached AML:
-- `dataset` ← the viz `dataset:`.
-- `M` ← the y-axis measure. If the chart has **more than one** y-axis measure, don't pick for the user — **ask which one** to analyze (list them and wait), unless the user already named one in their words. Anomaly detection runs on a single series, and silently choosing the wrong one wastes the whole run. With exactly one y-axis measure, use it. If `M` is a viz-level `calculation` rather than a dataset measure, carry its `@aql` formula and inline it as `metric M = <formula>;` in the Step 2 query.
-- `T` + `granularity` ← the x-axis field and its `transformation` (`datetrunc month` → grain = month). If the x-axis is **not** a time field, this isn't a time series → fall back to typed/ask.
-- `filters` ← the viz `filter` / `filter_groups` / `conditions`, **excluding** the time-range filter.
-- **Legend/breakdown** → collapse to the total (drop the legend) unless the user explicitly asks per-segment (per-segment is out of scope — Conventions → *Edge cases*).
-- **Timeframe + warm-up** — the reporting timeframe is what gets flagged/reported; the Step 2 query widens it by `W` buckets on the leading edge so the reporting window is fully banded. The chart shows those `W` lead-in buckets as trend context (unbanded); prose reports only within the reporting timeframe.
+### Step 1: Establish the series
 
-Confirm only fields you **guessed** (a ranked search: *"I'll use `sales_orders` (measure `total_revenue`). Confirm, or name another."* — then wait); silently accept fields **read** from the chart or stated by the user. Validate that `M` exists as a measure (or is a carried viz calculation); if a typed metric matches none, show the top-3 closest measures and ask. Echo the resolved slice back, including the lead-in context: *"Analyzing GMV for Region = West over Jul 2023 – Aug 2024 (your view); the chart also shows earlier months as lead-in to establish the trend."*
+Nothing can be called unusual until there is a definite series to judge: one measure, on one time axis, at one grain, for one slice, over one period. Almost all of that is already settled by whatever the user is looking at, so read it rather than asking for it back.
 
-### Step 2 — Detect (write AQL → execute_aql)
-1. Write the anomaly detection AQL with `generate_aql`, providing `M`, `T`, `<grain>`, `W`, `k`, folding in the dimensional filters, and widening the timeframe by `W` buckets for warm-up. Prompt structure:
-  ```
-  /detect-anomaly-aql
+Then draw it. The chart confirms the resolved grain and slice, and it is the picture the expected band gets added to in Step 3.
 
-  M: ...
-  T: ...
-  grain: ...
-  W: ...
-  k: ...
-  ```
-2. Call `execute_aql` (title per Conventions → *Titles*) — it validates the AQL on execution and errors loudly on a bad query. The result is the **anomaly results** — the summary's source of truth and the exact AQL you hand to `generate_viz` in Step 3.
+Resolve the spec (*Resolving the spec*), then draw the series:
 
-### Step 3 — Present (generate_viz → execute_viz → summarize)
-Feed the Step 2 AQL to `generate_viz` per Output → *Anomaly chart*, adjust only decoration, then `execute_viz` (title per Conventions → *Titles*). Then write the prose per Output → *Summary*, reading only the buckets inside the reporting timeframe. On a failure, Conventions → *On an error*.
+```
+/detect-anomaly-viz
+
+chart: series
+dataset: ...
+M: ...
+T: ...
+grain: ...
+W: ...
+reporting: ...
+metric label: ...
+filters: ...
+```
+
+Read the returned rows for the three conditions that change what you can promise:
+- **Missing buckets** between the first and last. Gaps break the period-to-period comparison the method rests on.
+- **A final bucket still in progress.** A part-period value reads as a collapse. Exclude it, or say it is incomplete.
+- **Row count.** `detect-anomaly-aql` shrinks `W` or stops the run when history is short; either outcome must be said out loud.
+
+Then post: the metric, grain, slice and period as real dates; that the metric will be judged against its own recent history and the whole series scanned even if the user named a single date; and anything the three checks turned up.
+
+### Step 2: Turn "unusual" into a rule, and apply it
+
+Eyeballing the chart is not detection. A rule has to say what each period was expected to be, and how much deviation is normal for this particular metric.
+
+The rule: predict each period from where the last `W` periods of movement were heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. `detect-anomaly-aql` owns it, including the window sizes and the warm-up gate.
+
+Hand over the resolved parameters:
+
+```
+/detect-anomaly-aql
+
+M: ...
+T: ...
+grain: ...
+W: ...
+k: ...
+reporting: ...
+filters: ...
+```
+
+Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged. Then post the rule in the reader's terms, naming the `W` and `k` actually used.
+
+### Step 3: Show the expectation, not just the verdict
+
+The band is what makes "three periods were unusual" checkable rather than asserted: it shows where each period was expected to land, how wide normal was at that moment, and which points fell outside. Draw it onto the same picture from Step 1.
+
+```
+/detect-anomaly-viz
+
+chart: anomaly
+dataset: ...
+aql: <the Step 2 explore, verbatim>
+grain: ...
+metric label: ...
+```
+
+Then post how to read it: the band is the expected range given the recent trend, it widens when movement has been erratic, and the red columns mark what broke out.
+
+### Step 4: Read the result honestly
+
+A period that was never assessed carries `is_anomaly = 0` exactly like one that was assessed and found normal, and the warm-up buckets sit in the result set alongside real findings. Both read as "normal" unless checked for.
+
+Classify every bucket in the reporting window, **in this order**:
+1. **Not assessed.** `z_score` is null: a lead-in bucket without a full window of prior history. `is_anomaly` is `0` for these too, so testing it first misreports them as normal.
+2. **Unusual.** `z_score` non-null and `is_anomaly = 1`.
+3. **Normal.** `z_score` non-null and `is_anomaly = 0`.
+
+Then check, and write the summary (Output → *Summary*):
+- **Only buckets inside the reporting timeframe are reported.** The warm-up buckets are context, never findings.
+- **The `W` and `k` stated are the ones used**, including a shrunk `W`.
+- **The anomaly chart rendered**, or the fallback was taken and said so.
+- **No causal or dimensional claim** anywhere in the prose.
+- **Numbers formatted** per Conventions → *Numeric formatting*.
+
+Two patterns in the flagged set change what the summary can claim. Check both:
+- **Flags sharing a calendar position** (the same month each year, the same weekday). The method has no seasonal term, so a recurring peak flags as an anomaly. Say so, and offer the seasonality-aware re-run.
+- **Two flags within `W` buckets of each other.** The first widens the band for the periods after it, so the second was judged against a looser threshold and anything following it may have been missed.
 
 ## Output
 
-### Anomaly chart (generate_viz — Step 3)
-Don't hand-write the `CombinationChart` — pass the Step 2 explore (verbatim) to `generate_viz` and **state the decoration explicitly in the `query`** (generate_viz defaults its palette and `pattern: 'inherited'` unless told otherwise, so name the colours):
+### Summary (prose, Step 4)
 
-1. `generate_viz(dataset_uname: <dataset>, aql: <the Step 2 explore, verbatim>, query: "Combination chart of <metric label> by <grain>: actual as a solid #255DD4 line; lower_bound and upper_bound as grey #9CA3AF dashed lines forming the expected band; is_anomaly as red #FCB8B8 columns on a secondary 0..1 right axis; x-axis is the <grain> bucket; format <metric label> as short-suffix currency like $500K; tooltips for expected, <metric label>, and z_score.")`.
-2. Keep the structure `generate_viz` produced (axes, series, calculations); adjust only decoration. Keep 6-digit hex (an 8-digit alpha hex can be rejected).
-3. `execute_viz(dataset_uname: <dataset>, viz: <the adjusted viz>, title: …)` — pass only these three, no `aql` property.
+A complete answer on the primary path (no focus date, two buckets flagged). The chart is not written, it is what `execute_viz` returned in Step 3; the prose below it is Step 4's:
 
-If `execute_viz` errors, feed the error text back into `generate_viz`'s `query` (it self-corrects from prior errors) and retry once; if it still fails, fall back to the Step 2 `execute_aql` table + prose — **this is the only permitted reason to omit the chart.**
+> ⟦ Step 3 anomaly chart renders here ⟧
+>
+> **What counts as unusual here.** An anomaly is any month whose value departs sharply from where its recent trend was heading: a change much larger or smaller than GMV's normal month-to-month movement over the prior 12 months.
+>
+> **Found 2 unusual months in GMV, Jul 2023 to Aug 2024:**
+>
+> - **Nov 2023: $4.2M.** Above the expected trend by about 3.6× its normal monthly movement.
+> - **Mar 2024: $1.9M.** Below the expected trend by about 4.1× its normal monthly movement.
+>
+> **What this does not tell you.** Why they moved, and which segment drove them, is outside this analysis. Break GMV down by product, channel or customer segment, and check the marketing calendar and CRM for those two windows.
+>
+> Want me to re-run with a stricter or looser threshold? Looser flags more months (milder deviations); stricter flags only the most extreme. A seasonality-aware version is also available if GMV has a repeating annual shape.
 
-### Summary (prose — Step 3)
-For a business reader: plain and professional, no raw notation (no bare "σ", "z = 3.4", "3σ"). Read the anomaly results; don't render them as a table (the user sees the chart) unless asked.
+Then the conventions:
 
-Post an update with one sentence defining an anomaly under this method, then the findings:
+- **Register.** Business reader, plain and professional. No raw notation: no bare "σ", "z = 3.4", "3σ". `z` appears only as a spoken multiple, as above.
+- **Markup carries the scan.** A bold label opens each part; each finding leads with its date and value in bold, then a plain sentence for the assessment. No headings, no tables.
+- **The definition comes first**, with the grain, metric and `W` filled in.
+- **One line per flagged bucket, chronological**, each carrying the date, the value, the direction, and how far outside the band it fell in plain terms.
+- **The user has the chart.** Do not repeat the results as a table unless asked.
+- **Nothing flagged**: say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
+- **A date was named**: lead with the verdict on that bucket, unusual, normal, or not assessed for want of history, then the same list. The full series is still scanned.
+- **The closing pointer** appears only when something was flagged.
+- **The re-run offer goes last.** `k` is the only sensitivity control and is never asked upfront (values in `detect-anomaly-aql`). On accept, re-run Steps 2 to 4 with the new `k`.
 
-> *An anomaly is any <grain> whose value departs sharply from where its recent trend was heading — a change much larger or smaller than the metric's normal <grain>-to-<grain> movement over the prior <W> <grain>s.*
+## Resolving the spec
 
-Classify each bucket in the reporting window — **check in this exact order**:
-1. **Not enough history** — `z_score` is null (a lead-in bucket, `n_prior < W`): shown as context without a band; not assessed. `is_anomaly` returns `0` for these too — always check `z_score` nullness first, or you will misclassify lead-in buckets as normal.
-2. **Unusual** — `z_score` non-null AND `is_anomaly = 1`: actual broke above or below the expected trend band.
-3. **Normal** — `z_score` non-null AND `is_anomaly = 0`: moved in line with the trend.
+Produce one spec `{ dataset, M, T, granularity, filters, timeframe }`. **One fill pass, not a chart path and a typed path**: take each field from the chart when there is one, let the user's words override anything they spoke to ("…but over the last 3 years", "…just the West region"), then fall back to defaults, and ask only for what is still empty.
 
-Translate the statistics — describe the size of the surprise in plain terms (*"about <z> times its normal monthly swing"*), z only as a parenthetical.
+| Field | From the chart's Viz AML | Otherwise |
+|---|---|---|
+| `dataset` | the viz `dataset:` | a ranked measure search; ask if nothing matches |
+| `M` | the y-axis measure | the user's words; if a typed metric matches no measure, show the top-3 closest and ask |
+| `T` + `granularity` | the x-axis field and its `transformation` (`datetrunc month` → month) | `granularity` derived from `T` |
+| `filters` | `filter` / `filter_groups` / `conditions`, **excluding** the time-range filter | none |
+| `timeframe` | the chart's timeframe | per grain: `day`→90d, `week`→26w, `month`→24m, `quarter`→12q |
 
-No focus date (primary path):
-
-> **Found <N> unusual <grain>(s) in <metric label>** over **<reporting timeframe>**:
-> - **<date>** — <value>: **<above|below>** the expected trend (about <z>× its normal <grain> movement).
-> - … one bullet per flagged bucket, chronological
-
-If `N = 0`: *"No unusual values in <metric label> over <reporting timeframe> — every <grain> moved in line with its recent trend."*
-
-Focus date given: lead with the verdict on that bucket, then the same list.
-- Unusual: *"**<metric label> on <date> = <value>** is unusual — it broke **<above|below>** its recent trend (about <z>× the normal <grain> movement)."*
-- Normal: *"**<metric label> on <date> = <value>** moved in line with its recent trend — not unusual."*
-- Lead-in / no band: *"Not enough prior history to assess <date> — it's within the first <W> <grain>s, shown as context without a band."*
-
-Closing pointer (N ≥ 1): why an anomaly happened or which dimension drove it is out of scope — invite the user to investigate via a dimensional breakdown and business context (marketing calendar, CRM, recent news).
-
-Post-run override (offer last): *"Want me to re-run with a stricter or looser threshold? Looser flags more <grain>s (milder deviations); stricter flags only the most extreme. A seasonality-aware version (for weekly/annual patterns) is also available."* The threshold is `k` (looser = 2, stricter = 4; default 3) — the only sensitivity control, never asked upfront. On accept, re-run Steps 2–3 with the new `k`.
+- **More than one y-axis measure**: ask which to analyze (list them and wait), unless the user already named one.
+- **`M` is a viz-level `calculation`**, not a dataset measure: carry its `@aql` formula and inline it as `metric M = <formula>;` in the Step 2 query.
+- **The x-axis is not a time field**: this is not a time series. Ask for the metric and grain instead; do not proceed.
+- **A legend/breakdown**: drop it and analyze the total, unless the user explicitly asks per-segment (Conventions → *Out of scope*).
+- **No chart, and the metric cannot be parsed**, or `list_datasets()` is unsupported (dev mode): ask the user to name the dataset and metric explicitly. Do not proceed.
+- **Confirm only what you guessed** (*"I'll use `sales_orders` (measure `total_revenue`). Confirm, or name another."*), then wait. Fields read from the chart or stated by the user are accepted silently.
+- The timeframe resolved here is the **reporting** window. `detect-anomaly-aql` widens it for warm-up; those lead-in buckets are context on both charts and are never reported as findings.
 
 ## Conventions
-- **On an error, retry once, then fall back.** If a retry still fails: Step 2 → surface the error (don't pretend detection completed); Step 3 → fall back to the Step 2 table + prose. Never loop more than one retry per step.
-- **Titles.** `execute_aql` / `execute_viz` require a `title` (under ~60 chars; avoid "query 1"/"untitled"): the Step 2 anomaly results `execute_aql` → `<metric> anomaly results (<reporting timeframe>)`; the Step 3 anomaly chart `execute_viz` → `Anomaly detection: <metric> (<reporting timeframe>)`.
+- **On an error, retry once, then fall back.** Step 2: surface the error, never imply detection completed. Step 3: fall back to the Step 2 table plus prose. Never loop more than one retry per step.
+- **Titles.** `execute_aql` / `execute_viz` require a `title` (under ~60 chars; avoid "query 1"/"untitled"): Step 1 series chart → `<metric> by <grain> (<reporting timeframe>)`; Step 2 anomaly results → `<metric> anomaly results (<reporting timeframe>)`; Step 3 anomaly chart → `Anomaly detection: <metric> (<reporting timeframe>)`.
 
 ### Numeric formatting
 - Currency-like measures (label/name contains `revenue`, `cost`, `price`, `arr`, `mrr`, `gmv`, `amount`): `$` prefix, short suffix (`$500K`, `$1.2M`); use the dataset's stated currency symbol if metadata provides it.
 - Counts and rates: thousands separators (`1,234`); rates to two significant decimals (`3.42%`).
 - z-scores / multiples: one decimal place (`3.4`).
 
-### Edge cases
-
-| Situation | Behavior |
-|---|---|
-| Viz AML x-axis is not a time field | Not a time series — fall back to typed/ask for the metric + time grain. Don't proceed. |
-| Viz has more than one y-axis measure | Ask the user which single measure to analyze (list them); don't default to the first. Skip the ask only if the user already named one. |
-| Viz has a legend/breakdown | Collapse to the total (drop the legend) unless the user asks per-segment. |
-| Series too short even with the lead-in (starts inside the window) | Earliest buckets show without a band (`n_prior < W`); if < 8 usable points, stop with the insufficient-history message. |
-| Flat series (spread = 0) | `safe_divide` → `z_score` null; not flagged (never divide by zero). |
-| Non-negative metric, band dips below 0 | Rare (the band is around the trend, not the level), but clamp the *displayed* lower bound at 0 for non-negative metrics. |
-| `list_datasets()` unsupported (dev mode) or no chart + unparseable metric | Ask the user to name the dataset/metric explicitly. Do not proceed. |
-| User asks "why did this happen?" or "what dimension drove it?" | Reply: "I can flag which points broke from the trend, but identifying which dimension drove an anomaly — or its business cause — is outside this skill. Break the metric down by relevant dimensions in a dashboard, or check your marketing calendar / CRM / news for that window." |
-| User asks to "show the raw numbers" | Show the `execute_aql` anomaly results directly — `bucket`, `actual`, `expected`, `lower_bound`, `upper_bound`, `z_score`, `is_anomaly`. Never group/pivot rows by `is_anomaly`. |
+### Out of scope
+This skill says which points broke from the trend. It does not say why, and it does not attribute a break to a segment.
+- **"Why did this happen?" / "What dimension drove it?"** Reply: "I can flag which points broke from the trend, but identifying which dimension drove an anomaly, or its business cause, is outside this skill. Break the metric down by relevant dimensions in a dashboard, or check your marketing calendar / CRM / news for that window."
+- **A per-segment run.** Out of scope: one slice per analysis. Offer a separate run on the segment the user names.
+- **"Show the raw numbers."** Show the `execute_aql` anomaly results directly: `bucket`, `actual`, `expected`, `lower_bound`, `upper_bound`, `z_score`, `is_anomaly`. Never group or pivot rows by `is_anomaly`.
