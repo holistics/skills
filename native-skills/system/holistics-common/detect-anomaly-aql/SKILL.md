@@ -11,14 +11,18 @@ The expected band **follows the trend**. For each bucket `t` (`T` truncated to `
 - `expected` = previous actual **+ drift**, where drift = the trailing mean of `Δ` over the `W` buckets before `t`. This is the band's centre; it tilts with the trend.
 - `spread` = the trailing **stddev of `Δ`** over those `W` buckets.
 - `lower/upper_bound` = `expected ∓ k · spread`.
-- `z_score` = `(actual − expected) / spread` — is *this bucket's change* unusual versus the recent distribution of changes (stationary even when the level trends).
+- `z_score` = `(actual − expected) / spread`. Asks whether *this bucket's change* is unusual against the recent distribution of changes, which stays stationary even when the level trends.
 - `is_anomaly` = `1` when `abs(z_score) > k`, else `0`. `k` default 3 (looser 2, stricter 4).
 
-**Warm-up gate (required).** A bucket is only banded/flagged once it has a **full `W`-bucket window** of prior history. Partial-frame window stats return values (not null), so gate explicitly on `n_prior = window_count(...) ≥ W`: buckets with `n_prior < W` get **no band** and are **never flagged** — the leading `W` lead-in buckets are exactly these, shown as context.
+A flat window (`spread = 0`) gives `z_score` null through `safe_divide`, and those buckets are never flagged.
 
-**Use these W values exactly.** Only shrink W if the total available history is shorter than W+1 — and if you do, state the reason explicitly in your response. Never silently use a smaller W.
+The band follows the trend, not the calendar: there is no seasonal term, so a recurring calendar peak flags as an anomaly.
 
-Window `W` by grain — a whole number of cycles:
+**Warm-up gate (required).** A bucket is only banded and flagged once it has a **full `W`-bucket window** of prior history. Partial-frame window stats return values, not null, so gate explicitly on `n_prior = window_count(...) ≥ W`: buckets with `n_prior < W` get **no band** and are **never flagged**. The leading `W` lead-in buckets are exactly these, carried as context.
+
+**Use these W values exactly.** Shrink `W` only when the total available history is shorter than `W + 1`, and say so explicitly in your response when you do. Never silently use a smaller `W`.
+
+Window `W` by grain, a whole number of cycles:
 
 | Grain | `W` |
 |---|---|
@@ -31,9 +35,9 @@ If the series is shorter than `W + 1`, shrink `W` to about half the available hi
 
 ### Query
 
-Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the window for the grain, `k` = the sensitivity threshold (default 3), `<dataset>` = the dataset name, `<metric label>` = a readable label.
+Parameters from the caller: `M`, `T`, `grain`, `W`, `k`, `reporting` (the reporting timeframe in grains), `filters` (the dimensional filters, if any).
 
-`M`, `T`, `<grain>`, `W`, `k` are placeholders; the `-1..-1` range (previous bucket) is literal; every `window_*` call takes `order: T | <grain>() | asc(), partition: []`. Widen the timeframe filter by `W` buckets, and add any dimensional filters.
+The `-1..-1` range (previous bucket) is literal, and every `window_*` call takes `order: T | <grain>() | asc(), partition: []`. Widen the reporting timeframe by `W` buckets in the filter, and add the dimensional filters.
 
 Template:
 ```aql
@@ -71,8 +75,9 @@ explore {
 ```
 
 **Do not regress these:**
-- Count prior buckets with `window_count(M, -W..-1, …)` — **never** `window_sum(1, …)` (SQL-generation error).
-- The `n_prior ≥ W` gate is mandatory (partial windows return values, not null, and would false-flag the first `W` buckets).
+- Count prior buckets with `window_count(M, -W..-1, …)`, **never** `window_sum(1, …)` (SQL-generation error).
+- The `n_prior ≥ W` gate is mandatory. Partial windows return values, not null, and would false-flag the first `W` buckets.
 - `case(when: …, else: null)` is valid and is how the band is hidden in the lead-in.
-- The nested window (`window_stdev(m_delta, …)` where `m_delta` contains a window) compiles directly — one explore, no two-stage query.
-- `is_anomaly` must always return `0` or `1`, **never `null`** — the `else: 0` in the case expression is mandatory. It is plotted as a column on a 0..1 axis; nulls cause rendering gaps instead of clean zeros.
+- The nested window (`window_stdev(m_delta, …)` where `m_delta` contains a window) compiles directly: one explore, no two-stage query.
+- `is_anomaly` must always return `0` or `1`, **never `null`**. The `else: 0` is mandatory: it is plotted as a column on a 0..1 axis, and nulls cause rendering gaps instead of clean zeros.
+- `z_score` must be null whenever `n_prior < W`. The caller distinguishes unassessed buckets from normal ones by that null, since `is_anomaly` is `0` for both.
