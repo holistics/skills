@@ -79,5 +79,5 @@ explore {
 - The `n_prior ≥ W` gate is mandatory. Partial windows return values, not null, and would false-flag the first `W` buckets.
 - `case(when: …, else: null)` is valid and is how the band is hidden in the lead-in.
 - The nested window (`window_stdev(m_delta, …)` where `m_delta` contains a window) compiles directly: one explore, no two-stage query.
-- `is_anomaly` must always return `0` or `1`, **never `null`**. The `else: 0` is mandatory: it is plotted as a column on a 0..1 axis, and nulls cause rendering gaps instead of clean zeros.
+- `is_anomaly` must always return `0` or `1`, **never `null`**. The `else: 0` is mandatory: it is plotted as a column, and nulls cause rendering gaps instead of clean zeros.
 - `z_score` must be null whenever `n_prior < W`. The caller distinguishes unassessed buckets from normal ones by that null, since `is_anomaly` is `0` for both.

@@ -39,7 +39,7 @@ Keep it plain: no band, no annotations, nothing flagged. **A failure here does n
 
 Same series, plus the band and the flags. The Step 2 explore already returns every field this chart needs, so it is passed through untouched and no filters or timeframe are supplied again.
 
-1. `generate_viz(dataset_uname: <dataset>, aql: <the Step 2 explore, verbatim>, query: "Combination chart of <metric label> by <grain>: actual as a solid #255DD4 line; lower_bound and upper_bound as grey #9CA3AF dashed lines forming the expected band; is_anomaly as red #FCB8B8 columns on a secondary 0..1 right axis; x-axis is the <grain> bucket; format <metric label> as short-suffix currency like $500K; tooltips for expected, <metric label>, and z_score.")`
+1. `generate_viz(dataset_uname: <dataset>, aql: <the Step 2 explore, verbatim>, query: "Combination chart of <metric label> by <grain>: is_anomaly as red #FCB8B8 columns on the FIRST y-axis, 0..1 scale; actual as a solid #255DD4 line and lower_bound and upper_bound as grey #9CA3AF dashed lines, all three on the SECOND y-axis; x-axis is the <grain> bucket; format <metric label> as short-suffix currency like $500K; tooltips for expected, <metric label>, and z_score.")`
 2. Keep the structure `generate_viz` produced (axes, series, calculations); adjust decoration only.
 3. `execute_viz(dataset_uname: <dataset>, viz: <the adjusted viz>, title: …)`
 
@@ -48,6 +48,6 @@ On an error, feed the error text back into `generate_viz`'s `query` (it self-cor
 ### Do not regress
 - Pass only `dataset_uname`, `viz`, `title` to `execute_viz`. No `aql` property.
 - 6-digit hex only. An 8-digit alpha hex can be rejected.
-- `is_anomaly` belongs on a **secondary 0..1 right axis** as columns. On the main axis it is invisible against the metric's scale.
+- `is_anomaly` goes on the **first** y-axis (0..1) and the metric, `lower_bound` and `upper_bound` on the **second**. That order is what keeps the columns behind the lines.
 - Both charts cover `<reporting> + W`. Cropping the Step 1 chart to the reporting window alone makes the two charts disagree about where the series starts.
 - For a metric that cannot go negative, clamp the **displayed** lower bound at 0. The band sits around the trend rather than the level, so it can dip below zero.
