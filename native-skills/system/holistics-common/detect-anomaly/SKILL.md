@@ -99,6 +99,11 @@ Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those
 
 The band is what makes "three periods were unusual" checkable rather than asserted: it shows where each period was expected to land, how wide normal was at that moment, and which points fell outside. Draw it onto the same picture from Step 1.
 
+First, post the anomaly definition:
+> **What counts as unusual here.** An anomaly is any [grain] whose value departs sharply from where its recent trend was heading: a change much larger or smaller than [metric]'s normal [grain]-to-[grain] movement over the prior [W] [grains].
+
+Then draw the chart:
+
 ```
 /detect-anomaly-viz
 
@@ -137,9 +142,9 @@ Two patterns in the flagged set change what the summary can claim. Check both:
 
 A complete answer on the primary path (no focus date, two buckets flagged). The chart is not written, it is what `execute_viz` returned in Step 3; the prose below it is Step 4's:
 
-> ⟦ Step 3 anomaly chart renders here ⟧
+> ⟦ Step 3 anomaly definition post_update renders here ⟧
 >
-> **What counts as unusual here.** An anomaly is any month whose value departs sharply from where its recent trend was heading: a change much larger or smaller than GMV's normal month-to-month movement over the prior 12 months.
+> ⟦ Step 3 anomaly chart renders here ⟧
 >
 > **Found 2 unusual months in GMV, Jul 2023 to Aug 2024:**
 >
@@ -154,7 +159,6 @@ Then the conventions:
 
 - **Register.** Business reader, plain and professional. No raw notation: no bare "σ", "z = 3.4", "3σ". `z` appears only as a spoken multiple, as above.
 - **Markup carries the scan.** A bold label opens each part; each finding leads with its date and value in bold, then a plain sentence for the assessment. No headings, no tables.
-- **The definition comes first**, with the grain, metric and `W` filled in.
 - **One line per flagged bucket, chronological**, each carrying the date, the value, the direction, and how far outside the band it fell in plain terms.
 - **The user has the chart.** Do not repeat the results as a table unless asked.
 - **Nothing flagged**: say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
