@@ -42,7 +42,7 @@ Two charts and a prose summary.
 
 Four steps. Each is a move an analyst makes, and each closes with a `post_update` so the user follows the reasoning as it happens instead of receiving a verdict at the end. **Narrating is not pausing**: post and keep working. The only stop in the run is the measure question in Step 1.
 
-Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the window for the grain, `k` = the sensitivity threshold, `<dataset>` = the dataset name, `<metric label>` = a readable label.
+Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the baseline window, always 12, `k` = the sensitivity threshold, `<dataset>` = the dataset name, `<metric label>` = a readable label.
 
 ### Step 1: Establish the series
 
@@ -60,7 +60,6 @@ dataset: ...
 M: ...
 T: ...
 grain: ...
-W: ...
 reporting: ...
 metric label: ...
 filters: ...
@@ -69,7 +68,7 @@ filters: ...
 Read the returned rows for the three conditions that change what you can promise:
 - **Missing buckets** between the first and last. Gaps break the period-to-period comparison the method rests on.
 - **A final bucket still in progress.** A part-period value reads as a collapse. Exclude it, or say it is incomplete.
-- **Row count.** `detect-anomaly-aql` shrinks `W` or stops the run when history is short; either outcome must be said out loud.
+- **Row count.** A short series is not an error: it comes back unassessed rather than flagged. Say so instead of reporting that nothing was unusual.
 
 Then post: the metric, grain, slice and period as real dates; that the metric will be judged against its own recent history and the whole series scanned even if the user named a single date; and anything the three checks turned up.
 
@@ -77,7 +76,7 @@ Then post: the metric, grain, slice and period as real dates; that the metric wi
 
 Eyeballing the chart is not detection. A rule has to say what each period was expected to be, and how much deviation is normal for this particular metric.
 
-The rule: predict each period from where the last `W` periods of movement were heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. `detect-anomaly-aql` owns it, including the window sizes and the warm-up gate.
+The rule: predict each period from where the last `W` periods of movement were heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. `detect-anomaly-aql` owns it, including the baseline length and the full-window rule.
 
 Hand over the resolved parameters:
 
@@ -87,13 +86,12 @@ Hand over the resolved parameters:
 M: ...
 T: ...
 grain: ...
-W: ...
 k: ...
 reporting: ...
 filters: ...
 ```
 
-Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged. Then post the rule in the reader's terms, naming the `W` and `k` actually used.
+Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged. Then post the rule in the reader's terms, naming the baseline length and `k`.
 
 ### Step 3: Show the expectation, not just the verdict
 
@@ -118,7 +116,7 @@ Then post how to read it: the band is the expected range given the recent trend,
 
 ### Step 4: Read the result honestly
 
-A period that was never assessed carries `is_anomaly = 0` exactly like one that was assessed and found normal, and the warm-up buckets sit in the result set alongside real findings. Both read as "normal" unless checked for.
+A period that was never assessed carries `is_anomaly = 0` exactly like one that was assessed and found normal, and the lead-in buckets sit in the result set alongside real findings. Both read as "normal" unless checked for.
 
 Classify every bucket in the reporting window, **in this order**:
 1. **Not assessed.** `z_score` is null: a lead-in bucket without a full window of prior history. `is_anomaly` is `0` for these too, so testing it first misreports them as normal.
@@ -126,8 +124,8 @@ Classify every bucket in the reporting window, **in this order**:
 3. **Normal.** `z_score` non-null and `is_anomaly = 0`.
 
 Then check, and write the summary (Output → *Summary*):
-- **Only buckets inside the reporting timeframe are reported.** The warm-up buckets are context, never findings.
-- **The `W` and `k` stated are the ones used**, including a shrunk `W`.
+- **Only buckets inside the reporting timeframe are reported.** The lead-in buckets are context, never findings.
+- **`W` and `k` are the values from `detect-anomaly-aql`**, never adjusted for this series.
 - **The anomaly chart rendered**, or the fallback was taken and said so.
 - **No causal or dimensional claim** anywhere in the prose.
 - **Numbers formatted** per Conventions → *Numeric formatting*.
@@ -184,7 +182,7 @@ Produce one spec `{ dataset, M, T, granularity, filters, timeframe }`. **One fil
 - **A legend/breakdown**: drop it and analyze the total, unless the user explicitly asks per-segment (Conventions → *Out of scope*).
 - **No chart, and the metric cannot be parsed**, or `list_datasets()` is unsupported (dev mode): ask the user to name the dataset and metric explicitly. Do not proceed.
 - **Confirm only what you guessed** (*"I'll use `sales_orders` (measure `total_revenue`). Confirm, or name another."*), then wait. Fields read from the chart or stated by the user are accepted silently.
-- The timeframe resolved here is the **reporting** window. `detect-anomaly-aql` widens it for warm-up; those lead-in buckets are context on both charts and are never reported as findings.
+- The timeframe resolved here is the **reporting** window. `detect-anomaly-aql` opens the filter earlier to supply the lead-in; those buckets are context on both charts and are never reported as findings.
 
 ## Conventions
 - **On an error, retry once, then fall back.** Step 2: surface the error, never imply detection completed. Step 3: fall back to the Step 2 table plus prose. Never loop more than one retry per step.
