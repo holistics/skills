@@ -13,7 +13,7 @@ Invoked once per chart. `chart:` selects which; the caller supplies the rest.
 
 ### Series chart (Step 1)
 
-`chart: series`. Parameters: `dataset`, `M`, `T`, `grain`, `W`, `reporting` (the reporting timeframe in grains), `metric label`, `filters` (the dimensional filters, if any).
+`chart: series`. Parameters: `dataset`, `M`, `T`, `grain`, `reporting` (the reporting timeframe in grains), `metric label`, `filters` (the dimensional filters, if any). `W` is 12, per `detect-anomaly-aql`.
 
 The metric as it stands, nothing added. Span is `<reporting> + W` so it matches the Step 3 chart.
 
