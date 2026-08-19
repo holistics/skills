@@ -310,7 +310,12 @@ Ranked table of all confirmed dimensions, sorted by `dimension_driver_pct` desce
 |-----------|-------------|------------------------|
 | … | | |
 
-For the **Contribution to change** column, apply the same threshold rule as the per-segment display:
+For the **Contribution to change** column:
+
+> **Critical:** `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100`
+> The denominator is always `overall_delta_value` from Phase 2 (the metric's net change with no segment grouping). Never use the top segment's delta, the dimension's total, or any other value as the denominator. Using the wrong denominator will produce 100% or other nonsensical results.
+
+Apply the threshold rule:
 - If `|dimension_driver_pct| ≤ 100%`: show `[dimension_driver_pct]%`
 - If `|dimension_driver_pct| > 100%`: show `[N]× the net change` where [N] = round(|dimension_driver_pct| / 100, 1)
 
