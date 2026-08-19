@@ -236,7 +236,7 @@ Execute this once per dimension, in confirmed order. Complete the full phase —
 
 6. Compute `contribution_pct = delta_value / overall_delta_value × 100` for each segment using the scalar `overall_delta_value` from Phase 2.
 
-7. Compute and store `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100` — used to rank dimensions in Phase 4.
+7. Compute and store `top_segment_contribution_pct = top_driver_segment_delta_value / overall_delta_value × 100` — the contribution of the single top driver segment; used in the Phase 4 "Contribution to change" column and to rank dimensions.
 
 **Show:**
 
@@ -304,20 +304,21 @@ Opening heading and summary line:
 >
 > [Metric] [dropped/increased] by [pct_change]% (from [comparison_value] to [base_value], [±abs(delta)]) between [comparison period] and [base period].
 
-Ranked table of all confirmed dimensions, sorted by `dimension_driver_pct` descending. Successfully analyzed dimensions appear first; failed dimensions appear at the bottom:
+Ranked table of all confirmed dimensions, sorted by `top_segment_contribution_pct` descending. Successfully analyzed dimensions appear first; failed dimensions appear at the bottom:
 
 | Dimension | Top Segment | Contribution to change |
 |-----------|-------------|------------------------|
 | … | | |
 
-For the **Contribution to change** column:
+For the **Contribution to change** column, show `top_segment_contribution_pct` — the contribution of the single top driver segment:
 
-> **Critical:** `dimension_driver_pct = sum(delta_value for all driver_of_change segments) / overall_delta_value × 100`
-> The denominator is always `overall_delta_value` from Phase 2 (the metric's net change with no segment grouping). Never use the top segment's delta, the dimension's total, or any other value as the denominator. Using the wrong denominator will produce 100% or other nonsensical results.
+> `top_segment_contribution_pct = top_driver_segment_delta_value / overall_delta_value × 100`
+>
+> **Critical:** The denominator is always `overall_delta_value` from Phase 2 (the metric's net change with no segment grouping). Never use the top segment's own delta as the denominator — that always produces 100%.
 
 Apply the threshold rule:
-- If `|dimension_driver_pct| ≤ 100%`: show `[dimension_driver_pct]%`
-- If `|dimension_driver_pct| > 100%`: show `[N]× the net change` where [N] = round(|dimension_driver_pct| / 100, 1)
+- If `|top_segment_contribution_pct| ≤ 100%`: show `[top_segment_contribution_pct]%`
+- If `|top_segment_contribution_pct| > 100%`: show `[N]× the net change` where [N] = round(|top_segment_contribution_pct| / 100, 1)
 
 **Conditionally include (one line each):**
 
