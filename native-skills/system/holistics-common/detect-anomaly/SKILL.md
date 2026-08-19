@@ -95,7 +95,7 @@ Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those
 
 ### Step 3: Show the expectation, not just the verdict
 
-The band is what makes "three periods were unusual" checkable rather than asserted: it shows where each period was expected to land, how wide normal was at that moment, and which points fell outside. Draw it onto the same picture from Step 1.
+The chart is the evidence for the verdict, whichever way the verdict goes: it shows where each period was expected to land, how wide normal was at that moment, and whether the series stayed inside. **A run that flags nothing needs it as much as one that flags three.** Without the band, "nothing was unusual" is an assertion the reader has no way to check. Draw it onto the same picture from Step 1.
 
 First, post the anomaly definition:
 > **What counts as unusual here.** An anomaly is any [grain] whose value departs sharply from where its recent trend was heading: a change much larger or smaller than [metric]'s normal [grain]-to-[grain] movement over the prior [W] [grains].
@@ -126,7 +126,7 @@ Classify every bucket in the reporting window, **in this order**:
 Then check, and write the summary (Output → *Summary*):
 - **Only buckets inside the reporting timeframe are reported.** The lead-in buckets are context, never findings.
 - **`W` and `k` are the values from `detect-anomaly-aql`**, never adjusted for this series.
-- **The anomaly chart rendered**, or the fallback was taken and said so.
+- **The anomaly chart was drawn**, including when nothing was flagged, or the fallback was taken and said so.
 - **No causal or dimensional claim** anywhere in the prose.
 - **Numbers formatted** per Conventions → *Numeric formatting*.
 
@@ -159,7 +159,7 @@ Then the conventions:
 - **Markup carries the scan.** A bold label opens each part; each finding leads with its date and value in bold, then a plain sentence for the assessment. No headings, no tables.
 - **One line per flagged bucket, chronological**, each carrying the date, the value, the direction, and how far outside the band it fell in plain terms.
 - **The user has the chart.** Do not repeat the results as a table unless asked.
-- **Nothing flagged**: say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
+- **Nothing flagged**: draw the chart anyway, then say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
 - **A date was named**: lead with the verdict on that bucket, unusual, normal, or not assessed for want of history, then the same list. The full series is still scanned.
 - **The closing pointer** appears only when something was flagged.
 - **The re-run offer goes last.** `k` is the only sensitivity control and is never asked upfront (values in `detect-anomaly-aql`). On accept, re-run Steps 2 to 4 with the new `k`.
