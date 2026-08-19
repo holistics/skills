@@ -125,6 +125,7 @@ Classify every bucket in the reporting window, **in this order**:
 
 Then check, and write the summary (Output → *Summary*):
 - **Only buckets inside the reporting timeframe are reported.** The lead-in buckets are context, never findings.
+- **The claim covers what was assessed, not what was asked for.** If any bucket in the period came back with a null `z_score`, the summary names the span actually judged (Output → *Summary*).
 - **`W` and `k` are the values from `detect-anomaly-aql`**, never adjusted for this series.
 - **The anomaly chart was drawn**, including when nothing was flagged, or the fallback was taken and said so.
 - **No causal or dimensional claim** anywhere in the prose.
@@ -160,6 +161,8 @@ Then the conventions:
 - **One line per flagged bucket, chronological**, each carrying the date, the value, the direction, and how far outside the band it fell in plain terms.
 - **The user has the chart.** Do not repeat the results as a table unless asked.
 - **Nothing flagged**: draw the chart anyway, then say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
+- **Nothing assessed**: when no bucket came back with a non-null `z_score`, the series was too short for the method to judge anything. Say that, never that nothing was unusual: *"Not enough history to assess GMV. The method needs 12 months of movement behind a month before it can judge it, and this series starts in Jan 2024."*
+- **Partly assessed**: when only some of the period was judged, name the span that was. *"Assessed GMV from Jul 2024 onward; the months before it had too little history behind them."* Findings and the "nothing unusual" claim both cover that span only, never the full period.
 - **A date was named**: lead with the verdict on that bucket, unusual, normal, or not assessed for want of history, then the same list. The full series is still scanned.
 - **The closing pointer** appears only when something was flagged.
 - **The re-run offer goes last.** `k` is the only sensitivity control and is never asked upfront (values in `detect-anomaly-aql`). On accept, re-run Steps 2 to 4 with the new `k`.
