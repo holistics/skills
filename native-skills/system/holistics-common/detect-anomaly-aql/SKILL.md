@@ -23,7 +23,7 @@ For each bucket `t` (`T` truncated to `<grain>`), over the `W` buckets before it
 
 **A full window is required.** Check `n_prior = window_count(...) >= W`, so a bucket is banded and flagged only once it has `W` buckets behind it, and gets `z_score` null otherwise. Without that check the opening `W` buckets false-flag, because a window function over a partial frame returns a value rather than null. Those opening buckets are the **lead-in**: carried for context, never judged.
 
-The gate is also what makes a short series safe, with no branching and no arithmetic: too little history returns nulls rather than an error. So read the result instead of predicting it. If no bucket in the reporting window comes back with a non-null `z_score`, there was not enough history to assess anything, and the answer says that rather than that nothing was unusual.
+The gate is also what makes a short series safe, with no branching and no arithmetic: too little history returns nulls rather than an error. Read the result instead of predicting it; the caller reports what came back assessed.
 
 ### Query
 
