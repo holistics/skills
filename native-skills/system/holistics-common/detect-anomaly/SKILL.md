@@ -1,7 +1,7 @@
 ---
 name: detect-anomaly
 description: |-
-  Detect statistical anomalies across a metric's history and visualize them: unusual spikes, drops, and deviations flagged against an expected range built from the metric's own recent history.
+  Detect statistical anomalies across a metric's history and visualize them: unusual spikes, drops, and deviations flagged against an expected range built from the metric's own history.
 
   Use when the user wants to find or check for unusual values in a metric. Trigger words include anomaly, unusual, spike, drop, dip, outlier, "out of the ordinary", "anything weird". A specific date is optional; the skill always scans the whole series.
 
@@ -11,13 +11,13 @@ description: |-
 user-invocable: false
 ---
 
-Build an expected band from a metric's recent history, flag the buckets that break out of it, and chart the result. This skill identifies which points are unusual, not why they moved (Conventions → *Out of scope*).
+Build an expected band from a metric's history, flag the buckets that break out of it, and chart the result. This skill identifies which points are unusual, not why they moved (Conventions → *Out of scope*).
 
 Two sub-skills carry the mechanics: **`detect-anomaly-aql`** owns the method and the query, **`detect-anomaly-viz`** owns the chart.
 
 ## What a good input looks like
 
-Anomaly detection compares a metric against its own recent history to determine whether a value is far from what the preceding periods would suggest. The analysis needs one measure, the date field and grain it is measured on, and enough prior history to establish what normal movement looks like.
+Anomaly detection compares a metric against its own history to determine whether a value is far from what the preceding periods would suggest. The analysis needs one measure, the date field and grain it is measured on, and enough prior history to establish what normal movement looks like.
 
 A task is fully specified when you can answer:
 
@@ -25,7 +25,7 @@ A task is fully specified when you can answer:
 2. **Which date field, and at what grain.** Day, week, month, or quarter. The grain sets what can be found: a spike lasting two days does not show up in monthly buckets, and a metric recorded monthly cannot be read daily.
 3. **Which slice of the data.** The segment in view, if any. The result describes the series you selected, not the business as a whole: one region collapsing can leave the company total flat, and a flat total can hide two segments moving in opposite directions. One slice per analysis; breaking the metric down by a dimension is a different question.
 4. **Which period the findings cover.** Flagged buckets are reported only inside this period. Earlier buckets are shown as context, because the method needs prior history before it can judge a bucket.
-5. **Whether the user has a specific date in question.** A named date does not narrow the analysis; the whole series is always scanned. It changes only what the answer leads with.
+5. **Whether the user has a specific date in question.** A named date does not narrow the analysis; the whole series is always scanned. It changes what the answer leads with — and, when that bucket falls in the lead-in, whether there is a verdict to lead with at all.
 
 The user rarely supplies all five, and often has not asked for anomaly detection by name.
 
@@ -42,7 +42,7 @@ One chart and a prose summary.
 
 Four steps. Each is a move an analyst makes, and each closes with a `post_update` so the user follows the reasoning as it happens instead of receiving a verdict at the end. **Narrating is not pausing**: post and keep working. The only stop in the run is the measure question in Step 1.
 
-Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `W` = the baseline window, always 12, `k` = the sensitivity threshold, `<dataset>` = the dataset name, `<metric label>` = a readable label.
+Placeholders: `M` = the metric measure (e.g. `gmv`), `T` = the bound time dimension (e.g. `bq_fct_order_items.created_date`), `<grain>` = the time grain, `k` = the sensitivity threshold, `<dataset>` = the dataset name, `<metric label>` = a readable label.
 
 ### Step 1: Establish the series
 
@@ -54,7 +54,7 @@ Post the metric, grain, slice and period as real dates, and that the whole serie
 
 ### Step 2: Run the detection
 
-The rule: predict each period from where the last `W` periods of movement were heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. `detect-anomaly-aql` owns it, including the baseline length and the full-window rule.
+The rule: predict each period from where the metric's movement so far was heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. There is no baseline length to choose — every period is judged against everything before it. `detect-anomaly-aql` owns the method and the query.
 
 Hand over the resolved parameters:
 
@@ -71,12 +71,13 @@ filters: ...
 
 Run `execute_aql` on what comes back (title per Conventions → *Titles*). Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged.
 
-Read the returned rows for the three conditions that change what you can promise:
+Read the returned rows for the four conditions that change what you can promise:
 - **Missing buckets** between the first and last. Gaps break the period-to-period comparison the method rests on.
 - **A final bucket still in progress.** A part-period value reads as a collapse. Exclude it, or say it is incomplete.
 - **Row count.** A short series is not an error: it comes back unassessed rather than flagged. Say so instead of reporting that nothing was unusual.
+- **The focus bucket's `verdict`, when the user pointed at one.** `not assessed` means the run cannot answer the question it was asked, however much of the rest of the series came back judged. Read it here rather than while writing the summary: it decides what the answer leads with.
 
-Then post the rule in the reader's terms, naming the baseline length and `k`, and anything the three checks turned up.
+Then post the rule in the reader's terms, naming `k`, and anything the four checks turned up.
 
 ### Step 3: Draw the anomaly chart
 
@@ -94,27 +95,32 @@ metric label: ...
 ```
 
 Then post the anomaly definition, so it lands with the band already on screen:
-> **What counts as unusual here.** An anomaly is any [grain] whose value departs sharply from where its recent trend was heading: a change much larger or smaller than [metric]'s normal [grain]-to-[grain] movement over the prior [W] [grains].
+> **What counts as unusual here.** An anomaly is any [grain] whose value departs sharply from where the trend was heading: a change much larger or smaller than [metric]'s normal [grain]-to-[grain] movement across its history up to that point.
 
-Then post how to read it: the band is the expected range given the recent trend, it widens when movement has been erratic, and the red columns mark what broke out.
+Then post how to read it: the band is the expected range given the trend so far, it widens when movement has been erratic, and the red columns mark what broke out.
 
 ### Step 4: Write the summary
 
-`is_anomaly = 0` means two different things — a normal bucket *and* a lead-in bucket never assessed (too little history behind it). They look identical unless you check `z_score` first, so classify each bucket in the reporting window in this order:
-1. **Not assessed** — `z_score` is null. Context, never a finding.
-2. **Unusual** — `z_score` non-null and `is_anomaly = 1`. These are the findings.
-3. **Normal** — `z_score` non-null and `is_anomaly = 0`.
+Read `verdict`. It is one field per bucket carrying one of three words, and it is the only thing that decides how a bucket is treated:
 
-Write the summary (Output → *Summary*) covering only what was assessed, not what was asked for: if any bucket in the period came back with a null `z_score`, name the span actually judged. Lead-in buckets are context, never findings.
+| `verdict` | What it is |
+|---|---|
+| `unusual` | A finding. These are what the summary lists. |
+| `normal` | Assessed, nothing to report. |
+| `not assessed` | Context, never a finding — too little history behind it, or no variation to judge against. |
+
+Do not infer any of this from `z_score` or `anomaly_flag`. `anomaly_flag` is `0` for both `normal` and `not assessed`, which is exactly the confusion `verdict` exists to remove; it is the chart's column series, not an input to the prose. `z_score` is only for phrasing how far a finding fell outside the band.
+
+Write the summary (Output → *Summary*) covering only what was assessed, not what was asked for: if any bucket in the period came back `not assessed`, name the span actually judged.
 
 Before writing, check:
-- `W` and `k` are the values from `detect-anomaly-aql`, never adjusted for this series.
+- `k` is the value from `detect-anomaly-aql`, never adjusted for this series.
 - The anomaly chart was drawn (even when nothing was flagged), or the fallback was taken and said so.
 - No causal or dimensional claim anywhere in the prose. Numbers per Conventions → *Numeric formatting*.
 
 Two patterns in the flagged set change what the summary can claim:
 - **Same calendar position** (same month each year, same weekday). The method has no seasonal term, so a recurring peak flags as an anomaly. Say so, and offer the seasonality-aware re-run.
-- **Two flags within `W` buckets of each other.** The first widens the band after it, so the second was judged against a looser threshold and anything following it may have been missed.
+- **A flag early in the series.** The baseline is every prior bucket, so an unusual value widens the band for everything after it and never falls back out. Anything milder later was judged against a looser threshold and may have been missed. Say so whenever the first flag lands well before the others.
 
 ## Output
 
@@ -141,10 +147,12 @@ Then the conventions:
 - **Markup carries the scan.** A bold label opens each part; each finding leads with its date and value in bold, then a plain sentence for the assessment. No headings, no tables.
 - **One line per flagged bucket, chronological**, each carrying the date, the value, the direction, and how far outside the band it fell in plain terms.
 - **The user has the chart.** Do not repeat the results as a table unless asked.
-- **Nothing flagged**: draw the chart anyway, then say so and name the period. *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with its recent trend."*
-- **Nothing assessed**: when no bucket came back with a non-null `z_score`, the series was too short for the method to judge anything. Say that, never that nothing was unusual: *"Not enough history to assess GMV. The method needs 12 months of movement behind a month before it can judge it, and this series starts in Jan 2024."*
-- **Partly assessed**: when only some of the period was judged, name the span that was. *"Assessed GMV from Jul 2024 onward; the months before it had too little history behind them."* Findings and the "nothing unusual" claim both cover that span only, never the full period.
-- **A date was named**: lead with the verdict on that bucket, unusual, normal, or not assessed for want of history, then the same list. The full series is still scanned.
+- **Report the assessed span, and no more.** The assessed span is the buckets whose `verdict` is not `not assessed`. Name it whenever it differs from the period that was asked for; findings and any "nothing unusual" claim cover that span only. The chart ships first in every case. Four shapes fall out of the one rule:
+  - *Fully assessed, nothing flagged* — *"No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with the trend up to it."*
+  - *Partly assessed* — *"Assessed GMV from Jul 2024 onward; the months before it had too little history behind them."*
+  - *Nothing assessed* — every bucket came back `not assessed`. *"Not enough history to assess GMV. The method needs a few months of movement behind a month before it can judge it, and this series starts in Nov 2025."* Never that nothing was unusual. When the cause is a flat series rather than a short one, say that instead: *"GMV held at exactly $40K every month, so there is no variation to judge a month against."*
+  - *A named date outside the assessed span* — lead with that, then the list for what was assessed: *"I can't judge Feb 2026 — it is one of the opening months of the series, and the method needs a few months of movement behind a month before it can judge it. GMV starts in Jan 2026."*
+- **A named date inside the assessed span**: lead with the verdict on that bucket, unusual or normal, then the same list. The full series is scanned either way.
 - **The closing pointer** appears only when something was flagged.
 - **The re-run offer goes last.** `k` is the only sensitivity control and is never asked upfront (values in `detect-anomaly-aql`). On accept, re-run Steps 2 to 4 with the new `k`.
 
@@ -166,7 +174,7 @@ Produce one spec `{ dataset, M, T, granularity, filters, timeframe }`. **One fil
 - **A legend/breakdown**: drop it and analyze the total, unless the user explicitly asks per-segment (Conventions → *Out of scope*).
 - **No chart, and the metric cannot be parsed**, or `list_datasets()` is unsupported (dev mode): ask the user to name the dataset and metric explicitly. Do not proceed.
 - **Confirm only what you guessed** (*"I'll use `sales_orders` (measure `total_revenue`). Confirm, or name another."*), then wait. Fields read from the chart or stated by the user are accepted silently.
-- The timeframe resolved here is the **reporting** window. `detect-anomaly-aql` opens the filter earlier to supply the lead-in; those buckets are context on the chart and are never reported as findings.
+- The timeframe resolved here is the **reporting** window: what the findings cover. `detect-anomaly-aql` queries the series from its start regardless, because the baseline is every prior bucket; the buckets before the reporting window are context on the chart and are never reported as findings.
 
 ## Conventions
 - **On an error, retry once, then fall back.** Step 2: surface the error, never imply detection completed. Step 3: fall back to the Step 2 table plus prose. Never loop more than one retry per step.
@@ -181,4 +189,4 @@ Produce one spec `{ dataset, M, T, granularity, filters, timeframe }`. **One fil
 This skill says which points broke from the trend. It does not say why, and it does not attribute a break to a segment.
 - **"Why did this happen?" / "What dimension drove it?"** Reply: "I can flag which points broke from the trend, but identifying which dimension drove an anomaly, or its business cause, is outside this skill. Break the metric down by relevant dimensions in a dashboard, or check your marketing calendar / CRM / news for that window."
 - **A per-segment run.** Out of scope: one slice per analysis. Offer a separate run on the segment the user names.
-- **"Show the raw numbers."** Show the `execute_aql` anomaly results directly: `bucket`, `actual`, `expected`, `lower_bound`, `upper_bound`, `z_score`, `is_anomaly`. Never group or pivot rows by `is_anomaly`.
+- **"Show the raw numbers."** Show the `execute_aql` anomaly results directly: `bucket`, `actual`, `expected`, `lower_bound`, `upper_bound`, `z_score`, `verdict`. Drop `anomaly_flag` — it duplicates `verdict` for the chart's benefit. Never group or pivot rows by `verdict`.
