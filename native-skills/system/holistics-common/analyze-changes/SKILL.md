@@ -118,6 +118,14 @@ Once the sub-skill's prose verdict is visible, output the following in this exac
 - If within normal range:
   `This falls within the expected range based on historical patterns — it may just be regular variation, so there may not be much to act on.`
 
+**2b. One or two plain sentences explaining how to read the chart above:**
+
+- If anomalous (focus period IS a red column):
+  `In the chart above, [base_period] is one of the red columns — that's where the anomaly check flagged it as breaking from the historical trend. Any other red columns are separate periods the full-series scan also flagged.`
+
+- If within normal range (focus period is NOT highlighted):
+  `In the chart above, [base_period] sits inside the shaded expected band — it isn't one of the red columns. The red columns mark other periods the full-series scan flagged as historically unusual; they're not related to the change you're asking about.`
+
 **3. The Stage 1 Summary Block as plain markdown** — output these fields as plain text (this is the handoff marker for Stage 2 detection):
 
 ---
