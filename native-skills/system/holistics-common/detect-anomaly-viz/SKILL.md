@@ -18,8 +18,8 @@ Parameters: `dataset`, `aql` (the Step 2 explore, verbatim), `grain`, `metric la
 The series, plus the band and the flags. The Step 2 explore already returns every field this chart needs, so it is passed through untouched and no filters or timeframe are supplied again.
 
 1. `generate_viz(dataset_uname: <dataset>, aql: <the Step 2 explore, verbatim>, query: "Combination chart of <metric label> by <grain>: anomaly_flag as red #FCB8B8 columns on the FIRST y-axis, 0..1 scale; actual as a solid #255DD4 line and lower_bound and upper_bound as grey #9CA3AF dashed lines, all three on the SECOND y-axis; x-axis is the <grain> bucket; format <metric label> as short-suffix currency like $500K; tooltips for expected, <metric label>, and z_score.")`
-2. Keep the structure `generate_viz` produced (axes, series, calculations); adjust decoration only.
-3. `execute_viz(dataset_uname: <dataset>, viz: <the adjusted viz>, title: …)`
+2. Use the viz `generate_viz` produced as-is. Do not adjust anything.
+3. `execute_viz(dataset_uname: <dataset>, viz: <the viz from generate_viz, unchanged>, title: …)`
 
 On an error, feed the error text back into `generate_viz`'s `query` (it self-corrects from prior errors) and retry once. If it still fails, fall back to the Step 2 table plus prose. **That is the only permitted reason to ship without this chart.**
 
