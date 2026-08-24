@@ -83,7 +83,7 @@ Then post the rule in the reader's terms, naming `k`, and anything the four chec
 
 Draw it even when nothing is flagged: without the band, "nothing was unusual" is an assertion the reader has no way to check. This is the run's only chart, so it carries the series as well as the band.
 
-Draw the chart first:
+**Delegate this step to a sub-agent.** Do not draw the chart yourself. Hand off:
 
 ```
 /detect-anomaly-viz
