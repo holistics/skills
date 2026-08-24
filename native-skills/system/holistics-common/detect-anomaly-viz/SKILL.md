@@ -27,6 +27,7 @@ On an error, feed the error text back into `generate_viz`'s `query` (it self-cor
 - Pass only `dataset_uname`, `viz`, `title` to `execute_viz`. No `aql` property.
 - 6-digit hex only. An 8-digit alpha hex can be rejected.
 - `anomaly_flag` goes on the **first** y-axis (0..1) and the metric, `lower_bound` and `upper_bound` on the **second**. That order is what keeps the columns behind the lines.
+- Do not render `expected` as a line, bar, or point series. Tooltip only.
 - Chart `anomaly_flag`, never `verdict`. `verdict` is a text field for the prose; it has no numeric series to plot.
 - The chart covers everything the Step 2 explore returned. Cropping to the reporting window hides the lead-in the band needs to form, and shows the series starting later than the results do. Do not re-filter here: the explore's own range is what its `expected`, `spread` and `z_score` were computed against.
 - For a metric that cannot go negative, clamp the **displayed** lower bound at 0. The band sits around the trend rather than the level, so it can dip below zero.
