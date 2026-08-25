@@ -54,10 +54,7 @@ Post the metric, grain, slice and period as real dates, and that the whole serie
 
 ### Step 2: Run the detection
 
-The rule: predict each period from where the metric's movement so far was heading, then judge the gap between actual and prediction against how much this metric usually moves period to period. There is no baseline length to choose — every period is judged against everything before it. `detect-anomaly-aql` owns the method and the query.
-
-**Delegate this step to a sub-agent.** Do not run the query yourself. Hand off:
-
+Brief:
 ```
 /detect-anomaly-aql
 
@@ -69,7 +66,10 @@ reporting: ...
 filters: ...
 ```
 
-The sub-agent invokes `detect-anomaly-aql` to get the query, then runs `execute_aql` (title per Conventions → *Titles*). Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged.
+Execution:
+* Delegate this step to a sub-agent. The sub-agent invokes `detect-anomaly-aql` to get the query, then runs `execute_aql` (title per Conventions → *Titles*).
+
+Those are the **anomaly results**, the summary's source of truth; the AQL itself goes to Step 3 unchanged.
 
 Read the returned rows for the four conditions that change what you can promise:
 - **Missing buckets** between the first and last. Gaps break the period-to-period comparison the method rests on.
@@ -83,8 +83,7 @@ Then post the rule in the reader's terms, naming `k`, and anything the four chec
 
 Draw it even when nothing is flagged: without the band, "nothing was unusual" is an assertion the reader has no way to check. This is the run's only chart, so it carries the series as well as the band.
 
-**Delegate this step to a sub-agent.** Do not draw the chart yourself. Hand off:
-
+Brief:
 ```
 /detect-anomaly-viz
 
@@ -94,7 +93,8 @@ grain: ...
 metric label: ...
 ```
 
-The sub-agent invokes `detect-anomaly-viz` to get the viz spec, then runs `generate_viz`.
+Execution:
+* Delegate this step to a sub-agent. The sub-agent invokes `detect-anomaly-viz` to get the viz spec, then runs `generate_viz`.
 
 Then post the anomaly definition, so it lands with the band already on screen:
 > **What counts as unusual here.** An anomaly is any [grain] whose value departs sharply from where the trend was heading: a change much larger or smaller than [metric]'s normal [grain]-to-[grain] movement across its history up to that point.
