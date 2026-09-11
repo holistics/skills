@@ -63,7 +63,7 @@ Evaluate the returned rows for conditions that impact the final report:
 * **Missing buckets:** Gaps break period-to-period comparisons.
 * **In-progress final bucket:** A partial period reads as a false collapse. Exclude or flag it.
 * **Row count:** A short series returns as unassessed rather than flagged. State this clearly.
-* **Selected bucket's `verdict`:** `not assessed` means the run cannot evaluate the specific focus date.
+* **Selected bucket:** If its `verdict` is `not assessed`, it has fewer than 6 earlier buckets, or it is still in progress, the summary opens with **Cannot decide** (Step 4).
 
 Post the baseline rule naming `k`, along with any flags from these four checks.
 
@@ -90,29 +90,27 @@ Briefly explain that the band represents the expected range, it widens during er
 
 ### Step 4: Write the summary
 
-The summary answers the user's question: is the selected bucket unusual? It has three parts, in this order, and nothing after them.
+The summary answers the user's question: is the selected bucket an anomaly? It has three parts, in this order, and nothing after them.
 
-**1. The verdict.** One bold sentence on the selected bucket, followed by its numbers. Take it from that bucket's `verdict`. Do not infer it from `z_score` or `anomaly_flag`.
+**1. The verdict line.** It opens with one of three labels. Check the rows top to bottom and use the first that matches. Do not infer the label from `z_score` or `anomaly_flag` alone.
 
-| `verdict` | Verdict sentence | Followed by |
+| When | Label | Verdict line |
 | --- | --- | --- |
-| `unusual` | **Aug 2026 is unusual.** | `actual`, the direction, the expected range (`lower_bound` to `upper_bound`), and `z_score` as a multiple: "GMV was $2.3M, below the expected range of $2.5M to $2.7M (about 7.0× its normal monthly movement)." |
-| `normal` | **Jun 2026 is within the expected range.** | `actual` and the expected range: "GMV was $2.1M; the expected range was $1.9M to $2.2M." |
-| `not assessed` | **Can't judge Feb 2026.** | Nothing. The reason follows in part 2. |
+| It is still in progress. | ⚠️ **Cannot decide** | ⚠️ **Cannot decide: Sep 2026 isn't finished.** It has 11 of 30 days so far, so its $954K can't be compared with full months. |
+| It has fewer than 6 earlier buckets. This covers every `not assessed` bucket at the start of the series. | ⚠️ **Cannot decide** | ⚠️ **Cannot decide: Apr 2026 has too little history.** GMV starts in Jan 2026, and the check needs at least 6 earlier months. |
+| Its `verdict` is `not assessed` for any other reason: its `lower_bound` equals its `upper_bound`, so the metric did not move. | ⚠️ **Cannot decide** | ⚠️ **Cannot decide: MRR hasn't moved.** It was exactly $40K every month before Aug 2026, so there is no normal movement to compare against. |
+| Its `verdict` is `unusual`. | 🔴 **Anomaly found** | 🔴 **Anomaly found: Aug 2026.** GMV was $2.3M, below the expected $2.5M to $2.7M. That gap is about 7 times a typical month's swing. |
+| Its `verdict` is `normal`, and `abs(z_score)` is at least `k` − 1. | 🟢 **Anomaly not found** | 🟢 **Anomaly not found: Apr 2026, but it's close.** GMV was $2.0M, just inside the expected $1.9M to $3.1M. If an earlier bucket is `unusual`, add: "The range is wider than usual because of the Nov 2025 spike." |
+| Its `verdict` is `normal`. | 🟢 **Anomaly not found** | 🟢 **Anomaly not found: Jun 2026.** GMV was $2.1M, within the expected $1.9M to $2.2M. |
 
-A bucket still in progress is always **Can't judge**, whatever its `verdict` says.
+The numbers are `actual` and the expected range (`lower_bound` to `upper_bound`). For **Anomaly found**, add the direction (below or above) and `z_score` as a multiple of a typical bucket's swing.
 
-**2. The reason, when an edge case applies.** When any of these is true for the selected bucket, add up to two of them, most relevant first. Use the wording below with the real dates and values. Add nothing when none applies.
+**2. The reason, when an edge case applies.** Only after 🔴 or 🟢. When any of these is true for the selected bucket, add up to two of them, most relevant first. Use the wording below with the real dates and values. Add nothing when none applies.
 
 | When | Say |
 | --- | --- |
-| It is one of the first three buckets of the series. | "GMV starts in Jan 2026, and the check needs 3 earlier months before it can judge one." |
-| Its `lower_bound` equals its `upper_bound`: the metric did not move. | "GMV was exactly $40K every month, so there is no movement to compare against." |
-| It is still in progress. | "Sep 2026 has 11 of 30 days so far, so its value isn't comparable yet." |
 | The bucket before it is missing. | "Mar and Apr 2026 have no data, so this compares May with Feb: three months of change counted as one." |
 | It is `unusual`, and the bucket before it is `unusual` in the opposite direction. | "This is GMV returning after the Nov 2025 spike, not a separate event." |
-| It is `normal`, and `abs(z_score)` is at least `k` − 1. | "It is 2.8× its normal movement, just under the 3× cut-off." If an earlier bucket is `unusual`, add: "The range is wider than usual because of the Nov 2025 spike." |
-| It is judged with fewer than 6 earlier buckets behind it. | "Only 4 earlier months back this, so the expected range is still rough and small moves can stand out." |
 | Another bucket at the same calendar position (same month of the year, quarter, or weekday) is `unusual`. | "Dec 2023 and Dec 2024 were also flagged; this may be a yearly pattern the check doesn't account for." |
 
 **3. Other flags.** One line naming every other `unusual` bucket in the results, earliest first, so every red column on the chart is accounted for: "The chart also flags Dec 2023, Jan 2024 and Dec 2024." Name up to five, then "and N more". Leave the line out when there are none. Give no values or multiples for these unless the user asks.
@@ -129,28 +127,26 @@ Before writing, check:
 
 Three complete summaries. The Step 3 definition and chart render above each one.
 
-An unusual bucket with a reason and another flag:
+An anomaly with a reason and another flag:
 
-> **Dec 2025 is unusual.** GMV was $2.2M, below the expected range of $2.3M to $3.2M (about 3.4× its normal monthly movement).
+> 🔴 **Anomaly found: Dec 2025.** GMV was $2.2M, below the expected $2.3M to $3.2M. That gap is about 3.4 times a typical month's swing.
 >
 > This is GMV returning after the Nov 2025 spike, not a separate event.
 >
 > The chart also flags Nov 2025.
 
-A normal bucket close to the cut-off:
+No anomaly, but close to the cut-off:
 
-> **Apr 2026 is within the expected range.** GMV was $2.0M; the expected range was $1.9M to $3.1M.
->
-> It is 2.8× its normal movement, just under the 3× cut-off. The range is wider than usual because of the Nov 2025 spike.
+> 🟢 **Anomaly not found: Apr 2026, but it's close.** GMV was $2.0M, just inside the expected $1.9M to $3.1M. The range is wider than usual because of the Nov 2025 spike.
 >
 > The chart also flags Nov 2025 and Dec 2025.
 
-A bucket that can't be judged:
+Too little history to decide:
 
-> **Can't judge Feb 2026.** GMV starts in Jan 2026, and the check needs 3 earlier months before it can judge one.
+> ⚠️ **Cannot decide: Apr 2026 has too little history.** GMV starts in Jan 2026, and the check needs at least 6 earlier months.
 
-* **Register:** Professional and plain. Avoid raw notation (no "σ", "z = 3.4"). Express `z` as a spoken multiple.
-* **Formatting:** Bold only the verdict sentence. Each part is its own short paragraph. No headings, lists, or tables.
+* **Register:** Professional and plain. Avoid raw notation (no "σ", "z = 3.4", "×"). Express `z` as a spoken multiple: "about 7 times a typical month's swing".
+* **Formatting:** Start with the emoji, then bold the label and the rest of that first sentence. Each part is its own short paragraph. No headings, lists, or tables.
 * **No closing offers:** No "what this does not tell you" pointer and no re-run offer. `analyze-changes` offers the next steps after this summary.
 * **Different threshold:** If the user asks for a stricter or looser threshold, re-run Steps 2 to 4 with the new `k` (values in `detect-anomaly-aql`).
 
@@ -176,7 +172,7 @@ Produce one spec `{ dataset, M, T, granularity, filters, timeframe, focus date }
 
 * **Currency:** Prefix with `$` and use short suffixes (`$500K`, `$1.2M`). Use the dataset's native currency symbol if available.
 * **Counts/Rates:** Use thousands separators (`1,234`). Round rates to two decimals (`3.42%`).
-* **Multiples:** Round z-scores to one decimal place (`3.4`).
+* **Multiples:** Round z-scores to one decimal place and drop a trailing `.0` (`about 3.4 times`, `about 7 times`).
 * **Expected range:** Use enough precision that the value and both ends of the range read differently (`$1.68M`, `$1.61M to $1.64M`, not `$1.7M`, `$1.6M to $1.6M`). For a metric that can't go negative, start the range at `0`.
 
 ### Out of scope

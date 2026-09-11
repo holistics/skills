@@ -108,10 +108,10 @@ Once the sub-skill's summary is visible, output the following in this exact orde
 **Change Analysis — Stage 1 complete**
 - **Metric**: [metric]
 - **Change**: [drop/increase] [time_reference]
-- **Anomaly verdict**: [Anomalous / Within normal range / Not assessed]
+- **Anomaly verdict**: [Anomaly found / Anomaly not found / Cannot decide]
 ---
 
-Take the verdict from the summary's first sentence: "is unusual" is Anomalous, "is within the expected range" is Within normal range, and "Can't judge" is Not assessed. Stage 2 proceeds the same way for all three.
+Copy the label the summary opens with (🔴 Anomaly found, 🟢 Anomaly not found, ⚠️ Cannot decide), without the emoji. Stage 2 proceeds the same way for all three.
 
 **2. Output the proceed question as plain text** — do NOT call `ask_user` or format options as markdown links. Output this immediately after the Stage 1 Summary Block:
 
