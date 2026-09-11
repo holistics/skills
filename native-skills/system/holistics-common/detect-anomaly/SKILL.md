@@ -20,7 +20,7 @@ Anomaly detection requires sufficient historical data to establish a baseline. A
 1. **Measure and dataset:** The method compares a series against itself, requiring exactly one measure.
 2. **Date field and grain:** Day, week, month, or quarter. The grain defines detection resolution (e.g., a two-day spike vanishes in monthly buckets).
 3. **Data slice:** The chart's filters plus the specific dimension series selected. One region collapsing can leave the company total flat; one series is analyzed per run.
-4. **Period covered:** Flagged buckets are only reported within this timeframe. Earlier data provides necessary baseline context.
+4. **Period covered:** The timeframe named in the Step 1 update and the titles. Earlier data provides necessary baseline context, and is still drawn on the chart.
 5. **Focus date:** The selected point's date. The entire series is always scanned, but this date determines the summary's opening focus.
 
 State the specification back in a single sentence using real dates to confirm accuracy.
@@ -28,7 +28,7 @@ State the specification back in a single sentence using real dates to confirm ac
 ## What a bare minimum output looks like
 
 * **The anomaly chart (Step 3):** Required output via `detect-anomaly-viz`. The run must provide it or state why it failed.
-* **The prose summary (Step 4):** A business-friendly explanation of the anomaly definition, followed by flagged buckets listing date, value, direction, and magnitude of deviation.
+* **The prose summary (Step 4):** The verdict on the selected bucket, the reason when an edge case applies to it, and one line naming any other flagged buckets.
 * **The anomaly results (Step 2):** Kept internal as the summary's source of truth. Do not display as a table unless explicitly requested.
 
 ## Workflow
@@ -90,47 +90,69 @@ Briefly explain that the band represents the expected range, it widens during er
 
 ### Step 4: Write the summary
 
-Base the summary strictly on the `verdict` field. Do not infer status from `z_score` or `anomaly_flag`.
+The summary answers the user's question: is the selected bucket unusual? It has three parts, in this order, and nothing after them.
 
-| `verdict` | Definition |
+**1. The verdict.** One bold sentence on the selected bucket, followed by its numbers. Take it from that bucket's `verdict`. Do not infer it from `z_score` or `anomaly_flag`.
+
+| `verdict` | Verdict sentence | Followed by |
+| --- | --- | --- |
+| `unusual` | **Aug 2026 is unusual.** | `actual`, the direction, the expected range (`lower_bound` to `upper_bound`), and `z_score` as a multiple: "GMV was $2.3M, below the expected range of $2.5M to $2.7M (about 7.0× its normal monthly movement)." |
+| `normal` | **Jun 2026 is within the expected range.** | `actual` and the expected range: "GMV was $2.1M; the expected range was $1.9M to $2.2M." |
+| `not assessed` | **Can't judge Feb 2026.** | Nothing. The reason follows in part 2. |
+
+A bucket still in progress is always **Can't judge**, whatever its `verdict` says.
+
+**2. The reason, when an edge case applies.** When any of these is true for the selected bucket, add up to two of them, most relevant first. Use the wording below with the real dates and values. Add nothing when none applies.
+
+| When | Say |
 | --- | --- |
-| `unusual` | A statistically significant finding to list in the summary. |
-| `normal` | Assessed; aligned with historical trend. |
-| `not assessed` | Insufficient history or variation to judge. |
+| It is one of the first three buckets of the series. | "GMV starts in Jan 2026, and the check needs 3 earlier months before it can judge one." |
+| Its `lower_bound` equals its `upper_bound`: the metric did not move. | "GMV was exactly $40K every month, so there is no movement to compare against." |
+| It is still in progress. | "Sep 2026 has 11 of 30 days so far, so its value isn't comparable yet." |
+| The bucket before it is missing. | "Mar and Apr 2026 have no data, so this compares May with Feb: three months of change counted as one." |
+| It is `unusual`, and the bucket before it is `unusual` in the opposite direction. | "This is GMV returning after the Nov 2025 spike, not a separate event." |
+| It is `normal`, and `abs(z_score)` is at least `k` − 1. | "It is 2.8× its normal movement, just under the 3× cut-off." If an earlier bucket is `unusual`, add: "The range is wider than usual because of the Nov 2025 spike." |
+| It is judged with fewer than 6 earlier buckets behind it. | "Only 4 earlier months back this, so the expected range is still rough and small moves can stand out." |
+| Another bucket at the same calendar position (same month of the year, quarter, or weekday) is `unusual`. | "Dec 2023 and Dec 2024 were also flagged; this may be a yearly pattern the check doesn't account for." |
 
-Write a summary covering only the assessed span. Verify that `k` is unadjusted from Step 2, the chart was drawn (or fallback explained), and no causal claims are made.
+**3. Other flags.** One line naming every other `unusual` bucket in the results, earliest first, so every red column on the chart is accounted for: "The chart also flags Dec 2023, Jan 2024 and Dec 2024." Name up to five, then "and N more". Leave the line out when there are none. Give no values or multiples for these unless the user asks.
 
-Address two specific patterns if present:
+Before writing, check:
 
-* **Recurring calendar positions:** The method lacks seasonal awareness. If anomalies repeat annually/weekly, state this and offer a seasonality-aware re-run.
-* **Early flags:** An early unusual value permanently widens the baseline band. Warn the user that milder subsequent anomalies may have been masked by this widened threshold.
+* `k` is the default from `detect-anomaly-aql`, unless the user asked for a different threshold.
+* The anomaly chart was drawn, or the fallback was taken and said so.
+* No causal or dimensional claims. Numbers follow *Numeric formatting*.
 
 ## Output
 
 ### Summary (prose, Step 4)
 
-> ⟦ Step 3 anomaly definition post_update renders here ⟧
+Three complete summaries. The Step 3 definition and chart render above each one.
+
+An unusual bucket with a reason and another flag:
+
+> **Dec 2025 is unusual.** GMV was $2.2M, below the expected range of $2.3M to $3.2M (about 3.4× its normal monthly movement).
 >
-> ⟦ Step 3 anomaly chart renders here ⟧
+> This is GMV returning after the Nov 2025 spike, not a separate event.
 >
-> **Found 2 unusual months in GMV, Jul 2023 to Aug 2024:**
+> The chart also flags Nov 2025.
+
+A normal bucket close to the cut-off:
+
+> **Apr 2026 is within the expected range.** GMV was $2.0M; the expected range was $1.9M to $3.1M.
 >
-> * **Nov 2023: $4.2M.** Above the expected trend by about 3.6× its normal monthly movement.
-> * **Mar 2024: $1.9M.** Below the expected trend by about 4.1× its normal monthly movement.
+> It is 2.8× its normal movement, just under the 3× cut-off. The range is wider than usual because of the Nov 2025 spike.
 >
-> **What this does not tell you.** Why they moved, and which segment drove them, is outside this analysis. Break GMV down by product, channel, or customer segment, and check the marketing calendar for those windows.
->
-> Want me to re-run with a stricter or looser threshold? Looser flags more months; stricter flags only the most extreme. A seasonality-aware version is also available if GMV has a repeating annual shape.
+> The chart also flags Nov 2025 and Dec 2025.
+
+A bucket that can't be judged:
+
+> **Can't judge Feb 2026.** GMV starts in Jan 2026, and the check needs 3 earlier months before it can judge one.
 
 * **Register:** Professional and plain. Avoid raw notation (no "σ", "z = 3.4"). Express `z` as a spoken multiple.
-* **Formatting:** Use bold labels to open sections. Bold the date and value for each finding, followed by plain text. No formal headings or markdown tables for the summary results.
-* **Chronological lines:** One line per flagged bucket detailing date, value, direction, and magnitude.
-* **Assessed span:** Explicitly name the judged span if it differs from the requested period.
-  * *Fully assessed, nothing flagged:* "No unusual values in GMV over Jul 2023 to Aug 2024; every month moved in line with the trend."
-  * *Partly assessed:* "Assessed GMV from Jul 2024 onward; earlier months lacked sufficient history."
-  * *Nothing assessed:* "Not enough history to assess GMV. The method requires prior movement to establish a baseline."
-* **Focus date:** If the selected date falls inside the assessed span, lead with its verdict. If outside, state it cannot be judged before listing the rest.
-* **Re-run offer:** Always close with an offer to adjust `k` if findings are present.
+* **Formatting:** Bold only the verdict sentence. Each part is its own short paragraph. No headings, lists, or tables.
+* **No closing offers:** No "what this does not tell you" pointer and no re-run offer. `analyze-changes` offers the next steps after this summary.
+* **Different threshold:** If the user asks for a stricter or looser threshold, re-run Steps 2 to 4 with the new `k` (values in `detect-anomaly-aql`).
 
 ## Resolving the spec
 
@@ -155,6 +177,7 @@ Produce one spec `{ dataset, M, T, granularity, filters, timeframe, focus date }
 * **Currency:** Prefix with `$` and use short suffixes (`$500K`, `$1.2M`). Use the dataset's native currency symbol if available.
 * **Counts/Rates:** Use thousands separators (`1,234`). Round rates to two decimals (`3.42%`).
 * **Multiples:** Round z-scores to one decimal place (`3.4`).
+* **Expected range:** Use enough precision that the value and both ends of the range read differently (`$1.68M`, `$1.61M to $1.64M`, not `$1.7M`, `$1.6M to $1.6M`). For a metric that can't go negative, start the range at `0`.
 
 ### Out of scope
 
