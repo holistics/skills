@@ -78,11 +78,11 @@ Before running any phase, look for `metric`, `direction`, `time_reference`, and 
     > **[base_period_name]** to see which dimensions changed the most between those periods."
   - Then proceed directly to Phase 2.
 - In Phase 2: prepend one sentence before the standard overview, referencing the anomaly verdict:
-  - If `anomaly_verdict` = Anomalous → *"The anomaly check confirmed this [drop/increase] is
+  - If `anomaly_verdict` = Anomaly found → *"The anomaly check confirmed this [drop/increase] is
     unusual. Let's find what drove it."*
-  - If `anomaly_verdict` = Within normal range → *"Note: the anomaly check found this
+  - If `anomaly_verdict` = Anomaly not found → *"Note: the anomaly check found this
     [drop/increase] is within the normal range. Here's the breakdown for reference:"*
-  - If `anomaly_verdict` = Not assessed → *"The anomaly check couldn't judge this
+  - If `anomaly_verdict` = Cannot decide → *"The anomaly check couldn't decide on this
     [drop/increase], so here's the breakdown without that check:"*
 
 **If not found** — manual invocation. Run all phases as normal with no changes.
