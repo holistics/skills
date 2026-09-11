@@ -82,6 +82,8 @@ Before running any phase, look for `metric`, `direction`, `time_reference`, and 
     unusual. Let's find what drove it."*
   - If `anomaly_verdict` = Within normal range → *"Note: the anomaly check found this
     [drop/increase] is within the normal range. Here's the breakdown for reference:"*
+  - If `anomaly_verdict` = Not assessed → *"The anomaly check couldn't judge this
+    [drop/increase], so here's the breakdown without that check:"*
 
 **If not found** — manual invocation. Run all phases as normal with no changes.
 
