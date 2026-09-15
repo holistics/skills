@@ -25,6 +25,11 @@
       "source": "./plugins/holistics-migrate-power-bi"
     },
     {
+      "name": "holistics-migrate-looker",
+      "description": "Skills for migrating Looker views, Explores, and dashboards to Holistics AMQL projects.",
+      "source": "./plugins/holistics-migrate-looker"
+    },
+    {
       "name": "analytics",
       "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools.",
       "source": "./plugins/analytics"
