@@ -69,24 +69,39 @@ A theme file contains one shared Brand Tokens object, then two components per mo
 
 ```aml
 // 1. Brand Tokens — the theme's single source of truth, covering both modes.
-//    Unsuffixed keys are shared by both modes. `_light` / `_dark` keys are the ONLY things
-//    the lighting changes; keep each pair on one line so the two modes stay comparable.
+//    Unsuffixed keys are shared by both modes. `_light` / `_dark` keys are the ONLY
+//    things the lighting changes; keep each pair adjacent so the two stay comparable.
 const <slug>_brand = {
-  primary: "oklch(...)",                secondary: "oklch(...)",
-  font_body: "<body family>",           font_display: "<title family>",
-  corner_style: "sharp|rounded|soft",   density: "compact|comfortable|spacious",   elevation: "hairline|flat|shadow",
+  primary: "oklch(...)"
+  secondary: "oklch(...)"
+  font_body: "<body family>"
+  font_display: "<title family>"
+  corner_style: "sharp|rounded|soft"
+  density: "compact|comfortable|spacious"
+  elevation: "hairline|flat|shadow"
 
-  background_light: "oklch(...)",       background_dark: "oklch(...)",
-  canvas_bg_light: "oklch(...)",        canvas_bg_dark: "oklch(...)",
-  block_bg_light: "oklch(...)",         block_bg_dark: "oklch(...)",
-  text_primary_light: "oklch(...)",     text_primary_dark: "oklch(...)",
-  text_muted_light: "oklch(...)",       text_muted_dark: "oklch(...)",
-  text_subtle_light: "oklch(...)",      text_subtle_dark: "oklch(...)",
-  border_light: "oklch(...)",           border_dark: "oklch(...)",
-  focus_ring_light: "oklch(...)",       focus_ring_dark: "oklch(...)",
-  semantic_success_light: "oklch(...)", semantic_success_dark: "oklch(...)",
-  semantic_warning_light: "oklch(...)", semantic_warning_dark: "oklch(...)",
-  semantic_danger_light: "oklch(...)",  semantic_danger_dark: "oklch(...)"
+  background_light: "oklch(...)"
+  background_dark: "oklch(...)"
+  canvas_bg_light: "oklch(...)"
+  canvas_bg_dark: "oklch(...)"
+  block_bg_light: "oklch(...)"
+  block_bg_dark: "oklch(...)"
+  text_primary_light: "oklch(...)"
+  text_primary_dark: "oklch(...)"
+  text_muted_light: "oklch(...)"
+  text_muted_dark: "oklch(...)"
+  text_subtle_light: "oklch(...)"
+  text_subtle_dark: "oklch(...)"
+  border_light: "oklch(...)"
+  border_dark: "oklch(...)"
+  focus_ring_light: "oklch(...)"
+  focus_ring_dark: "oklch(...)"
+  semantic_success_light: "oklch(...)"
+  semantic_success_dark: "oklch(...)"
+  semantic_warning_light: "oklch(...)"
+  semantic_warning_dark: "oklch(...)"
+  semantic_danger_light: "oklch(...)"
+  semantic_danger_dark: "oklch(...)"
 }
 
 // 2. Chart Palette — 8 categorical OKLCH colors
@@ -100,10 +115,16 @@ ColorPalette <slug>_<mode>_palette {
 // 3. Page Theme — References tokens via accessors
 PageTheme <slug>_<mode>_theme {
   title: "<Human Name>"
-  color { data: <slug>_<mode>_palette }
-  background { bg_color: <slug>_brand("background_<mode>") }
+  color {
+    data: <slug>_<mode>_palette
+  }
+  background {
+    bg_color: <slug>_brand("background_<mode>")
+  }
   canvas {
-    background { bg_color: <slug>_brand("canvas_bg_<mode>") }
+    background {
+      bg_color: <slug>_brand("canvas_bg_<mode>")
+    }
     border {
       border_width: 0
       border_radius: "..." // "sharp" -> 4 | "rounded" -> 12 | "soft" -> 20
@@ -114,7 +135,9 @@ PageTheme <slug>_<mode>_theme {
     opacity: 1
   }
   block {
-    background { bg_color: <slug>_brand("block_bg_<mode>") }
+    background {
+      bg_color: <slug>_brand("block_bg_<mode>")
+    }
     border {
       border_width: "..."  // "hairline" -> 1 | "flat" -> 0 | "shadow" -> 0
       border_style: "..."  // "hairline" -> "solid" | "flat" -> "none" | "shadow" -> "none"
@@ -152,8 +175,19 @@ PageTheme <slug>_<mode>_theme {
         border_width: 1
         hover_color: "oklch(...)"   // Derived inline: background.L +0.03 (light) / +0.05 (dark)
         banding_color: "oklch(...)" // Derived inline: background.L +0.015 (light) / +0.03 (dark)
-        cell_padding: DetailedSpacing { top: "...", right: "...", bottom: "...", left: "..." } // "compact" -> 6/12 | "comfortable" -> 10/16 | "spacious" -> 14/20
-        borders { outer: true, vertical: false, horizontal: true, header: true, row_header: false }
+        cell_padding: DetailedSpacing {
+          top: "..."       // "compact" -> 6  | "comfortable" -> 10 | "spacious" -> 14
+          right: "..."     // "compact" -> 12 | "comfortable" -> 16 | "spacious" -> 20
+          bottom: "..."    // "compact" -> 6  | "comfortable" -> 10 | "spacious" -> 14
+          left: "..."      // "compact" -> 12 | "comfortable" -> 16 | "spacious" -> 20
+        }
+        borders {
+          outer: true
+          vertical: false
+          horizontal: true
+          header: true
+          row_header: false
+        }
       }
       header {
         bg_color: <slug>_brand("background_<mode>")
@@ -173,12 +207,16 @@ PageTheme <slug>_<mode>_theme {
         font_weight: "medium"
       }
       sparkline {
-        line { color: <slug>_brand("primary") }
-        column { color: <slug>_brand("primary") }
+        line {
+          color: <slug>_brand("primary")
+        }
+        column {
+          color: <slug>_brand("primary")
+        }
       }
     }
     metric_kpi {
-      alignment: "left"
+      alignment: "left"    // "left" | "center" | "right"
       label {
         font_family: <slug>_brand("font_body")
         font_size: "..."   // "compact" -> 18 | "comfortable" -> 20 | "spacious" -> 22
@@ -190,14 +228,46 @@ PageTheme <slug>_<mode>_theme {
         font_color: <slug>_brand("text_primary_<mode>")
       }
       progress {
-        indicator { bg_color: <slug>_brand("primary") }
-        track { bg_color: <slug>_brand("border_<mode>") }
-        text { font_color: <slug>_brand("text_muted_<mode>") }
+        indicator {
+          bg_color: <slug>_brand("primary")
+        }
+        track {
+          bg_color: <slug>_brand("border_<mode>")
+        }
+        text {
+          font_color: <slug>_brand("text_muted_<mode>")
+        }
       }
+      // Each trend bg_color is a faint wash of its own hue, derived inline:
+      // light -> high L ~0.92, low C | dark -> low L ~0.40, low C
       trend {
-        positive { text { font_color: <slug>_brand("semantic_success_<mode>") font_weight: "medium" } background { bg_color: "oklch(...)" } }
-        negative { text { font_color: <slug>_brand("semantic_danger_<mode>") font_weight: "medium" } background { bg_color: "oklch(...)" } }
-        neutral  { text { font_color: <slug>_brand("text_muted_<mode>") font_weight: "normal" } background { bg_color: "oklch(...)" } }
+        positive {
+          text {
+            font_color: <slug>_brand("semantic_success_<mode>")
+            font_weight: "medium"
+          }
+          background {
+            bg_color: "oklch(...)"
+          }
+        }
+        negative {
+          text {
+            font_color: <slug>_brand("semantic_danger_<mode>")
+            font_weight: "medium"
+          }
+          background {
+            bg_color: "oklch(...)"
+          }
+        }
+        neutral {
+          text {
+            font_color: <slug>_brand("text_muted_<mode>")
+            font_weight: "normal"
+          }
+          background {
+            bg_color: "oklch(...)"
+          }
+        }
       }
     }
   }
