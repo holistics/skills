@@ -13,8 +13,9 @@ Author and save the AI Block prompt; do not generate, preview, or simulate the n
 ## Resolve scope
 
 - Explicit `@VizBlock:dashboard_uname.viz_uname` mentions mean exactly those visualizations.
-- "This dashboard" means all visualizations across its tabs.
-- "This tab" or "this page" means the current tab only — reference it as `@Tab:dashboard_uname.viz_uname.view_uname`, not plain text, so it powers the UI's dependency view.
+- "This dashboard" means `@Dashboard:dashboard_uname`, which includes all visualizations across its tabs.
+- "This tab" means `@Tab:dashboard_uname.view_uname` — the tab currently in the user's view — which includes all visualizations within it.
+- Referencing a tab or dashboard, rather than listing individual visualizations, keeps the AI Block current automatically: it updates on its own as visualizations are added or removed.
 - If scope is missing, ask the user to choose the relevant tab, the full dashboard, or specific visualizations. Do not guess.
 - An AI Block cannot use another AI Block as its source. Ask for non-AI-Block sources if one is included.
 
