@@ -1,6 +1,6 @@
 ---
 name: create-ai-block
-label: Create AI Block
+label: Create AI narrative on dashboard
 description: |-
   Use when the user wants a dashboard AI Block that provides a data-backed narrative inline in the dashboard — such as a summary, executive readout, key insights, callout, or top-movers note.
 
