@@ -1,3 +1,14 @@
+## [0.7.0](https://github.com/holistics/skills/compare/holistics-development-v0.6.0...holistics-development-v0.7.0) (2026-09-17)
+
+### Features
+
+* **plugins.development:** add create-ai-block skill ([9e00e2b](https://github.com/holistics/skills/commit/9e00e2b9060b35c52df621239f4dff1ade0f34cd))
+
+### Bug Fixes
+
+* **native.system:** drop tool names from the build-dashboard plan guardrail ([c05fac7](https://github.com/holistics/skills/commit/c05fac7094607e930b61aa36120a5ca24dd8e690))
+* **native.system:** forbid query and viz tools before the build-dashboard plan ([4a910aa](https://github.com/holistics/skills/commit/4a910aa5e0990fb6274ba132668bc11d80352c17))
+
 ## [0.6.0](https://github.com/holistics/skills/compare/holistics-development-v0.5.5...holistics-development-v0.6.0) (2026-08-12)
 
 ### Features
