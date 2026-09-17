@@ -2,9 +2,11 @@
 name: create-ai-block
 label: Create AI Block
 description: |-
-  Use when the user wants a dashboard AI Block that provides a data-backed narrative inline in the dashboard — such as a summary, executive readout, key insights, callout, or top-movers note. Typical phrasings: "add a summary for this dashboard", "summarize this page", "turn these charts into an executive readout", "add a block calling out the top movers", or "@VizBlock:sales_overview.revenue_trend — give me the key insights".
+  Use when the user wants a dashboard AI Block that provides a data-backed narrative inline in the dashboard — such as a summary, executive readout, key insights, callout, or top-movers note.
 
-Do not use for a one-off explanation in chat, a new chart or query, a dashboard restructure, or reformatting existing narrative text without adding content.
+  Typical phrasings: "add a summary for this dashboard", "add a block calling out the top movers", or "give viewers the takeaway here so they don't have to read the chart themselves".
+
+  Do not use for a one-off explanation the user wants answered in chat with nothing saved to the dashboard — answer directly instead. Also do not use for a new chart or query, a dashboard restructure, or reformatting existing narrative text without adding content.
 ---
 # Create an AI Block
 
