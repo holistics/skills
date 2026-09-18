@@ -100,42 +100,20 @@ Dependency: Step 2
 
 Brief:
 ```
-Once the sub-skill's prose verdict is visible, output the following in this exact order:
+Once the sub-skill's summary is visible, output the following in this exact order. Do not restate the verdict or explain the chart: the summary above already does both.
 
-**1. Plain-language verdict sentence** (bold):
-
-- If anomalous:
-  `**The [drop/increase] in [metric] [time_reference] is abnormal.**`
-
-- If within normal range:
-  `**The [drop/increase] in [metric] [time_reference] is normal.**`
-
-**2. One sentence of plain-text context:**
-
-- If anomalous:
-  `This is outside what we'd expect based on historical patterns — it's a real signal worth investigating.`
-
-- If within normal range:
-  `This falls within the expected range based on historical patterns — it may just be regular variation, so there may not be much to act on.`
-
-**2b. One or two plain sentences explaining how to read the chart above:**
-
-- If anomalous (focus period IS a red column):
-  `In the chart above, [base_period] is one of the red columns — that's where the anomaly check flagged it as breaking from the historical trend. Any other red columns are separate periods the full-series scan also flagged.`
-
-- If within normal range (focus period is NOT highlighted):
-  `In the chart above, [base_period] sits inside the shaded expected band — it isn't one of the red columns. The red columns mark other periods the full-series scan flagged as historically unusual; they're not related to the change you're asking about.`
-
-**3. The Stage 1 Summary Block as plain markdown** — output these fields as plain text (this is the handoff marker for Stage 2 detection):
+**1. The Stage 1 Summary Block as plain markdown** — output these fields as plain text (this is the handoff marker for Stage 2 detection):
 
 ---
 **Change Analysis — Stage 1 complete**
 - **Metric**: [metric]
 - **Change**: [drop/increase] [time_reference]
-- **Anomaly verdict**: [Anomalous / Within normal range]
+- **Anomaly verdict**: [Anomaly found / Anomaly not found / Cannot decide]
 ---
 
-**4. Output the proceed question as plain text** — do NOT call `ask_user` or format options as markdown links. Output this immediately after the Stage 1 Summary Block:
+Copy the label the summary opens with (🔴 Anomaly found, 🟢 Anomaly not found, ⚠️ Cannot decide), without the emoji. Stage 2 proceeds the same way for all three.
+
+**2. Output the proceed question as plain text** — do NOT call `ask_user` or format options as markdown links. Output this immediately after the Stage 1 Summary Block:
 
 How would you like to proceed?
 1. Break down by dimensions — find which segments (e.g., region, plan, product, channel) drove the [drop/increase] the most
