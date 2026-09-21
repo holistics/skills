@@ -3,6 +3,7 @@ name: format-ai-block-output
 label: Format AI Block Output
 description: |-
   Use when generating the output or narrative of a dashboard AI Block based on the block's saved prompt — a data-backed summary, report, comparison, status update, risk list, or recommendation — and needs a nice, compact, scannable HTML output. Do NOT trigger while a prompt is still being authored or edited in chat; only once actual content exists to render.
+user-invocable: false
 ---
 Return HTML only, no Markdown fences or preamble. Apply these rules based on the content; not every rule fires on every block.
 
