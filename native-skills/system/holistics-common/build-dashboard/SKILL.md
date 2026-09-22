@@ -112,8 +112,8 @@ When the user is specific ("just one chart of X"), their scope wins — build th
    **Don't write/run queries and don't edit files in steps 1–2** — that's step 3, after approval. And "just build it, don't ask me questions" doesn't waive the plan: post it, then go on to step 3 in the same turn.
 
 3. **Build the dashboard** per Schema. Author the **static text** blocks yourself (titles, section intros, how-to-read notes). For each **data** block, generate the viz and put the returned AML in the block; hand-write a `viz: <Type> { … }` body only as a last resort, because hand-written viz AML is the single biggest source of invalid output (if you must, the `ref:` forms in the Schema are where it breaks). Then lay everything out **to the wireframe you confirmed** — same blocks, same rows, same order, span → width `3` = 280 · `4` = 380 · `6` = 580 · `12` = 1180. The view is always a TabLayout: one tab for a single-page dashboard, or blocks partitioned across tabs, each tab's canvas built the same way with a control row reserved at the top.
-4. **Wire the controls and the `interactions: []` array.** Every dashboard needs it — not only to connect the controls but because viz blocks cross-filter each other by default. Build the control set the job needs (a date range + 1–2 dimension filters at minimum; add a date drill or Period Comparison when the questions call for one), then wire each control to every block it can affect, disable filter→filter cross-linking, and disable everything that would cross a tab boundary.
-5. **Verify against the minimum output.** Every block answers a ranked question (cut any that can't); the opening block matches what the reader is doing, and you can say why this dashboard's shape would be wrong for a different reader — if you can't, you defaulted; each KPI's comparison comes from the dashboard's Period Comparison control, not a period baked into the KPI; block bodies are sound, styling-free, and **carry no hard-coded time window or comparison period** — the date filter and Period Comparison provide those; every block declared is placed in the view, and the canvas matches the wireframe the user confirmed — same blocks, same rows, same spans (if the build had to deviate, say which row and why at handoff); the `interactions: []` array is present and complete — every control wired to every block it can affect (each filter to every block on its dataset or disabled; Period Comparison to the KPIs, not just the trend), cross-tab cross-filtering disabled; then check code diagnostics and fix every error.
+4. **Wire the controls and the `explicit_interactions: []` array.** Every dashboard carries it, empty or not — a canvas dashboard without the key falls back to legacy behavior, where filters and charts on the same dataset link themselves. Build the control set the job needs (a date range + 1–2 dimension filters at minimum; add a date drill or Period Comparison when the questions call for one), then list under each control every block it should reach. Nothing connects unless it is listed, so an unlisted block is an unfiltered block. Leave filter → filter entries out, and keep every control's list inside the tab(s) it is shown on.
+5. **Verify against the minimum output.** Every block answers a ranked question (cut any that can't); the opening block matches what the reader is doing, and you can say why this dashboard's shape would be wrong for a different reader — if you can't, you defaulted; each KPI's comparison comes from the dashboard's Period Comparison control, not a period baked into the KPI; block bodies are sound, styling-free, and **carry no hard-coded time window or comparison period** — the date filter and Period Comparison provide those; every block declared is placed in the view, and the canvas matches the wireframe the user confirmed — same blocks, same rows, same spans (if the build had to deviate, say which row and why at handoff); the `explicit_interactions: []` array is present and complete — every control lists every block it should reach (each filter every block on its dataset that it should slice; Period Comparison the KPIs, not just the trend), no filter lists another filter, and no list crosses a tab boundary; then check code diagnostics and fix every error.
 6. **Deliver** with a handoff note — dataset used; each block name + viz type + the question it answers; which blocks carry date fields (with the field reference); tab membership if tabbed; and the assumptions you made.
 
 ## Schema
@@ -192,38 +192,31 @@ Dashboard sales_overview {
   block v_by_country: VizBlock { label: 'Sales by Country' viz: BarChart { … } }
   block v_detail:     VizBlock { label: 'Order Detail' viz: DataTable { … } }
 
-  // ---- INTERACTIONS: always present. Two kinds of disable live here:
-  //   • ALWAYS (single-page too): filter → filter — each filter disables every OTHER filter block,
-  //     so choosing a value in one doesn't narrow another's options.
-  //   • TABBED only: nothing crosses a tab boundary — each filter / drill / pop / viz also disables
-  //     every block on the other tab(s). Omit these lines on a single-page dashboard.
-  interactions: [
+  // ---- INTERACTIONS: always present, `[]` when there is nothing to wire. Nothing connects unless
+  //   it is listed here: each control names every block it reaches, grouped by the field those
+  //   blocks read. `to` holds plain block names.
+  //   • No filter → filter entry: a filter that targets another filter narrows its options.
+  //   • TABBED: a control lists only the blocks on the tab(s) it is shown on.
+  explicit_interactions: [
     FilterInteraction {
-      from: 'f_country'
-      to: [
-        CustomMapping { block: 'v_monthly_sales' field: r(car_retails_offices.country) },   // map EVERY block it can affect
-        CustomMapping { block: ['v_by_country', 'v_detail'] field: r(car_retails_offices.country) },
-        CustomMapping { block: ['f_date'] disabled: true },                                 // parent-child — ALWAYS
-        CustomMapping { block: ['<other_tab_viz>'] disabled: true }                         // TABBED only
-      ]
+      from: 'f_date'                                                  // the date range reaches EVERY data block
+      to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales', 'v_by_country', 'v_detail']
+      field: r(car_retails_payments.payment_date)
+    },
+    FilterInteraction {
+      from: 'f_country'                                               // list EVERY block it should slice
+      to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales', 'v_by_country', 'v_detail']
+      field: r(car_retails_offices.country)
     },
     DateDrillInteraction {
       from: '<drill>'
-      to: [ CustomMapping { block: 'v_monthly_sales' field: r(car_retails_payments.payment_date) } ]
+      to: ['v_monthly_sales']
+      field: r(car_retails_payments.payment_date)
     },
     PopInteraction {
-      from: 'c_pop'
-      to: [
-        // model.field ref — NOT ref('<dataset>', …). PoP maps to the KPIs too, not only the trend.
-        CustomMapping { block: ['v_total_sales', 'v_orders', 'v_customers'] field: r(car_retails_payments.payment_date) },
-        CustomMapping { block: 'v_monthly_sales' field: r(car_retails_payments.payment_date) }
-      ]
-    },
-    // TABBED viz cross-filtering off too: for EVERY viz block, a FilterInteraction disabling EVERY
-    // viz block on the other tab(s). Symmetric — repeat per viz block.
-    FilterInteraction {
-      from: '<tab_a_viz>'
-      to: [ CustomMapping { block: ['<other_tab_viz_1>', '<other_tab_viz_2>'] disabled: true } ]
+      from: 'c_pop'                                                   // the KPIs too, not only the trend
+      to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales']
+      field: r(car_retails_payments.payment_date)                     // model.field ref — NOT ref('<dataset>', …)
     }
   ]
 
@@ -281,7 +274,8 @@ The instant a block must show a *live data value* it is not a TextBlock — that
 
 ## Conventions
 
-* **Never invent a layout property.** The Schema above shows the constructs you need (`Dashboard`, `block`, `interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`); it is not an exhaustive list of what the product supports, so anything beyond it gets checked, not guessed — confirm with `search_docs` first. In particular there is no layout `margin`/`padding`/`gap`; spacing is pos()-driven. A bare top-level `view: CanvasLayout` and a `LinearLayout` are also valid AML, but this skill always wraps the canvas in a TabLayout for uniformity.
+* **Never invent a layout property.** The Schema above shows the constructs you need (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`); it is not an exhaustive list of what the product supports, so anything beyond it gets checked, not guessed — confirm with `search_docs` first. In particular there is no layout `margin`/`padding`/`gap`; spacing is pos()-driven. A bare top-level `view: CanvasLayout` and a `LinearLayout` are also valid AML, but this skill always wraps the canvas in a TabLayout for uniformity.
+* **Editing a dashboard that wires with `interactions: [ … ]` and `CustomMapping`** — that is the legacy key, where filters and charts on the same dataset link themselves. Adding `explicit_interactions` beside it switches the whole legacy array off, so never mix the two. Leave the wiring alone when the edit doesn't touch it; when the edit adds blocks or controls, convert the whole dashboard first, per build-dashboard-controls → *Legacy dashboards*.
 * **Prefer a generated viz over a hand-written one** — hand-written viz AML is the biggest source of invalid output.
 * **Prefer the dashboard's controls over per-chart filters for anything interactive.** The date filter sets the time window, Period Comparison the comparison period, the drill the grain, dimension filters the segmenting — a chart that hard-codes one of those ships empty, or goes stale as soon as the viewer moves the control. A filter that defines what the chart *is* (top 10 by revenue, one segment) is fine and stays.
 * Prose strings that may contain apostrophes or span lines (the dashboard `description`, TextBlock content, title subtitle) go in `@md … ;;` heredocs, not single quotes.
