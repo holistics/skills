@@ -17,47 +17,60 @@ Build or edit a Holistics `page.aml` dashboard.
 
 ## What a good input looks like
 
-A dashboard task is fully specified when you can answer all of:
+A dashboard task is fully specified when you can answer all of the following:
 
-1. **Audience & decision** — who reads this, and what do they decide with it?
-2. **What the reader is doing with it** — monitoring ("is anything off?"), diagnosing ("why did it move?"), comparing ("which of these is doing better?"), planning ("what should we do next?"), or looking something up ("find me the record"). Decide this before anything else: it drives the dashboard's shape more than any other answer.
-3. **Questions, ranked** — the real questions this audience asks, in the order they ask them, in their words. Derive them from the audience, the decision, and what the dataset can actually answer. *(A performance-monitoring dashboard commonly lands on status → trend → drivers → lookup. That is one pattern, not the definition — a diagnostic, a comparison, a funnel, or a lookup tool ranks differently, and many have no "how are we doing" question at all.)*
-4. **What each question needs** — the measures and dimensions that answer it, and, for a measure that has one, its comparison context (vs previous period, vs target).
-5. **Time** — the primary date field, grain, and window that matter.
-6. **Interactivity** — what viewers will want to slice by themselves.
-7. **Structure & look** — one page or sections/tabs; any branding.
+1. **Audience & decision** — Who reads this dashboard, and what business decisions do they make with it?
+2. **Primary user action** — What is the reader doing with the data?
 
-The user's prompt almost never supplies all of this. Your job is to fill the gaps yourself — not to build less because less was specified. Filling a gap means deciding it for *this* reader and *this* dataset, not falling back on a default arrangement.
+   * *Monitoring* ("Is anything off?")
+   * *Diagnosing* ("Why did it move?")
+   * *Comparing* ("Which of these is performing better?")
+   * *Planning* ("What should we do next?")
+   * *Looking up* ("Find me a specific record.")
+
+   Decide this first: it dictates the dashboard structure more than any other factor.
+3. **Ranked questions** — What real-world questions does the audience ask, in what priority, and in their own words? Derive these from the audience, their decision, and the available dataset. *(For instance, a monitoring dashboard typically follows: Status → Trend → Drivers → Lookup. Diagnostic, comparative, or funnel dashboards follow entirely different rank orderings.)*
+4. **Question requirements** — Which measures and dimensions answer each question? What comparison context is needed (e.g., vs. previous period, vs. target)?
+5. **Time parameters** — What are the primary date fields, time grains, and date windows?
+6. **Interactivity** — Which dimensions will users want to slice or filter by?
+7. **Structure & presentation** — Should this be single-page or tabbed? Are there branding or visual guidelines?
+
+When the user's prompt leaves gaps, fill them yourself based on the reader and dataset rather than defaulting to a generic design.
 
 ## What a bare minimum output looks like
 
-The minimum is a **quality bar, not a shape**. A dashboard is a vertical stack of **sections**; which sections, and in what order, comes from the questions you ranked.
+The minimum requirement is a **quality standard, not a fixed layout**. A dashboard is a vertical stack of **sections**, ordered by your ranked questions.
 
-* **A section** = a short heading (TextBlock) + the block that answers its question + 0–2 supporting blocks. Each section answers one question you actually ranked — if you can't name a section's question in the reader's words, cut it.
-* **Every ranked question is answered by some block, and no block answers none.** Completeness is measured in questions covered, not blocks placed: a generic prompt still gets every question answered, not a sketch — and nothing beyond them.
-* **The opening follows what the reader is doing.** Monitoring → a few KPIs across the top. Diagnosing → the thing that moved, large, with its drivers beneath it. Comparing → the comparison itself leading. Planning → the projection or the gap to target. Looking something up → the filters and the table, and little else. **A KPI row is one opening among these, not the default** — a dashboard that isn't for monitoring often has no KPI row at all, and a trailing detail table is worth placing only when someone actually needs the rows.
-* **The dataset says what can be answered; the questions say what is.** Read the major subjects/metrics from `fetch_dataset` to find the real fields and the candidate material — then let the ranked questions decide which of it earns a section. One section per dataset subject is a template too.
-* **Depth follows the ask.** A broad ask spreads across more sections, each shallow; a focused ask goes deep on one or two and drops the rest. Section count follows the ask's breadth and the dataset's richness.
-* **Every block renders real data on real fields**; a KPI's comparison comes from the Period Comparison control, not baked in. The dashboard has wired **controls** — never left on platform defaults — and a **theme** (default `theme: H.themes.classic`). Data with no wired controls is below the minimum.
-* **Layout** — sections stack top-to-bottom by importance; within a section, blocks sit in a row of **1–4** (full-width for a hero trend/table, 2–3 side by side for comparisons), aligned to the grid and sized by importance. Per tab, each tab is its own coherent canvas, never a dumping ground; a single-page dashboard is one tab. *(width / `grid_size` / `pos()` mechanics are in the Schema.)*
+* **Section composition** — A short heading (`TextBlock`) + a primary block that answers the section's question + 0–2 supporting blocks. Every section must answer a specific ranked question. If a block doesn't answer a user question, drop it.
+* **Complete question coverage** — Ensure every ranked question is answered by a block. Quality is measured by questions answered, not block count.
+* **Opening layout aligns with user action:**
+  * *Monitoring* → KPI cards across the top.
+  * *Diagnosing* → Prominent metric/driver visual that shifted.
+  * *Comparing* → Comparison chart leading the page.
+  * *Planning* → Target gap or projection view.
+  * *Lookup* → Prominent filter controls and detail tables.
 
-When the user is specific ("just one chart of X"), their scope wins — build that, note what you'd add, and move on.
+  *A KPI row is not the default opening; non-monitoring dashboards rarely need one, and detail tables should only be included when row-level lookup is explicitly required.*
+* **Data-driven scope** — Use `fetch_dataset` to examine available fields and metrics. Let the user's ranked questions determine which metrics merit a section.
+* **Proportional depth** — Broad requests require wider, shallower sections; narrow requests require deep, focused sections.
+* **Real data & interactive controls** — Wire real fields and metrics. KPI comparisons must reference the dashboard's Period Comparison control rather than static values. Always wire dashboard controls explicitly and apply a theme (default: `theme: H.themes.classic`).
+* **Grid layout** — Stack sections vertically by priority. Within each section, place 1–4 blocks per row (full-width for hero trends/tables; 2–3 columns for side-by-side comparisons). Maintain consistent grid alignment and sizing based on visual hierarchy. Each tab must be a self-contained canvas.
 
-**Two dashboards for different jobs should not come out the same shape.** If the one you are about to build would look the same on any dataset with any reader, you defaulted instead of deciding — go back to what the reader is doing and re-derive the opening.
+If the user gives a tight instruction ("just build one chart for X"), stick strictly to their scope, mention potential additions, and complete the request.
 
 ## Workflow
 
-1. **Derive the spec, then the sections** (fill "What a good input looks like", in this order): from the prompt → from the dataset (call `fetch_dataset` — predefined metrics first, then date fields, then low-cardinality descriptive dimensions as breakdown/filter candidates). Name **what the reader is doing** and **rank their questions** before you think about blocks — those two answers decide the dashboard's opening and its order, and skipping them is what makes every dashboard come out the same. Then turn the ranked questions into **sections**, using the dataset's subjects/metrics as the material that answers them (see *What a bare minimum output looks like*), and set each section's depth by the ask's breadth. Ask at most one short round, and only for what is genuinely undecidable; decide everything else and state every assumption.
-2. **Propose and confirm.** Present a short text plan, then draw the layout as a wireframe — name the dataset with its `@Dataset:` reference, give each section the question it answers in the reader's words, and list each control in plain terms (what viewers can slice by).
+1. **Derive the spec and rank the sections.** Collect specs from the prompt and run `fetch_dataset` (identifying metrics, primary date fields, and low-cardinality dimensions for slicing). Identify the reader's primary action and rank their core questions. Map these questions directly to dashboard sections. Clarify only critical ambiguities with the user; make reasonable assumptions for everything else and document them.
+2. **Propose and confirm.** Present a concise summary plan along with a 12-column grid wireframe detailing dataset references, ranked section questions, and filter controls:
 
    ````
    ## What's in the dashboard
-   **For** — <who reads it> **doing** <monitoring | diagnosing | comparing | planning | looking something up>
+   **For** — <audience> **doing** <monitoring | diagnosing | comparing | planning | looking something up>
    **Dataset** — @Dataset:<dataset_name>
-   **Sections** — in the order the reader asks them; each answers one question
-   - **<section>** — <the question this section answers, in the reader's words>
-   **Controls** — a date range plus 1–2 things viewers can slice by
-   - <Filter label> — <what it filters, in plain words>
+   **Sections** — ordered by question hierarchy:
+   - **<section>** — <question answered, in reader's words>
+   **Controls** — date range and slicing dimensions:
+   - <Filter label> — <target field/description>
 
    ```mermaid
    ---
@@ -88,175 +101,137 @@ When the user is specific ("just one chart of X"), their scope wins — build th
    ```
    ````
 
-   **The wireframe is the layout, not a sketch** — every block you'll declare, in view order, at the width you'll build it, on the same 12-column grid as the canvas. What the user approves here is what step 3 builds.
+   * **Wireframe rules:** Enclose the layout in a `block:frame` container with `columns 12`. Set column spans to match canvas positions (`3` = ¼, `4` = ⅓, `6` = ½, `12` = full). Every row must sum to 12; use bare `space:<n>` blocks for padding. Apply styles using the exact `classDef` definitions (`sect` for text, `ctrl` for filters, `viz` for visualizations). Label blocks as `<name> · <VizType>`. For multi-tab layouts, provide a separate diagram per tab under `**Tab: <label>**`.
 
-   * Everything sits inside the `block:frame … end` wrapper — that is the border that separates the wireframe from the message around it. `columns 12` inside it; spans are the canvas spans: ¼ `3` · ⅓ `4` · ½ `6` · full `12`.
-   * **Every row must total exactly 12** — pad a short row with `space:<n>`. Boxes fill left to right and wrap on their own, so a row that doesn't add up shifts every block after it. `space` is a keyword, not a block id: write it bare every time, however often you need it, and never number it to make it unique — `space1:3` is a real block and draws an empty lavender box labelled "space1".
-   * One box per declared block, in view order: the control row first, then the blocks top-to-bottom. A full-width heading TextBlock is what separates one section from the next.
-   * **Copy the three `classDef` lines character for character** — they are design-system values, not choices — and put every block on the matching `class` line: `sect` for TextBlocks, `ctrl` for FilterBlock / PopBlock / DateDrillBlock, `viz` for every VizBlock. A block on no `class` line reads as none of them.
-   * Label a box `<block name> · <VizType>`; a heading gets its heading text. Keep labels short — no `:`, no markdown, no emoji.
-   * Tabbed: one diagram per tab, each headed by `**Tab: <label>**`.
-
-   Then get the user's OK before building — never build straight off the plan. Do NOT call `ask_user`. Close the message with an **option link** — `[text](#opt)`, which renders as a clickable chip:
+   Include actionable option links at the end of your proposal:
 
    ```
    Build this dashboard? 
    [Yes — build it as planned](#opt) 
-   [<another way to build it — as an instruction>](#opt)
+   [<alternative instruction or adjustment>](#opt)
    ```
 
-   The first link is always the approval; what follows depends on the plan — the calls you made that this reader might want made differently. Clicking a chip sends its text **verbatim** as the user's next message, so write every label as the instruction they'd otherwise have typed.
-
-   **Then end your turn and wait** — the link is only markdown, not a tool call, so nothing pauses you. Build on approval; if the reply names a change, revise the plan and confirm again.
-
-   **Don't write/run queries and don't edit files in steps 1–2** — that's step 3, after approval. And "just build it, don't ask me questions" doesn't waive the plan: post it, then go on to step 3 in the same turn.
-
-3. **Build the dashboard** per Schema. Author the **static text** blocks yourself (titles, section intros, how-to-read notes). For each **data** block, generate the viz and put the returned AML in the block; hand-write a `viz: <Type> { … }` body only as a last resort, because hand-written viz AML is the single biggest source of invalid output (if you must, the `ref:` forms in the Schema are where it breaks). Then lay everything out **to the wireframe you confirmed** — same blocks, same rows, same order, span → width `3` = 280 · `4` = 380 · `6` = 580 · `12` = 1180. The view is always a TabLayout: one tab for a single-page dashboard, or blocks partitioned across tabs, each tab's canvas built the same way with a control row reserved at the top.
-4. **Wire the controls and the `explicit_interactions: []` array.** Every dashboard carries it, empty or not — a canvas dashboard without the key falls back to legacy behavior, where filters and charts on the same dataset link themselves. Build the control set the job needs (a date range + 1–2 dimension filters at minimum; add a date drill or Period Comparison when the questions call for one), then list under each control every block it should reach. Nothing connects unless it is listed, so an unlisted block is an unfiltered block. Leave filter → filter entries out, and keep every control's list inside the tab(s) it is shown on.
-5. **Verify against the minimum output.** Every block answers a ranked question (cut any that can't); the opening block matches what the reader is doing, and you can say why this dashboard's shape would be wrong for a different reader — if you can't, you defaulted; each KPI's comparison comes from the dashboard's Period Comparison control, not a period baked into the KPI; block bodies are sound, styling-free, and **carry no hard-coded time window or comparison period** — the date filter and Period Comparison provide those; every block declared is placed in the view, and the canvas matches the wireframe the user confirmed — same blocks, same rows, same spans (if the build had to deviate, say which row and why at handoff); the `explicit_interactions: []` array is present and complete — every control lists every block it should reach (each filter every block on its dataset that it should slice; Period Comparison the KPIs, not just the trend), no filter lists another filter, and no list crosses a tab boundary; then check code diagnostics and fix every error.
-6. **Deliver** with a handoff note — dataset used; each block name + viz type + the question it answers; which blocks carry date fields (with the field reference); tab membership if tabbed; and the assumptions you made.
+   Wait for user confirmation before building. Do not run queries or edit files until approved.
+3. **Build the dashboard.** Follow the AML Schema. Create static text blocks (`TextBlock`) for titles and guidance. Generate visualization AML for data blocks rather than hand-writing them. Construct the layout using a `TabLayout` structure with `pos()` coordinates matched precisely to your approved wireframe.
+4. **Wire controls and interactions.** Include the `explicit_interactions: []` block on every dashboard. Map each control (`FilterBlock`, `PopBlock`, `DateDrillBlock`) to its target visualization blocks and fields. Ensure interactive controls reach all relevant data blocks on their respective tabs.
+5. **Verify output quality.** Confirm that every block answers a ranked question, opening blocks reflect the user's workflow, layout spans match the wireframe, control interactions are fully mapped, and no diagnostics errors exist.
+6. **Deliver.** Provide a handoff summary containing the dataset used, block-to-question mappings, date field references, tab structures, and key design assumptions.
 
 ## Schema
 
-A dashboard is a `Dashboard <uname> { … }` object: you **declare blocks**, wire **interactions**, and place every block in the **view**. A block that isn't placed in the view is not shown. Never invent a dataset, model, or field name — use only ones you confirmed via `fetch_dataset` or the provided context.
+A dashboard is defined as a `Dashboard <uname> { … }` object containing block declarations, filter interactions, and layout positioning. Use only dataset, model, and field names verified via `fetch_dataset`.
 
 ### Block types
 
-* **VizBlock** — `viz: <a Viz object>`; the main content block (chart, table, KPI, dynamic content). Block-level `settings { hide_label: true }` hides the block's own label — use it on KPIs, whose viz already prints the label.
-* **TextBlock** — `content: @md … ;;`; static markdown/HTML/CSS. See *Text blocks* below.
-* **FilterBlock** — a dashboard-level control. `type:` is one of `'field' | 'text' | 'number' | 'date' | 'truefalse'`; a field filter takes `source: FieldFilterSource { dataset field }`. **Never give a FilterBlock a `default`** — a default silently hides rows on load.
-* **PopBlock** (period-over-period / Period Comparison) and **DateDrillBlock** (date granularity) — same block shape; add when the dashboard's questions need a comparison or a switchable grain.
+* **VizBlock** — Contains a visualization (`viz: <VizObject>`). Use `settings { hide_label: true }` on KPI blocks where the visual already displays the metric title.
+* **TextBlock** — Static text, markdown, or custom HTML (`content: @md … ;;`).
+* **FilterBlock** — Interactive filter control. Set `type:` (`'field' | 'text' | 'number' | 'date' | 'truefalse'`) and configure `source: FieldFilterSource { dataset field }`. Do not set a `default` property, as defaults hide unselected data on initial load.
+* **PopBlock & DateDrillBlock** — Controls for Period-over-Period comparisons and date granularity switching.
 
 ### Field references inside a viz (the #1 source of errors)
 
-`ref:` takes a different form depending on what you are pointing at:
+Use the correct `ref:` syntax based on the field type:
 
-* **model field / dimension** → `r(<model>.<field>)`
-* **dataset metric** → `r(<dataset>.<metric>)`
-* **dataset dimension** (two-arg) → `r(<dataset>, <model>.<dimension>)`
-* **an adhoc `calculation` defined inside the viz** → its **bare string name**, not `r()` — e.g. `ref: 'total_sales'`
+* **Model field / dimension:** `r(<model>.<field>)`
+* **Dataset metric:** `r(<dataset>.<metric>)`
+* **Dataset dimension (two-argument):** `r(<dataset>, <model>.<dimension>)`
+* **Ad-hoc calculation (defined in viz):** Use the string alias directly (`ref: 'total_sales'`), not `r()`.
 
 ### The dashboard — worked example
-
-Copy the vocabulary here, not the arrangement — this one is a monitoring dashboard.
 
 ```aml
 Dashboard sales_overview {
   title: 'Sales Overview'
-  theme: H.themes.classic                    // default; build-dashboard-theme for real branding
-  settings { timezone: 'Asia/Ho_Chi_Minh' autorun: true cache_duration: 3600 }   // all optional
+  theme: H.themes.classic
+  settings { timezone: 'Asia/Ho_Chi_Minh' autorun: true cache_duration: 3600 }
 
-  // ---- BLOCKS: declared once here, by name. Positions live in the view, never here.
+  // ---- BLOCKS DECLARATION
   block b_title: TextBlock { content: @md # Sales Overview ;; }
 
-  block f_date: FilterBlock {                // the date range — sets the time window for the whole page
+  block f_date: FilterBlock {
     label: 'Date Range'
     type: 'date'
     source: FieldFilterSource { dataset: car_retails field: r(car_retails_payments.payment_date) }
   }
-  block f_country: FilterBlock {             // 1–2 dimension filters — what viewers slice by
+  block f_country: FilterBlock {
     label: 'Office Country'
     type: 'field'
     source: FieldFilterSource { dataset: car_retails field: r(car_retails_offices.country) }
-  }                                          // no `default {}` — a default hides rows on load
-  block c_pop: PopBlock { label: 'Compare To' }   // Period Comparison — the KPIs' comparison comes from HERE
+  }
+  block c_pop: PopBlock { label: 'Compare To' }
 
   block v_total_sales: VizBlock {
     label: 'Total Sales'
     settings { hide_label: true }
-    viz: MetricKpi { … }                     // the generated viz AML
+    viz: MetricKpi { … }
   }
   block v_orders: VizBlock { label: 'Orders' settings { hide_label: true } viz: MetricKpi { … } }
   block v_customers: VizBlock { label: 'Customers' settings { hide_label: true } viz: MetricKpi { … } }
 
   block h_trend: TextBlock { content: @md ## How sales are moving ;; }
-  block v_monthly_sales: VizBlock {          // hand-written body — LAST RESORT; note each ref: form
+  block v_monthly_sales: VizBlock {
     label: 'Monthly Sales Trend'
     viz: LineChart {
       dataset: car_retails
       calculation avg_order { formula: @aql car_retails_orders | average(...) ;; calc_type: 'measure' data_type: 'number' }
       x_axis: VizFieldFull {
-        ref: r(car_retails_payments.payment_date)      // model field
+        ref: r(car_retails_payments.payment_date)
         transformation: 'datetrunc month'
         format { type: 'date' pattern: 'LLL yyyy' }
       }
       y_axis {
-        series { field: VizFieldFull { ref: r(car_retails.total_sales) } }   // dataset metric
-        series { field: VizFieldFull { ref: 'avg_order' } }                  // adhoc calculation: bare name
+        series { field: VizFieldFull { ref: r(car_retails.total_sales) } }
+        series { field: VizFieldFull { ref: 'avg_order' } }
       }
       settings { row_limit: 100 show_data_points: true }
     }
-  }                                          // NO viz-level `filter` — f_date and c_pop provide the window and the comparison
+  }
 
   block h_where: TextBlock { content: @md ## Where it comes from ;; }
   block v_by_country: VizBlock { label: 'Sales by Country' viz: BarChart { … } }
-  block v_detail:     VizBlock { label: 'Order Detail' viz: DataTable { … } }
+  block v_detail: VizBlock { label: 'Order Detail' viz: DataTable { … } }
 
-  // ---- INTERACTIONS: always present, `[]` when there is nothing to wire. Nothing connects unless
-  //   it is listed here: each control names every block it reaches, grouped by the field those
-  //   blocks read. `to` holds plain block names.
-  //   • No filter → filter entry: a filter that targets another filter narrows its options.
-  //   • TABBED: a control lists only the blocks on the tab(s) it is shown on.
+  // ---- INTERACTIONS
   explicit_interactions: [
     FilterInteraction {
-      from: 'f_date'                                                  // the date range reaches EVERY data block
+      from: 'f_date'
       to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales', 'v_by_country', 'v_detail']
       field: r(car_retails_payments.payment_date)
     },
     FilterInteraction {
-      from: 'f_country'                                               // list EVERY block it should slice
+      from: 'f_country'
       to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales', 'v_by_country', 'v_detail']
       field: r(car_retails_offices.country)
     },
-    DateDrillInteraction {
-      from: '<drill>'
-      to: ['v_monthly_sales']
-      field: r(car_retails_payments.payment_date)
-    },
     PopInteraction {
-      from: 'c_pop'                                                   // the KPIs too, not only the trend
+      from: 'c_pop'
       to: ['v_total_sales', 'v_orders', 'v_customers', 'v_monthly_sales']
-      field: r(car_retails_payments.payment_date)                     // model.field ref — NOT ref('<dataset>', …)
+      field: r(car_retails_payments.payment_date)
     }
   ]
 
-  // ---- VIEW: ALWAYS a TabLayout of CANVASES; each tab IS a canvas. SINGLE-PAGE = one tab.
-  // A canvas carries each block's position + layer, never its body, and its coordinates restart at (20, 20).
+  // ---- VIEW LAYOUT
   view: TabLayout {
     tab main: CanvasLayout {
-      label: 'Overview'                      // tab title
-      width: 1220                            // 12-col grid, 80px cols · spans: ¼ 280 · ⅓ 380 · ½ 580 · full 1180
-      height: 1000                           // tallest block's bottom + 20
-      grid_size: 20                          // legal: 5 | 10 | 15 | 20 | 25 — use 20; spacing is pos()-driven:
-                                             // first block at 20, steps of 20, last ends at width - 20
+      label: 'Overview'
+      width: 1220
+      height: 1440
+      grid_size: 20
       auto_expand_vertically: true
-      // HEIGHT — give text blocks, MetricKpi, and control blocks (filter/drill/pop) a pos() height of
-      // AT LEAST 100 (more when the content needs it): each renders taller than a naive estimate, so a
-      // shorter height clips the content or forces an inner scrollbar. Charts scale to their box — size
-      // those by importance.
-      block b_title    { position: pos(20, 20, 1180, 100) layer: 1 }    // full-width title
-      block f_date     { position: pos(20, 140, 280, 100) layer: 1 }    // control row across the top
-      block f_country  { position: pos(320, 140, 280, 100) layer: 1 }
-      block c_pop      { position: pos(620, 140, 280, 100) layer: 1 }
-      block v_total_sales { position: pos(20, 260, 280, 120) layer: 1 } // KPI row: x 20 / 320 / 620 / 920
+
+      block b_title       { position: pos(20, 20, 1180, 100) layer: 1 }
+      block f_date        { position: pos(20, 140, 280, 100) layer: 1 }
+      block f_country     { position: pos(320, 140, 280, 100) layer: 1 }
+      block c_pop         { position: pos(620, 140, 280, 100) layer: 1 }
+      block v_total_sales { position: pos(20, 260, 280, 120) layer: 1 }
       block v_orders      { position: pos(320, 260, 280, 120) layer: 1 }
       block v_customers   { position: pos(620, 260, 280, 120) layer: 1 }
-      block h_trend    { position: pos(20, 400, 1180, 100) layer: 1 }   // section heading
-      block v_monthly_sales { position: pos(20, 520, 1180, 400) layer: 1 }  // hero; ends at 1200 = width - 20
-      block h_where    { position: pos(20, 940, 1180, 100) layer: 1 }
-      block v_by_country { position: pos(20, 1060, 580, 360) layer: 1 } // ½ + ½ side by side
-      block v_detail     { position: pos(620, 1060, 580, 360) layer: 1 }
+      block h_trend       { position: pos(20, 400, 1180, 100) layer: 1 }
+      block v_monthly_sales { position: pos(20, 520, 1180, 400) layer: 1 }
+      block h_where       { position: pos(20, 940, 1180, 100) layer: 1 }
+      block v_by_country  { position: pos(20, 1060, 580, 360) layer: 1 }
+      block v_detail      { position: pos(620, 1060, 580, 360) layer: 1 }
       mobile { mode: 'auto' }
-    }
-
-    // MULTI-TAB — add more `tab <x>: CanvasLayout { … }`, each built exactly like the tab above
-    // (coordinates restart at 20,20 per tab). Partition the blocks; each tab is coherent on its own.
-    tab detail: CanvasLayout {
-      label: 'Detail'
-      width: 1220
-      height: 460
-      grid_size: 20
-      block <other_viz> { position: pos(20, 20, 1180, 400) layer: 1 }
     }
   }
 }
@@ -264,20 +239,19 @@ Dashboard sales_overview {
 
 ### Text blocks — the dashboard's words
 
-`TextBlock` carries the title + subtitle, section headings/intros, dividers, and **how-to-read notes** (what a metric means, how to filter, caveats). Good analytics is explained, not just plotted — reach for a text block whenever the dashboard needs guidance, not only charts.
+Use `TextBlock` components for titles, subtitles, section headings, explanatory notes, metric definitions, and user documentation.
 
 ```aml
-block <x>: TextBlock { content: @md ## Section heading ;; }   // static markdown / HTML / CSS
+block <x>: TextBlock { content: @md ## Section heading ;; }
 ```
 
-The instant a block must show a *live data value* it is not a TextBlock — that's a data block (a MetricKpi or a dynamic content block).
+When a block displays dynamic, real-time data values, use a data visualization block (`MetricKpi` or standard chart) instead of a `TextBlock`.
 
 ## Conventions
 
-* **Never invent a layout property.** The Schema above shows the constructs you need (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`); it is not an exhaustive list of what the product supports, so anything beyond it gets checked, not guessed — confirm with `search_docs` first. In particular there is no layout `margin`/`padding`/`gap`; spacing is pos()-driven. A bare top-level `view: CanvasLayout` and a `LinearLayout` are also valid AML, but this skill always wraps the canvas in a TabLayout for uniformity.
-* **Editing a dashboard that wires with `interactions: [ … ]` and `CustomMapping`** — that is the legacy key, where filters and charts on the same dataset link themselves. Adding `explicit_interactions` beside it switches the whole legacy array off, so never mix the two. Leave the wiring alone when the edit doesn't touch it; when the edit adds blocks or controls, convert the whole dashboard first, per build-dashboard-controls → *Legacy dashboards*.
-* **Prefer a generated viz over a hand-written one** — hand-written viz AML is the biggest source of invalid output.
-* **Prefer the dashboard's controls over per-chart filters for anything interactive.** The date filter sets the time window, Period Comparison the comparison period, the drill the grain, dimension filters the segmenting — a chart that hard-codes one of those ships empty, or goes stale as soon as the viewer moves the control. A filter that defines what the chart *is* (top 10 by revenue, one segment) is fine and stays.
-* Prose strings that may contain apostrophes or span lines (the dashboard `description`, TextBlock content, title subtitle) go in `@md … ;;` heredocs, not single quotes.
-* Write the dashboard `description` and title subtitle for end users in plain language — not for analysts, not technical.
-* **File placement:** decide the target folder once — the user's stated location, or `dashboards/` by default — and keep it for the whole conversation. Never switch folders because an example file you read lives elsewhere.
+* **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
+* **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure.
+* **Prefer generated visualizations.** Rely on tool-generated visualization AML rather than manually coding viz blocks to minimize syntax errors.
+* **Use global controls over per-chart filters.** Let dashboard-level filters control time ranges, grains, and segments across charts. Use chart-specific filters only for core chart definitions (e.g., Top 10 lists).
+* **Format text strings cleanly.** Use `@md … ;;` heredocs for multiline content or strings containing special characters and apostrophes. Write clear descriptions and titles aimed at end users.
+* **Maintain consistent file structure.** Save dashboard files in the specified project directory (defaulting to `dashboards/`).
