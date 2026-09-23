@@ -25,7 +25,7 @@ Before asking:
 
 1. Inspect source definitions, reports, documentation, usage history, and available Looker outputs.
 2. Make reversible work choices within the guardrails; state consequential assumptions.
-3. Ask one unresolved, blocking question with evidence, a recommendation, and its consequences. See [the campaign example](reference/campaign-benchmark.md#owner-decisions).
+3. Ask one unresolved, blocking question with evidence, a recommendation, and its consequences.
 
 Preserve established behavior when evidence agrees. Log pending decisions and continue independent work. Defer retirement, rollout, and broader acceptance questions until needed. Ask before acting if an authorization blocks even the first result.
 
@@ -76,7 +76,7 @@ When sample data is available, calculate expected keyed totals and grouped rows 
 Apply the relevant review:
 
 - Derived tables: inspect LookML, not README labels. `derived_table: sql` maps to a Query Model; `explore_source` is a native derived table requiring Explore-aware redesign. For SQL-derived tables, review Liquid inputs, dialect, grain, persistence, and permissions separately from the model mapping.
-- Liquid/parameters/filters: classify intent using [the Liquid review](reference/mapping.md#liquid-and-filter-review). For derived dates or populations, follow [the campaign benchmark](reference/campaign-benchmark.md).
+- Liquid/parameters/filters: classify intent using [the Liquid review](reference/mapping.md#liquid-and-filter-review).
 - Relationships: verify [target cardinalities](reference/mapping.md#cardinality). Reversing one-to-many notation does not preserve roots, joins, or filters. For many-to-many, profile both keys and bridge grain; consider junction models, separate facts with conformed dimensions, pre-aggregation, or metric redesign. A bridge alone does not prove correct sums/distinct counts.
 - Keys: never disguise duplicates as one-to-one/many-to-one. Establish unique keys and document allocation/weighting for facts belonging to multiple categories. Test equal measure values on different fact keys: deduplicate by fact key, not `SUM(DISTINCT value)`.
 - Query paths: compare dimension-only, metric-only, mixed-model, and filter-only queries under Holistics' dynamic root versus Looker's fixed root. Review custom/multi-condition joins, ambiguous/forced paths, nullability, filter direction, and row-level permission propagation. Fixed SQL may need a Query Model; record its loss of dynamic modeling flexibility.

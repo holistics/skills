@@ -112,5 +112,3 @@ Check input behavior:
 - verify multi-value parameter support in the target version;
 - validate scalars against the agreed type/domain or allowed values, using supported escaping/binding;
 - allowlist SQL identifiers and branches; never interpolate free text into identifiers or SQL fragments.
-
-When campaign selection derives dates for a network benchmark, use [the campaign benchmark example](campaign-benchmark.md).
