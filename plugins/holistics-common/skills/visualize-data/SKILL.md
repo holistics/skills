@@ -11,16 +11,15 @@ description: Create charts, tables, and visualizations from queries. Use this wh
 * Set up Holistics MCP
 
 ## Recommended workflow
-1. `generate_aql` to query the raw data (WITHOUT visualization requirements)
+1. Write the AQL for the raw data (WITHOUT visualization requirements) with the [](../write-aql/) skill
 2. `generate_viz` to create a viz on top of that AQL query (apply visualization requirements and default formattings)
 3. `execute_viz` to run the viz and show the result to the user
 
 If `generate_viz` fails, fall back to showing a plain table with `execute_aql`.
 
 ## Rules
-* To update date/time filters, use `generate_aql` first. It can write accurate date/time condition syntax.
+* To update date/time filters, change the AQL first (with [](../write-aql/)), then regenerate the viz.
 * Cohort retention should ALWAYS be visualized as Pivot Table.
-* `generate_aql` knows how to calculate cohort retention. You don't need to explain the steps when using it.
 * **Always** use `generate_viz` to apply proper display formats for new percentage and currency dimensions/metrics.
   * Percentage: Make sure to display with proper "%" format
   * Currency: Make sure to include the proper currency symbol

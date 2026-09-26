@@ -30,6 +30,8 @@ Quick guidance on picking a `type`:
 ```
 plugins/
   holistics-common/       # Shared source of truth for Holistics- skills and references
+    agent-templates/      # Sub-agent sources; rendered into agents/ by build-agents.js
+    agents/               # Generated — do not edit
     references/
     skills/
   holistics-development/  # Plugin for Holistics development workflows
@@ -38,6 +40,7 @@ plugins/
   analytics/              # Plugin for generic analytics workflows (not Holistics-specific)
     skills/
 scripts/
+  build-agents.js         # Render agent-templates/ into agents/ (--check to verify)
   bump.js                 # Bump plugin version and update CHANGELOG
   create-link.sh          # Add a shared skill/reference to a plugin
   sync-links.sh           # Sync all (or one) linked directories from source
@@ -88,6 +91,20 @@ pnpm validate-links  # runs automatically as a pre-commit hook
 ```
 
 This checks that each linked directory matches its source and warns about missing sources.
+
+## Sub-agents
+
+Sub-agents (Claude Code `agents/*.md`) are generated from `plugins/<plugin>/agent-templates/*.md`. A template line `<!-- include: <path> -->` is replaced with that file's contents (path relative to the plugin), so an agent can preload skill references without a hand-maintained copy.
+
+After editing a template or an included file, run `pnpm build-agents`, then `pnpm sync-links`. The pre-commit hook runs `pnpm build-agents --check` and rejects out-of-date agents.
+
+## Content copied from other repos
+
+Some sources are copied verbatim from another repo and are **not** synced automatically. Each carries an `.upstream` file recording the origin repo, path, and commit.
+
+* `plugins/holistics-common/skills/aql/` — from [anfra-ai/skills](https://github.com/anfra-ai/skills) `plugins/anfra-development/skills/aql`.
+
+To update, re-copy from upstream, bump the commit in `.upstream`, then `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied files so re-copying stays a clean overwrite.
 
 ## Scripts
 
