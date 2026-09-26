@@ -12,6 +12,7 @@
     "create-link": "bash scripts/create-link.sh",
     "validate-links": "bash scripts/validate-links.sh",
     "validate-frontmatter": "node scripts/validate-frontmatter.js",
+    "build-agents": "node scripts/build-agents.js",
     "test": "bash scripts/test.sh"
   },
   "config": {

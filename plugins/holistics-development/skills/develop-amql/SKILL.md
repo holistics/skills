@@ -9,7 +9,7 @@ description: Write and edit AML/AQL code for Holistics models, datasets, dashboa
 * Use Holistics knowledge and tools
   * Refer to [](../../references/) and use `search_docs` to learn about code syntax. See [](../search-docs/) for invocation details.
   * Use `fetch_dataset` to learn about the dataset (e.g. all available models and fields within that dataset), in order to make accurate edits.
-  * Use `generate_aql` to write AQL (e.g. AQL metrics).
+  * Use [](../write-aql/) to write AQL (e.g. AQL metrics); validate it with `validate_aql`.
   * Use `generate_viz` to define Viz.
   * Use `list_data_sources`, `list_data_source_schemas`, `read_data_source_schema`, `read_data_source_table_schema` to study the underlying database schema in order to write relevant and accurate modeling codes.
 * Pay attention to code diagnostics and fix them if possible.
@@ -18,7 +18,7 @@ description: Write and edit AML/AQL code for Holistics models, datasets, dashboa
 1. Read relevant codes
 2. If working with a dataset, use `fetch_dataset` to view all semantics of the dataset
 3. Refer to [](../../references/) and use `search_docs` to learn the correct syntax
-4. To write AQL and Viz, use `generate_aql` and `generate_viz`. For others, research further and write the codes.
+4. To write AQL, use [](../write-aql/); to define Viz, use `generate_viz`. For others, research further and write the codes.
 5. Make code suggestions for the user
 
 ## Creating new datasets

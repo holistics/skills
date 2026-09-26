@@ -64,7 +64,7 @@ For each Power BI measure (work in dependency order, base measures first):
 
 1. Read the full DAX, including any referenced sub-measures.
 2. Classify the measure using the patterns in [](./dax-to-aql.md).
-3. Call `generate_aql` with the DAX, the intent, and the relevant dimensions.
+3. Write the AQL with the `write-aql` skill, from the DAX, the intent, and the relevant dimensions.
 4. Place the metric in the appropriate model or dataset scope.
 5. Run `validate_aql`, then sample-execute via `execute_aql` and compare to the Power BI oracle.
 

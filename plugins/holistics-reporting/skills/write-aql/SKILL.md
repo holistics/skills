@@ -3,36 +3,63 @@ name: write-aql
 description: Write and run AQL (Analytic Query Language) queries to answer data questions. Use this whenever the user asks for data, wants to query a dataset, needs to filter/aggregate/join data, or asks about metrics and dimensions in Holistics.
 ---
 
-## Pre-requisites
+# Writing AQL to answer a question
+
+Goal: turn the user's analytics request into a correct AQL query, verify it, and
+run it.
+
+> **AQL is not SQL.**  Writing it from SQL habits or memory produces wrong queries and burns validate→fix cycles.
+> **Read the [](../aql/) references _before_ you write — not after you fail.**
+> Looking things up first is faster than guessing and retrying.
+
+> **Prefer delegating to a sub-agent (to save context).** Reading the AQL references consumes context. If an `aql-writer` sub-agent is available, hand the request to it and let it do the lookups + write/validate — it returns only the final AQL, keeping your main context lean. Otherwise, if your runtime has a generic task/subagent tool, spawn one and tell it to use the `aql`, `write-aql`, and `validate-aql` skills. If neither is available (e.g. claude.ai, ChatGPT), or you *are* the `aql-writer` sub-agent, do the work yourself.
+
+## Who writes the AQL
+By default, **write it yourself** with the workflow below.
+
+Delegate to Holistics AI (`generate_aql`) instead — see *Delegating to Holistics AI* — when the user asks for Holistics AI / `generate_aql`, or the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`) say to use it.
+
+## Prerequisites
 * Set up Holistics MCP
+* Know the dataset. Use `fetch_dataset` to list its models, fields, and metrics — that's your `dataset_fields`. Use only those, with their **EXACT** names. In an AMQL repo, also read the dataset/model `.aml` files for definitions and descriptions.
 
-## Writing AQL
-* Always use `generate_aql` tool to write AQLs instead of writing yourself. It can understand the question well and write accurate queries.
-* In your natural language query:
-  * Provide all relevant data context (e.g. sample data, past errors) to improve the tool's accuracy and relevance.
-  * Quote filter values if (and only if) you know the exact values to filter (e.g. "Vietnam", "VN", `England`).
-* Always leverage previous tool call results as reference resources:
-  * This enables reuse of existing metric/measure definitions rather than regenerating them from scratch.
-  * Even partially relevant AQLs are valuable — they may contain reusable measures, metrics, or filters that apply to the new query.
-* When working with unknown data structures (such as structs, JSONs, or ambiguous fields like "settings", "configs"), you **CANNOT** simply ask `generate_aql` to query them, and **NEVER** assume or guess their properties and structures. Otherwise, `generate_aql` may use INACCURATE or NON-EXISTING properties. In this case, run one query to preview and inspect the data structure first, then write another query for the actual answer.
+## Workflow
+1. **Understand the request** against the available fields. If you genuinely can't (no matching fields, ambiguous business logic, or it's not an analytic), ask the user to clarify instead of guessing.
+2. **Read the AQL references first — required, before writing anything.** Don't write AQL from memory or SQL intuition. Via the [](../aql/) skill:
+   * Read `references/aqlearn.md` (the core lessons/rules) if you haven't yet this session.
+   * Look up the exact functions/operators you'll use in `references/aql/`.
+   * For nested aggregation, top-N-per-group, period comparison, level-of-detail, cohort retention, or ranking — study the worked examples and gotchas in `references/examples/`. Always check the `[silent]` gotchas: they produce wrong-but-valid AQL with **no** validation error, so validation won't catch them for you.
+3. **Verify filter values before using them.** If the request filters on values you're not certain match the stored data (case, abbreviations, typos), use [](../lookup-values/) first. Never assume filter literals are exact.
+4. **Inspect opaque fields.** For structs / JSON / "settings"-type fields, never guess the structure — run a preview query (e.g. 10 latest rows with that field) to see a sample, then write the real query using the observed shape.
+5. **Write a single `explore`** using what you read in step 2.
+6. **Validate** with [](../validate-aql/) and fix any errors.
+7. **Run** it with [](../run-aql/) and answer from the result.
 
-  Example recommended workflow:
-  * User question: List users who have spell check enabled
-  * Step 1: `generate_aql`: List 10 latest users with their settings
-  * Step 2: `execute_aql` and check the result for data shape of user settings
-  * Step 3: `generate_aql`: List users who have spell check enabled (by checking their settings). Example of `users.settings`: `{"enable_spell_check": true, "theme": 3}`
-    * NOTE: **ALWAYS** provide the data schema or example if it's not already available in dataset. It is **MORE USEFUL** than only providing the json path.
-  * Step 4: `execute_aql` and provide answer
+## Core principles
+* Think **metric-centric**, not table-centric (SQL). Do **NOT** write joins — AQL joins automatically through relationships.
+* Prefer **existing** dimensions/measures/metrics; don't redeclare them. Never invent models, fields, functions, or arguments; use documented ones with the correct argument order.
+* Reuse AQL from earlier in the conversation — even a partially relevant query may hold measures, metrics, or filters that apply to the new one.
+* Give human-readable **snake_case** names to explore dimensions/measures, always add `sorts`, and **narrow the result** to exactly what's asked (if the user asks for a total, return only the total — not raw rows).
+* Prefer native time functions (`running_total`, `relative_period`, `period_to_date`, …) for period comparisons.
+* AQL has no visual features ("highlight", "% format", "color", "column chart") — those belong to the visualization. Leave them out of the query and handle them with [](../visualize-data/).
+* If a feature seems missing or you hit an error, assume it's a knowledge gap (wrong function/args) — check the [](../aql/) references — not an AQL bug.
 
-## Tool: `generate_aql`
-* In your natural language query, do NOT put filter values in quotes unless you are absolutely certain the filter values are exactly accurate. If you quote uncertain filter values, it can result in wrong filtering due to case sensitivity and typos.
-* AQL does NOT have visualization features such as "highlight", "% format", "color", "column chart", but Viz AML DOES. => You MUST OMIT the visual stuff (like "highlight" or "color") from the `query` for `execute_aql`, and provide them to `generate_viz` INSTEAD.
+## Presenting the result
+* Prefer a visualization ([](../visualize-data/)) over a plain table whenever it reads better — e.g. always for cohort retention.
+* `execute_aql` shows the AQL and its result to the user directly. Don't repeat them; summarize the notable numbers (or a short insight) instead.
+* If the AQL comes from a past conversation, say so in your answer.
 
-## Tool: `execute_aql`
-* IMPORTANT: Prefer visualizations (using `generate_viz` + `execute_viz`) to plain tables (using `execute_aql`) whenever **appropriate**. E.g. always use `generate_viz` + `execute_viz` for Cohort Retention because otherwise it would be very hard for the user to read the plain data table.
-* Always try to provide a summary with highlightable data/numbers (or even short insights) for the result. But do NOT repeat the result in your answer.
-* Remember that `execute_aql` tool shows the AQL and its result directly to the user. You should not repeat the AQL in your answer.
-* If the AQL comes from past conversations, ALWAYS mention the past conversations in your final answer.
+## Delegating to Holistics AI
+`generate_aql` spawns a Holistics AQL sub-agent that writes the query from a natural-language request. When using it:
+* Provide all relevant data context (sample data, past errors, earlier AQL) in the `query`.
+* Quote filter values only if you know they're exact (e.g. "Vietnam", `England`); otherwise leave them unquoted, since a quoted wrong value filters wrongly.
+* For opaque fields (structs, JSON, "settings"), preview the data first and pass the observed shape — e.g. ``Example of `users.settings`: `{"enable_spell_check": true, "theme": 3}` `` — rather than only a JSON path.
+* Omit visual requirements from the `query`; pass them to the visualization step instead.
+* Run the result with [](../run-aql/) as usual.
 
 ## Related skills
-* Writing and executing AQL only return plain table data. To retrieve visualized data (e.g. pivot tables, column charts), use [](../visualize-data/) skill.
+* [](../aql/) — AQL knowledge and reference docs.
+* [](../lookup-values/) — verify exact filter values before filtering.
+* [](../validate-aql/) — validate a query or expression before running it.
+* [](../run-aql/) — run a validated query and get its result.
+* [](../visualize-data/) — show the result as a chart or formatted table.
