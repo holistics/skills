@@ -1,0 +1,6 @@
+# Copied verbatim from anfra-skills; not synced automatically.
+# To update: re-copy from upstream and bump the commit below.
+repo: git@github.com:anfra-ai/skills.git
+path: plugins/anfra-development/skills/aql
+commit: c080a59db26b00c8abea43b07d9db47ca75a736e
+copied: 2026-09-25
