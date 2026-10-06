@@ -35,7 +35,7 @@ A controls task is fully specified when you can identify:
 
 ## Workflow
 
-1. **Analyze `page.aml` first**, even if the conversation summarizes it. Identify real block names, viz types, date field references `r(<model>.<field>)`, and tab memberships. Wire connections using real names only. Check the interactions key: if you see `explicit_interactions`, work within that array.
+1. **Analyze `page.aml` first**, even if the conversation summarizes it. Identify real block names, viz types, date field references `r(<model>.<field>)`, and tab memberships. Wire connections using real names only. Check the interactions key: if you see `explicit_interactions`, work within that array; otherwise see Conventions → *Legacy syntax* before changing any wiring.
 2. **Determine the control set** based on the existing blocks and user intentions. State your decisions clearly; only ask the user for input if a scoping decision is both highly ambiguous and consequential.
 3. **Declare each control and its interaction** (per the Schema). A control without a declared interaction does nothing. Group all targeted blocks by the field they read. (Note: Newly added viz blocks also start unwired, so include them in the interactions of any controls that should reach them).
 4. **Verify the routing matrix.** Ensure every control-to-block relationship appears in exactly one `to` list under the field that block reads. Confirm no `to` list targets a block on a tab where the control isn't visible. Ensure filters do not target other filters unless a cascading hierarchy was requested. **Crucial limit: No viz block may appear in more than one `DateDrillInteraction` or more than one `PopInteraction`.** Finally, fix any code diagnostics.
@@ -123,6 +123,10 @@ For `FilterInteraction`, `from` can be a filter or a viz block. `DateDrillIntera
 **Tab Boundaries:** Connections do not cross tabs. A control placed on one tab should only target blocks on that same tab. You do not need to explicitly disable cross-tab interactions; simply omitting those blocks from the `to` list is sufficient.
 
 **Avoid `disabled: true`:** An entry that includes `from`, `to`, and `disabled: true` simply turns the connection off. Leaving the entry out altogether achieves the exact same thing. If you see this in GUI-generated code, you may keep or remove it.
+
+### Legacy syntax
+
+`interactions` (with `CustomMapping`) is a legacy syntax. When editing a dashboard that uses it, or has neither key, read [Dashboard interactions → Interactions (legacy)](https://docs.holistics.io/reference/aml/dashboard-interactions#interactions-legacy) to see which connections are live, and rebuild them in `explicit_interactions`. Tell the user any you dropped.
 
 ### Others
 
