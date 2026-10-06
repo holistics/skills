@@ -146,7 +146,8 @@ Dashboard sales_overview {
   title: 'Sales Overview'
   theme: H.themes.classic
   settings {                                           // no timezone — follows the Organization Timezone
-    autorun: true
+    autorun_on_open: true
+    autorun_on_changes: true
     cache_duration: 3600
   }
 
