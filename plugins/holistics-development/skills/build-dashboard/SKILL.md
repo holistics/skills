@@ -61,7 +61,7 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
 ## Workflow
 
 1. **Derive the spec and rank the sections.** Collect specs from the prompt and run `fetch_dataset` (identifying metrics, primary date fields, and low-cardinality dimensions for slicing). Identify the reader's primary action and rank their core questions. Map these questions directly to dashboard sections. Clarify only critical ambiguities with the user; make reasonable assumptions for everything else and document them.
-2. **Propose and confirm.** Present a concise summary plan along with a 12-column grid wireframe detailing dataset references, ranked section questions, and filter controls:
+2. **Propose and confirm.** Present a concise summary plan along with a grid wireframe detailing dataset references, ranked section questions, and filter controls:
 
    ````
    ## What's in the dashboard
@@ -101,7 +101,7 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
    ```
    ````
 
-   * **Wireframe rules:** Enclose the layout in a `block:frame` container with `columns 12`. Set column spans to match canvas positions (`3` = ¼, `4` = ⅓, `6` = ½, `12` = full). Every row must sum to 12; use bare `space:<n>` blocks for padding. Apply styles using the exact `classDef` definitions (`sect` for text, `ctrl` for filters, `viz` for visualizations). Label blocks as `<name> · <VizType>`. For multi-tab layouts, provide a separate diagram per tab under `**Tab: <label>**`.
+   * **Wireframe rules:** Enclose the layout in a `block:frame` with `columns 12`, unless the user's layout or reference calls for another split. Set spans to match canvas positions (on 12: `3` = ¼, `4` = ⅓, `6` = ½, `12` = full). Every row fills the frame's columns; a nested `block:<id>:<span>` (e.g., a side rail) counts as its span. Pad with bare `space:<n>`. Apply styles using the exact `classDef` definitions (`sect` for text, `ctrl` for filters, `viz` for visualizations). Label blocks as `<name> · <VizType>`. For multi-tab layouts, provide a separate diagram per tab under `**Tab: <label>**`.
 
    Include actionable option links at the end of your proposal:
 
