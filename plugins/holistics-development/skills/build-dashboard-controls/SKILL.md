@@ -47,7 +47,7 @@ These are the ONLY control constructs available in AML—do not invent others. D
 
 ### Control blocks
 
-The `default` blocks below represent the **neutral opening state**—copy them as written. Replace values only when a specific starting point is requested (e.g., a filter takes a real `operator`/`value`, a drill takes a grain like `'month'`, and a PoP takes a `duration`/`granularity`).
+The `default` blocks below represent the **neutral opening state**—copy them as written. The neutral `operator` depends on the filter's data type: `'matches'` for date and datetime, `'is'` for text, number and true/false — `'matches'` on a text filter breaks it in the UI. Replace values only when a specific starting point is requested (e.g., a filter takes a real `operator`/`value`, a drill takes a grain like `'month'`, and a PoP takes a `duration`/`granularity`).
 
 **Prefer field filters.** Because they are backed by a model field, they inherit the correct data type and support drill-through. Reach for a manual filter (where `type:` is `'date'`, `'text'`, `'number'`, or `'truefalse'`, with no underlying field) only when the target blocks span **different datasets**. Both types of filters only affect the blocks listed in their interactions.
 
@@ -56,12 +56,12 @@ block <filter>: FilterBlock {                         // field filter — the de
   label: 'Filter Label'
   type: 'field'                                       // takes its data type from the field
   source: FieldFilterSource { dataset: <dataset_name> field: r(<model>.<field>) }
-  default { operator: 'matches' value: '$H_NIL$' }
+  default { operator: 'is' value: '$H_NIL$' }         // 'matches' only for a date/datetime field
 }
 block <date_filter>: FilterBlock {                    // manual filter — only across datasets
   label: 'Date Range'
   type: 'date'                                        // or 'text' | 'number' | 'truefalse'
-  default { operator: 'matches' value: '$H_NIL$' }
+  default { operator: 'matches' value: '$H_NIL$' }    // 'is' for 'text' | 'number' | 'truefalse'
 }
 block <drill>: DateDrillBlock { label: 'Date Drill' default: 'default' }
 block <pop>: PopBlock {                               // the ONLY period-comparison construct — no PeriodComparisonBlock exists
