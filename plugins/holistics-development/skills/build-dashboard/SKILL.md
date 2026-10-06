@@ -128,6 +128,8 @@ A dashboard is defined as a `Dashboard <uname> { … }` object containing block 
 * **FilterBlock** — Interactive filter control. Set `type:` (`'field' | 'text' | 'number' | 'date' | 'truefalse'`) and configure `source: FieldFilterSource { dataset field }`. Do not set a `default` property, as defaults hide unselected data on initial load.
 * **PopBlock & DateDrillBlock** — Controls for Period-over-Period comparisons and date granularity switching.
 
+**Timezone:** Leave `timezone` out of `settings`. A dashboard without one follows the Organization Timezone (Admin Settings → General Settings), which is what the org already reads its numbers in. Set it only when the user asks for a specific timezone, and then as an IANA name (`'Asia/Ho_Chi_Minh'`, `'America/New_York'`, `'Etc/UTC'`) — bare `'UTC'`, `'GMT+7'` or offsets fail with "Type 'String' is not assignable to type 'Timezone'". Never guess one.
+
 ### Field references inside a viz (the #1 source of errors)
 
 Use the correct `ref:` syntax based on the field type:
@@ -143,7 +145,10 @@ Use the correct `ref:` syntax based on the field type:
 Dashboard sales_overview {
   title: 'Sales Overview'
   theme: H.themes.classic
-  settings { timezone: 'Asia/Ho_Chi_Minh' autorun: true cache_duration: 3600 }
+  settings {                                           // no timezone — follows the Organization Timezone
+    autorun: true
+    cache_duration: 3600
+  }
 
   // ---- BLOCKS DECLARATION
   block b_title: TextBlock { content: @md # Sales Overview ;; }
