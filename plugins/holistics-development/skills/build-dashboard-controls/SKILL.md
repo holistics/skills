@@ -4,7 +4,7 @@ label: Build Dashboard Controls
 description: |-
   Add or edit a Holistics dashboard's interactive controls and the interactions that wire them: field and date-range filters (FilterBlock), date drill (DateDrillBlock), period-over-period comparison (PopBlock).
 
-  Use when the user wants to add, change, or scope a control, or to move a dashboard's legacy `interactions` onto `explicit_interactions`.
+  Use when the user wants to add, change, or scope a control.
 
   Typical phrasings: add a filter, filter by category, let viewers slice by X, add a date range or date picker, let viewers switch granularity, compare year over year, this filter should only affect X.
 
@@ -35,7 +35,7 @@ A controls task is fully specified when you can identify:
 
 ## Workflow
 
-1. **Analyze `page.aml` first**, even if the conversation summarizes it. Identify real block names, viz types, date field references `r(<model>.<field>)`, and tab memberships. Wire connections using real names only. Check the interactions key: if you see `explicit_interactions`, work within that array. If you see only `interactions`, or neither, it is a legacy dashboard—read Conventions → *Legacy dashboards* before modifying any wiring.
+1. **Analyze `page.aml` first**, even if the conversation summarizes it. Identify real block names, viz types, date field references `r(<model>.<field>)`, and tab memberships. Wire connections using real names only. Check the interactions key: if you see `explicit_interactions`, work within that array.
 2. **Determine the control set** based on the existing blocks and user intentions. State your decisions clearly; only ask the user for input if a scoping decision is both highly ambiguous and consequential.
 3. **Declare each control and its interaction** (per the Schema). A control without a declared interaction does nothing. Group all targeted blocks by the field they read. (Note: Newly added viz blocks also start unwired, so include them in the interactions of any controls that should reach them).
 4. **Verify the routing matrix.** Ensure every control-to-block relationship appears in exactly one `to` list under the field that block reads. Confirm no `to` list targets a block on a tab where the control isn't visible. Ensure filters do not target other filters unless a cascading hierarchy was requested. **Crucial limit: No viz block may appear in more than one `DateDrillInteraction` or more than one `PopInteraction`.** Finally, fix any code diagnostics.
@@ -123,34 +123,6 @@ For `FilterInteraction`, `from` can be a filter or a viz block. `DateDrillIntera
 **Tab Boundaries:** Connections do not cross tabs. A control placed on one tab should only target blocks on that same tab. You do not need to explicitly disable cross-tab interactions; simply omitting those blocks from the `to` list is sufficient.
 
 **Avoid `disabled: true`:** An entry that includes `from`, `to`, and `disabled: true` simply turns the connection off. Leaving the entry out altogether achieves the exact same thing. If you see this in GUI-generated code, you may keep or remove it.
-
-### Legacy dashboards — `interactions` and `CustomMapping`
-
-Older dashboards define connections under `interactions: [ … ]`, where the `to` field contains `CustomMapping { block: … field: … }` objects. This legacy system auto-links filters and charts on the same dataset; the array only records exceptions (like using a different field or `disabled: true`).
-
-Determine the active behavior using this matrix:
-
-| `explicit_interactions` | `interactions` | In force |
-| --- | --- | --- |
-| present | present | `explicit_interactions` — the legacy array is ignored |
-| present | absent | `explicit_interactions` |
-| absent | present | `interactions`, plus auto-linking |
-| absent | absent | auto-linking, no exceptions |
-
-**Warning:** Adding `explicit_interactions` instantly disables the entire legacy `interactions` array and all auto-linking. Any connections you do not explicitly rebuild will silently break. Never mix a new explicit entry into a legacy array. Instead, convert the entire dashboard to the explicit model first, then apply the requested changes.
-
-**When to convert:** Convert the dashboard when you need to change a control, modify an interaction, or add a block that a control should affect. If your task does not alter wiring (e.g., restyling, rewording, or simply moving blocks), leave the legacy array alone.
-
-**How to convert:** Trace every currently active connection and explicitly declare it:
-
-1. **Mapped edges:** Convert each `CustomMapping` (that has a `field`) into a new entry: retain the same `from` and `field`, and place the mapping's `block` names in the `to` array. Carry over any `aggregation` settings. Merge mappings that share a `from` and a `field` into a single entry.
-2. **Auto-linked filter → viz edges:** By default, legacy field filters reached all viz blocks on their dataset (unless overridden). Add an explicit entry routing the filter to those blocks using the filter's own `source` field. (Note: Auto-linking ignored tabs. Retain a cross-tab edge only if the filter is actually visible on the target tab; otherwise, drop it and notify the user).
-3. **Drill and pop edges:** These were never auto-linked. Carry over their mappings using Rule 1.
-4. **Disabled edges:** Ignore these entirely. Omitting them is how you disable them in the new syntax.
-5. **Parent-child and cross-filtering:** Legacy systems auto-linked filter → filter and viz → viz on the same dataset. Keep only the essential ones (e.g., obvious hierarchies like country → city, or user-requested cross-filters). Drop the rest, and list what was removed during delivery so the user can request them back if needed.
-6. **Delete the `interactions` array:** Once `explicit_interactions` contains all necessary connections, delete the old array to prevent confusion for future editors.
-
-Run Workflow → *step 4* on your resulting configuration. Upon delivery, confirm that the dashboard was migrated to the new syntax and outline any edges that were changed or dropped.
 
 ### Others
 
