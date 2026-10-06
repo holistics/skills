@@ -257,7 +257,7 @@ When a block displays dynamic, real-time data values, use a data visualization b
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
-* **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure.
+* **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure, following [Dashboard interactions → Interactions (legacy)](https://docs.holistics.io/reference/aml/dashboard-interactions#interactions-legacy).
 * **Prefer generated visualizations.** Rely on tool-generated visualization AML rather than manually coding viz blocks to minimize syntax errors.
 * **Use global controls over per-chart filters.** Let dashboard-level filters control time ranges, grains, and segments across charts. Use chart-specific filters only for core chart definitions (e.g., Top 10 lists).
 * **Format text strings cleanly.** Use `@md … ;;` heredocs for multiline content or strings containing special characters and apostrophes. Write clear descriptions and titles aimed at end users.
