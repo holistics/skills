@@ -163,7 +163,8 @@ Type Dashboard (elem_name_as: 'uname') {
   view (optional): DashboardLayout
   settings(optional): {
     timezone(optional): Timezone
-    autorun(optional): Boolean
+    autorun_on_open(optional): Boolean
+    autorun_on_changes(optional): Boolean
     allow_timezone_change(optional): Boolean
     cache_duration(optional): Number
     analysis_interactions(optional): AnalysisInteractions
