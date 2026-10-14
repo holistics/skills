@@ -1,3 +1,19 @@
+## [0.8.0](https://github.com/holistics/skills/compare/holistics-development-v0.7.0...holistics-development-v0.8.0) (2026-10-14)
+
+### Features
+
+* **native,plugins.development:** build dashboard themes for both app modes ([21863f7](https://github.com/holistics/skills/commit/21863f74ca12eaad1138c7a7938bcfc87e927273))
+* **native.system,plugins.development:** wire dashboard controls with explicit_interactions ([d1a51f8](https://github.com/holistics/skills/commit/d1a51f8c211bb3637ff0ed5d20e6faa4cab96c7b))
+
+### Bug Fixes
+
+* **native.system,plugins.common,plugins.development:** split autorun into on_open and on_changes ([cbcdc37](https://github.com/holistics/skills/commit/cbcdc379f259c0c7bcc40e785ab8c01cfb188554))
+* **native.system,plugins.development:** default non-date filters to the is operator ([adb8174](https://github.com/holistics/skills/commit/adb817463595a534e894e059625f4eee987fcb6c))
+* **native.system,plugins.development:** leave the dashboard timezone to the org default ([8920696](https://github.com/holistics/skills/commit/8920696623a500f8521620eb21601266c4d6a478))
+* **native.system,plugins.development:** list the syntax that breaks the plan's mermaid wireframe ([3aef31b](https://github.com/holistics/skills/commit/3aef31b56416c88e4c3da3ed2ec99985a15ce28b))
+* **native.system,plugins.development:** point legacy interactions edits to the docs ([8b78723](https://github.com/holistics/skills/commit/8b7872336dac3100950c8692e46f5f5e21e58f4b))
+* **native.system,plugins.development:** stop pinning dashboard controls to a top row ([0f376c3](https://github.com/holistics/skills/commit/0f376c3cb384152b49905a66b6b84a8dc34ebeea))
+
 ## [0.7.0](https://github.com/holistics/skills/compare/holistics-development-v0.6.0...holistics-development-v0.7.0) (2026-09-17)
 
 ### Features
