@@ -35,14 +35,15 @@ Static text with no live data isn't a VizBlock — that's a TextBlock.
 
 ## Workflow
 
-Per block:
+Per block, new or edited:
 
 1. **Read the dataset** — `fetch_dataset` for the real measures and dimensions. Bind only fields you have read.
-2. **Decide the analytics task and the viz type yourself** (Output → *Choosing the viz type*) — leave the type unstated and generate_viz picks one. A chart form no built-in covers goes to the build-custom-chart skill instead.
-3. **Get the explore** — `generate_aql`; generate_viz consumes an AQL explore, not a field list.
-4. **Write the `query`** — name the viz type, which field plays which role, the number/date formatting, and what to leave out (Conventions → *A VizBlock owns its data and shape*), since it defaults anything unstated. Retrying after an error? Include the error text — it self-corrects from it.
-5. **Check what comes back** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the result in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic.
-6. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference.
+2. **When editing, read the block itself** — its viz type, fields, series, and settings.
+3. **Decide the analytics task and the viz type yourself** (Output → *Choosing the viz type*) — leave the type unstated and generate_viz picks one. A chart form no built-in covers goes to the build-custom-chart skill instead. When editing, work out what the request changes and what it leaves alone.
+4. **Get the explore** — `generate_aql`; generate_viz consumes an AQL explore, not a field list.
+5. **Write the `query`** — name the viz type, which field plays which role, the number/date formatting, and what to leave out (Conventions → *A VizBlock owns its data and shape*), since it defaults anything unstated. When editing, restate the current viz, then the change — a `query` that states only the change rebuilds the chart without the rest. Retrying after an error? Include the error text — it self-corrects from it.
+6. **Check what comes back** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the result in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic. When editing, compare with the original block: anything changed or removed that the user didn't ask for is a mistake — restore it. If the request could mean either keeping or replacing the original, ask instead of guessing.
+7. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference. When editing, also say what you kept, changed, and removed.
 
 ## Output
 
