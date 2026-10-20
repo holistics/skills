@@ -84,6 +84,7 @@ Browse the linked `skills/` folders to see the actual skill files for each plugi
 * [`holistics-development`](./plugins/holistics-development/skills/): When you are developing your AMQL project with coding agents such as Claude Code, Codex, etc.
 * [`holistics-reporting`](./plugins/holistics-reporting/skills/): When you want to ask data questions on published AMQL objects (datasets, dashboards, etc.) with general agents such as Claude.ai, ChatGPT, etc.
 * [`holistics-migrate-power-bi`](./plugins/holistics-migrate-power-bi/skills/): When you are migrating a Power BI semantic model (TMDL + DAX) and reports to a Holistics AMQL project. Pair with `holistics-development` for AML/AQL authoring.
+* [`holistics-migrate-looker`](./plugins/holistics-migrate-looker/skills/): When you are migrating Looker views, Explores, and dashboards to a Holistics AMQL project. Pair with `holistics-development` for AML/AQL authoring and validation.
 
 ## For Holistics native agent
 Skills under [`native-skills/`](./native-skills/) can be used by Holistics App to extend **Holistics native AI agent**. They run inside Holistics and have access to native web UI and backend features. Browse the folder to see what's available.
