@@ -28,6 +28,17 @@ If you catch yourself guessing at AML syntax or Holistics behavior, load the rel
 
 Don't duplicate if equivalent pointers already exist.
 
+## AQL & Viz authoring mode
+AQL and Viz are written in one of two modes:
+- **`holistics-ai`** (default) — Holistics AI writes AQL and Viz (`generate_aql`, `generate_viz`).
+- **`self`** — the agent writes AQL and Viz itself from the bundled `aql` / `viz` skill references, and validates them with `validate_aql` / `execute_viz`.
+
+If the project's instructions don't already state a mode, ask the user once which one they want (don't change it unprompted), then record it:
+- **For this project** (any agent tool): add `Holistics authoring mode: self` (or `holistics-ai`) to the project's `CLAUDE.md` / `AGENTS.md`.
+- **For this user** (Claude Code): `/plugin configure holistics-development@holistics-skills` and set *AQL & Viz authoring*.
+
+The project's instructions take precedence over the plugin setting.
+
 ## Holistics CLI
 ### Setup (once)
 Use [](../setup-holistics-cli/) skill

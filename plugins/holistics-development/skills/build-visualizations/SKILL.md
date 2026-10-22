@@ -39,11 +39,11 @@ Per block:
 
 1. **Read the dataset** — `fetch_dataset` for the real measures and dimensions. Bind only fields you have read.
 2. **Decide the analytics task and the viz type yourself** (Output → *Choosing the viz type*) — don't leave it to a default. A chart form no built-in covers goes to the build-custom-chart skill instead.
-3. **Write the viz body** (Output → *Authoring*) — yourself from the **viz** skill's references if that skill is available; otherwise through generate_aql → generate_viz. Either way, leave out what the theme or a control provides (Conventions → *A VizBlock owns its data and shape*).
+3. **Write the viz body** (Output → *Authoring*) — through generate_aql → generate_viz by default; yourself from the **viz** skill's references in self authoring mode. Either way, leave out what the theme or a control provides (Conventions → *A VizBlock owns its data and shape*).
 4. **Check it** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the viz in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic.
 5. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference.
 
-With several blocks to build and a `viz-writer` sub-agent available, you may hand blocks to sub-agents in parallel (see the viz skill's *Sub-agent or inline?*) — give each its viz type, fields, and what to leave out, then wrap and check what comes back.
+In self authoring mode, with several blocks to build and a `viz-writer` sub-agent available, you may hand blocks to sub-agents in parallel (see the viz skill's *Sub-agent or inline?*) — give each its viz type, fields, and what to leave out, then wrap and check what comes back.
 
 ## Output
 
@@ -78,10 +78,10 @@ Each built-in type's field roles and settings come from the viz skill's type def
 
 ### Authoring
 
-Viz grammar written from memory is the top source of invalid output, so every viz body — built-in or dynamic content block — comes from one of two paths:
+Viz grammar written from memory is the top source of invalid output, so every viz body — built-in or dynamic content block — comes from one of two paths. Authoring mode (plugin setting): `${user_config.authoring_mode}`. Use self authoring **only** when the authoring mode is `self` — set by the user in this conversation, the project's instructions (e.g. "Holistics authoring mode: self" in `CLAUDE.md` / `AGENTS.md`), or that plugin setting — and the **viz** skill is available. Otherwise, including when the plugin setting is an unfilled `${…}` placeholder, use generate_viz.
 
-* **With the viz skill (if available)** — write it yourself from that skill's references: read `guide.md`, use only the properties your viz type has in `type_definitions/viz.aml`, pattern-match `examples.md`, and for a `MarkdownViz` follow the [dynamic content block syntax](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference). Start from the dataset fields; an AQL explore is optional. Switch to generate_viz when the user or the project's instructions ask for Holistics AI, or when the viz still fails after ~3 fix rounds.
-* **Otherwise, generate_viz** — never hand-write the body. It consumes an **AQL explore**, so the flow is **generate_aql → generate_viz**. In its `query`, name the viz type, which field plays which role, and the number/date formatting, since it defaults anything unstated. Retrying after an error? Include the error text — it self-corrects from it.
+* **generate_viz (default)** — never hand-write the body. It consumes an **AQL explore**, so the flow is **generate_aql → generate_viz**. In its `query`, name the viz type, which field plays which role, and the number/date formatting, since it defaults anything unstated. Retrying after an error? Include the error text — it self-corrects from it.
+* **Self authoring** — write it yourself from the viz skill's references: read `guide.md`, use only the properties your viz type has in `type_definitions/viz.aml`, pattern-match `examples.md`, and for a `MarkdownViz` follow the [dynamic content block syntax](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference). Start from the dataset fields; an AQL explore is optional. Switch to generate_viz when the viz still fails after ~3 fix rounds.
 
 Either way, `execute_viz` validates it. Wrap the viz — `block <x>: VizBlock { label: '…' viz: <viz> }` — and give a `MetricKpi` block-level `settings { hide_label: true }` (Conventions → *MetricKpi*); verify any unknown construct with search_docs.
 

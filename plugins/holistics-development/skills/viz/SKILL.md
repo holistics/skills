@@ -9,6 +9,11 @@ A Viz is the AML block that turns a dataset query into a chart, table, or
 other visualization — e.g. `PieChart { dataset: ecommerce ... }`. This skill is
 the knowledge base you consult while writing one; it doesn't run anything.
 
+## Authoring mode
+Plugin setting: `${user_config.authoring_mode}`
+
+Write a Viz yourself with this skill **only** when the authoring mode is `self`. It's set by, in priority order: the user in this conversation, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`, Cursor rules — "Holistics authoring mode: self"), then the plugin setting above. Otherwise — including when the plugin setting above is an unfilled `${…}` placeholder — use Holistics AI: `generate_aql` → `generate_viz` (see *Holistics AI* below).
+
 ## How to use these references
 **Don't write Viz AML from memory — properties differ per viz type and invented ones fail.**
 
@@ -37,5 +42,5 @@ You can write the Viz yourself or hand it to a sub-agent — a `viz-writer` sub-
 * **Do it inline** when you've already read the Viz references this session (a sub-agent re-reads them every time it starts), when it's a small edit to an existing Viz, or when the work needs back-and-forth with the user or depends on surrounding decisions.
 * **Always inline** when no sub-agent is available (e.g. claude.ai, ChatGPT), or when you *are* the sub-agent.
 
-## Delegating to Holistics AI
-Use `generate_viz` instead of writing the Viz yourself when the user asks for Holistics AI, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`) say to use it, or the Viz still fails after ~3 fix rounds. It needs an AQL explore (`aql`); pass your last attempt as `current_viz` and its errors in `current_result`.
+## Holistics AI
+`generate_viz` writes the Viz for you. Use it when the authoring mode isn't `self`, or when your own Viz still fails after ~3 fix rounds. It needs an AQL explore (`aql`); when retrying, pass the last attempt as `current_viz` and its errors in `current_result`. Check what it returns with `execute_viz` as above.

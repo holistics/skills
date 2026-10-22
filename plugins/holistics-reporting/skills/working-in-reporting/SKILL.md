@@ -16,3 +16,9 @@ Use [](../setup-holistics-mcp/) skill
 
 ### Usage
 Utilize relevant Holistics MCP tools for your work. They provide high-quality knowledge and outputs.
+
+## AQL & Viz authoring mode
+- **`holistics-ai`** (default) — Holistics AI writes AQL and Viz (`generate_aql`, `generate_viz`).
+- **`self`** — the agent writes AQL and Viz itself from the bundled `aql` / `viz` skill references, and validates them with `validate_aql` / `execute_viz`.
+
+The user can switch with `/plugin configure holistics-reporting@holistics-skills` (Claude Code), or by telling you or adding `Holistics authoring mode: self` to their project or custom instructions. See the `write-aql` skill for how the mode is resolved.
