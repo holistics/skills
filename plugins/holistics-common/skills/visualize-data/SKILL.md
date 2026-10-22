@@ -11,21 +11,19 @@ description: Create charts, tables, and visualizations from queries. Use this wh
 * Set up Holistics MCP
 
 ## Recommended workflow
-1. Write the AQL for the raw data (WITHOUT visualization requirements) with the [](../write-aql/) skill
-2. `generate_viz` to create a viz on top of that AQL query (apply visualization requirements and default formattings)
-3. `execute_viz` to run the viz and show the result to the user
+1. Read the dataset with `fetch_dataset`. If the data needs AQL beyond the dataset's fields (new metrics, filters, period comparisons), write it with the [](../write-aql/) skill — WITHOUT visualization requirements.
+2. Write the Viz yourself using the [](../viz/) skill's references: pick the viz type, place the fields, and apply the visualization requirements and default formatting.
+3. `execute_viz` to run the viz and show the result to the user. Fix any errors it reports and re-run.
 
-If `generate_viz` fails, fall back to showing a plain table with `execute_aql`.
+If the viz can't be made to work, fall back to showing a plain table with `execute_aql`.
+
+Use `generate_viz` instead of step 2 when the user or the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`) ask for Holistics AI, or when the viz still fails after ~3 fix rounds. It needs an AQL explore; pass your last attempt and its errors. Unless the user asked for a viz type, let it pick one.
 
 ## Rules
-* To update date/time filters, change the AQL first (with [](../write-aql/)), then regenerate the viz.
+* To visualize a plain table (no formatting, colors, etc.), you don't need a Viz — `execute_aql` is enough. Anything with formatting, conditional formatting, colors, or a chart type needs a Viz.
+* To update date/time filters, change the AQL first (with [](../write-aql/)), then update the viz.
 * Cohort retention should ALWAYS be visualized as Pivot Table.
-* **Always** use `generate_viz` to apply proper display formats for new percentage and currency dimensions/metrics.
+* **Always** apply proper display formats to new percentage and currency dimensions/metrics.
   * Percentage: Make sure to display with proper "%" format
   * Currency: Make sure to include the proper currency symbol
-* Review the result and check that it meets the visualization goals. Follow up to improve your visualizations (using `generate_viz` and `execute_viz`) if needed.
-
-## Tool: `generate_viz`
-* To visualize plain tables (without any formatting, colors, etc.), you don't need to call this. You can use `execute_aql` directly.
-* To visualize non-plain tables (e.g. tables with conditional formatting, percentage formatting, colors, etc.) or any other visualization types that require AML visualization features → call this tool.
-* Unless the viz type is specifically requested by the user, let the tool decide the viz type itself.
+* Review the result and check that it meets the visualization goals. Follow up to improve your visualizations if needed.
