@@ -38,12 +38,11 @@ Static text with no live data isn't a VizBlock — that's a TextBlock.
 Per block:
 
 1. **Read the dataset** — `fetch_dataset` for the real measures and dimensions. Bind only fields you have read.
-2. **Decide the analytics task and the viz type yourself** (Output → *Choosing the viz type*) — don't leave it to a default. A chart form no built-in covers goes to the build-custom-chart skill instead.
-3. **Write the viz body** (Output → *Authoring*) — through generate_aql → generate_viz by default; yourself from the **viz** skill's references in self authoring mode. Either way, leave out what the theme or a control provides (Conventions → *A VizBlock owns its data and shape*).
-4. **Check it** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the viz in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic.
-5. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference.
-
-In self authoring mode, with several blocks to build and a `viz-writer` sub-agent available, you may hand blocks to sub-agents in parallel (see the viz skill's *Sub-agent or inline?*) — give each its viz type, fields, and what to leave out, then wrap and check what comes back.
+2. **Decide the analytics task and the viz type yourself** (Output → *Choosing the viz type*) — leave the type unstated and generate_viz picks one. A chart form no built-in covers goes to the build-custom-chart skill instead.
+3. **Get the explore** — `generate_aql`; generate_viz consumes an AQL explore, not a field list.
+4. **Write the `query`** — name the viz type, which field plays which role, the number/date formatting, and what to leave out (Conventions → *A VizBlock owns its data and shape*), since it defaults anything unstated. Retrying after an error? Include the error text — it self-corrects from it.
+5. **Check what comes back** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the result in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic.
+6. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference.
 
 ## Output
 
@@ -67,32 +66,27 @@ Pick the viz type by analytics task — built-in types are the default (top of t
 | Cross-tab of values | `PivotTable` | — |
 | Metrics laid out side by side | `MetricSheet` | — |
 | Geography | `PointMap` | `FilledMap` (by region), `Heatmap` (density) |
-| Data-bound prose, a branded card, or a bespoke table no built-in can shape | `MarkdownViz` (dynamic content block) — see Authoring | — |
+| Data-bound prose, a branded card, or a bespoke table no built-in can shape | `MarkdownViz` (dynamic content block) — describe the card in the `query` (Authoring) | — |
 | A chart form no built-in covers (box plot, sankey, waterfall, candlestick, calendar heatmap, dumbbell) | custom chart → the **build-custom-chart** skill (Vega/Vega-Lite) | — |
 
-Each built-in type's field roles and settings come from the viz skill's type definitions, generate_viz, or the docs (search_docs) — never inline the full catalog or invent a type. Watch the confusable boundaries:
+generate_viz writes the built-in types (Authoring); their per-type field roles and settings come from generate_viz or the docs (search_docs) — never inline the full catalog or invent a type. Watch the confusable boundaries:
 
 * **Static text vs MarkdownViz** — the instant text must show a *live data value*, it's a MarkdownViz (here); fixed words with no data are a TextBlock → build-dashboard.
 * **Built-in vs MarkdownViz** — if a standard chart shows it well, use the built-in; **never rebuild a bar/line/table in HTML**. MarkdownViz is for a presentation the built-ins can't express — not for restyling one they can (that's the theme's job).
 * **MarkdownViz vs custom chart** — presentational / narrative / branded and expressible in static HTML/CSS (no JS, no real axes) → **MarkdownViz**, inline to this dashboard. A true plotted chart form with axes/scales/marks, or one reused across dashboards → **custom chart** (Vega/Vega-Lite).
 
-### Authoring
+### Authoring — never hand-write a viz body
 
-Viz grammar written from memory is the top source of invalid output, so every viz body — built-in or dynamic content block — comes from one of two paths. Authoring mode (plugin setting): `${user_config.authoring_mode}`. Use self authoring **only** when the authoring mode is `self` — set by the user in this conversation, the project's instructions (e.g. "Holistics authoring mode: self" in `CLAUDE.md` / `AGENTS.md`), or that plugin setting — and the **viz** skill is available. Otherwise, including when the plugin setting is an unfilled `${…}` placeholder, use generate_viz. **In self mode, do NOT call generate_viz** except as the fallback below.
+Every viz — built-in or dynamic content block — is written by **generate_viz**, never by hand; hand-written viz grammar is the top source of invalid output. It consumes an **AQL explore**, so the flow is **generate_aql → generate_viz → execute_viz** (execute validates it). Wrap what comes back — `block <x>: VizBlock { label: '…' viz: <generate_viz output> }` — and give a `MetricKpi` block-level `settings { hide_label: true }` (Conventions → *MetricKpi*). You hand-write only the `VizBlock` wrapper and block-level settings; verify any unknown construct with search_docs.
 
-* **generate_viz (default)** — never hand-write the body. It consumes an **AQL explore**, so the flow is **generate_aql → generate_viz**. In its `query`, name the viz type, which field plays which role, and the number/date formatting, since it defaults anything unstated. Retrying after an error? Include the error text — it self-corrects from it.
-* **Self authoring** — write it yourself from the viz skill's references: read `guide.md`, use only the properties your viz type has in `type_definitions/viz.aml`, pattern-match `examples.md`, and for a `MarkdownViz` follow the [dynamic content block syntax](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference). Start from the dataset fields; an AQL explore is optional. Switch to generate_viz when the viz still fails after ~3 fix rounds.
-
-Either way, `execute_viz` validates it. Wrap the viz — `block <x>: VizBlock { label: '…' viz: <viz> }` — and give a `MetricKpi` block-level `settings { hide_label: true }` (Conventions → *MetricKpi*); verify any unknown construct with search_docs.
-
-A `MarkdownViz` card also needs **what it should say** — the sentence or layout, which value goes where, what to emphasize. Decide the finished card, not just the fields (and describe it that way in generate_viz's `query`). A card renders HTML/CSS/Markdown and never JavaScript, so nothing in it can be interactive.
+Only the `query` differs by type. A built-in needs the data and the viz type; a `MarkdownViz` card also needs **what it should say** — the sentence or layout, which value goes where, what to emphasize. Describe the finished card, not the fields. A card renders HTML/CSS/Markdown and never JavaScript, so nothing in it can be interactive.
 
 **Custom chart.** Use the **build-custom-chart** skill if available, else `search_docs` for `CustomChartDef` (reusable Vega/Vega-Lite).
 
 ## Conventions
 
 * **Prefer `CombinationChart` for any line, area, column, or bar chart.** Combination Chart is Holistics' superset of those four — it renders line, area, column, and bar series (with per-series type), so one viz type covers every trend and every category comparison/ranking. Preferring it keeps charts consistent to theme and lets a chart later gain a second measure, a dual axis, or a mixed column+line without swapping types. Ask generate_viz for a `CombinationChart` and set each series' display (line/area/column/bar) to the analytics task — not a standalone `LineChart`/`AreaChart`/`ColumnChart`/`BarChart`. (Part-to-whole stays `PieChart`; the non-cartesian types — map, funnel, radar, gauge, scatter — are unaffected.)
-* **A VizBlock owns its data and shape; the theme and the controls own the rest.** Both generate_viz and the viz skill's guide build each chart as a *standalone report*, so it carries decoration and a self-contained time window that a block on a dashboard usually shouldn't keep. One test covers both: *would the theme or a control otherwise provide this?* If yes, drop it. If removing it changes what the chart **says**, keep it — which is why a filter that's part of what the chart fundamentally is (a returns chart is by definition `status = returned`) stays, while one that merely restates what a control filters goes. **A user instruction outranks the test** — asked for this one chart in brand red, or pinned to last 30 days regardless of the date filter, keep it and say so in the handoff.
+* **A VizBlock owns its data and shape; the theme and the controls own the rest.** generate_viz builds each chart as a *standalone report*, so what comes back carries decoration and a self-contained time window that a block on a dashboard usually shouldn't keep. One test covers both: *would the theme or a control otherwise provide this?* If yes, drop it. If removing it changes what the chart **says**, keep it — which is why a filter that's part of what the chart fundamentally is (a returns chart is by definition `status = returned`) stays, while one that merely restates what a control filters goes. **A user instruction outranks the test** — asked for this one chart in brand red, or pinned to last 30 days regardless of the date filter, keep it and say so in the handoff.
 * **MetricKpi** blocks get `settings { hide_label: true }` at the block level (a sibling of `viz:`) — and no other block setting.
 * **Prose** that may contain apostrophes or span lines (viz labels, descriptions, DCB template text) goes in `@md … ;;` heredocs, not single quotes.
 * **Layout is build-dashboard's job.** On a fresh build, supply only the blocks; build-dashboard positions them. When adding a block to an existing dashboard standalone, place it and recompute the canvas height (as build-dashboard-controls does for controls).

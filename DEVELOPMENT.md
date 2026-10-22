@@ -84,6 +84,8 @@ This copies the source into the destination, writes the `.link` file, and runs a
 
 Delete the synced directory (the one containing the `.link` file) from the consumer. If no plugin still uses it, also delete the source.
 
+The pre-commit hook asks you to confirm any removed `.link` file. Committing from somewhere without a terminal (e.g. an IDE), confirm it up front instead: `VALIDATE_LINKS_IGNORE_REMOVALS=1 git commit ...`.
+
 **Verify everything is in sync**
 
 ```bash
@@ -91,6 +93,12 @@ pnpm validate-links  # runs automatically as a pre-commit hook
 ```
 
 This checks that each linked directory matches its source and warns about missing sources.
+
+## Native skills that diverge from plugins
+
+Native skills can't read plugin settings (`${user_config.*}`) or files bundled next to a skill, so a plugin skill that depends on either can't be linked into `native-skills/`. These are kept as separate copies — when changing what both share (e.g. dashboard conventions), edit both:
+
+* `native-skills/system/holistics-common/build-visualizations/` — always uses `generate_aql` → `generate_viz`; the plugin version (`plugins/holistics-development/skills/build-visualizations/`) adds the authoring-mode switch and the `viz` skill.
 
 ## Sub-agents
 
