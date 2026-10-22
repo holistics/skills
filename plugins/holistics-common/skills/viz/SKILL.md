@@ -14,6 +14,8 @@ Plugin setting: `${user_config.authoring_mode}`
 
 Write a Viz yourself with this skill **only** when the authoring mode is `self`. It's set by, in priority order: the user in this conversation, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`, Cursor rules — "Holistics authoring mode: self"), then the plugin setting above. Otherwise — including when the plugin setting above is an unfilled `${…}` placeholder — use Holistics AI: `generate_aql` → `generate_viz` (see *Holistics AI* below).
 
+**In self mode, write the Viz from these references and do NOT call `generate_viz`, except as the last-resort fallback below.**
+
 ## How to use these references
 **Don't write Viz AML from memory — properties differ per viz type and invented ones fail.**
 

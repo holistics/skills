@@ -13,6 +13,8 @@ Plugin setting: `${user_config.authoring_mode}`
 
 Write AQL yourself (*Self mode* below) **only** when the authoring mode is `self`. It's set by, in priority order: the user in this conversation, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`, Cursor rules — "Holistics authoring mode: self"), then the plugin setting above. Otherwise — including when the plugin setting above is an unfilled `${…}` placeholder — use *Holistics AI mode*.
 
+**Decide the mode now, before anything else. In self mode, follow *Self mode* and do NOT call `generate_aql`.**
+
 ## Prerequisites
 * Set up Holistics MCP
 * Know the dataset. Use `fetch_dataset` to list its models, fields, and metrics — that's your `dataset_fields`. Use only those, with their **EXACT** names. In an AMQL repo, also read the dataset/model `.aml` files for definitions and descriptions.
@@ -39,7 +41,7 @@ You can write the AQL yourself or hand it to a sub-agent — an `aql-writer` sub
 
 ### Workflow
 1. **Understand the request** against the available fields. If you genuinely can't (no matching fields, ambiguous business logic, or it's not an analytic), ask the user to clarify instead of guessing.
-2. **Read the AQL references first — required, before writing anything.** Don't write AQL from memory or SQL intuition. Via the [](../aql/) skill:
+2. **Read the AQL references first — required, before writing anything.** Don't write AQL from memory, SQL intuition, or by copying queries found in the project. Load the [](../aql/) skill (the files below live in its directory), then:
    * Read `references/aqlearn.md` (the core lessons/rules) if you haven't yet this session.
    * Look up the exact functions/operators you'll use in `references/aql/`.
    * For nested aggregation, top-N-per-group, period comparison, level-of-detail, cohort retention, or ranking — study the worked examples and gotchas in `references/examples/`. Always check the `[silent]` gotchas: they produce wrong-but-valid AQL with **no** validation error, so validation won't catch them for you.

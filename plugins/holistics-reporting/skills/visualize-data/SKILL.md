@@ -15,6 +15,8 @@ Plugin setting: `${user_config.authoring_mode}`
 
 Write the Viz yourself **only** when the authoring mode is `self`. It's set by, in priority order: the user in this conversation, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`, Cursor rules — "Holistics authoring mode: self"), then the plugin setting above. Otherwise — including when the plugin setting above is an unfilled `${…}` placeholder — use Holistics AI.
 
+**Decide the mode now, before anything else. In self mode, follow *Self mode* below and do NOT call `generate_viz`, except as its last-resort fallback.**
+
 ## Recommended workflow
 ### Holistics AI (default)
 1. Write the AQL for the raw data (WITHOUT visualization requirements) with the [](../write-aql/) skill.
