@@ -1,0 +1,27 @@
+// Synced 2026-08-20 from the aml repo: aml-definition/custom_chart_def.aml
+
+Type CustomChartDef {
+  label: String
+  description(optional): String
+  icon(optional): String
+  fields {
+    field(elem_name_as: 'field_name', multiple: true, unique_elem_name: true) {
+      label(optional): String
+      type: 'dimension' | 'measure'
+      sort(optional): {
+        apply_order (optional): Number
+        direction: 'asc' | 'desc'
+      }
+      data_type(optional): 'string' | 'number' | 'boolean' | 'date'
+    }
+  }
+  options(optional) {
+    option(elem_name_as: 'option_name',  multiple: true, unique_elem_name: true) {
+      label(optional): String
+      type: 'input' | 'number-input' | 'toggle' | 'radio' | 'select' | 'color-picker'
+      options(optional): List[String | Number]
+      default_value: String | Number | Boolean
+    }
+  }
+  template: Heredoc['vg' | 'vgl']
+}

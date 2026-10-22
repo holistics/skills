@@ -1,0 +1,10 @@
+# Exported from upstream; not synced automatically.
+# To update, from holistics/ai apps/orca:
+#   .venv/bin/python bin/export_skill_references.py viz <this skill>/references
+# then bump the commit below. SKILL.md is maintained here.
+
+# references/ — rendered from Vivid's prompt, docs, and AML type definitions
+repo: git@github.com:holistics/ai.git
+path: apps/orca/orca/agent/vivid
+commit: 944a9f0aa00eae8fdb5179c0eed256922d1c798e
+exported: 2026-10-22

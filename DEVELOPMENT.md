@@ -102,9 +102,17 @@ After editing a template or an included file, run `pnpm build-agents`, then `pnp
 
 Some sources are copied from another repo and are **not** synced automatically. Each carries an `.upstream` file recording the origin repo, path, commit, and any transformation applied.
 
-* `plugins/holistics-common/skills/aql/` — `SKILL.md` and per-function docs from [anfra-ai/skills](https://github.com/anfra-ai/skills); `aqlearn.md` and the worked examples from the Holistics AI agent's AQL prompts (`holistics/ai`, `apps/orca/.../aqua/prompts`), which are the source of truth for Holistics AQL.
+* `plugins/holistics-common/skills/aql/` — `SKILL.md` and per-function docs from [anfra-ai/skills](https://github.com/anfra-ai/skills); `aqlearn.md` and the worked examples exported from the Holistics AI agent's AQL prompts (Aqua), which are the source of truth for Holistics AQL.
+* `plugins/holistics-common/skills/viz/references/` — exported from the Holistics AI agent's Viz prompt, docs, and AML type definitions (Vivid).
 
-To update, re-copy from upstream, bump the commit in `.upstream`, then `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied files so re-copying stays a clean overwrite.
+Exports run from the `holistics/ai` repo, in `apps/orca`:
+
+```bash
+.venv/bin/python bin/export_skill_references.py aql <this repo>/plugins/holistics-common/skills/aql/references
+.venv/bin/python bin/export_skill_references.py viz <this repo>/plugins/holistics-common/skills/viz/references
+```
+
+Then bump the commit in `.upstream`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
 
 ## Scripts
 
