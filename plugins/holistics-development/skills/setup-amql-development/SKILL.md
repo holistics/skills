@@ -49,14 +49,29 @@ Use [](../setup-holistics-cli/) skill
 * Use `holistics aml validate <files...>` to validate AML files after making every new change. For example:
   * `holistics aml validate "new file.model.aml" "new_file2.dataset.aml"`
   * `holistics aml validate **/*.aml`
-* Using tools:
-  * `holistics mcp`: List available tools
-  * `holistics mcp <tool> --help`: Learn more about a tool and its inputs, outputs
-  * `holistics mcp <tool> '<json_payload>'`: Call a tool
+* Use `holistics mcp` to call Holistics tools — see *Calling tools via the CLI* below.
 
-## Tool invocation discipline
-**Never guess `holistics mcp <tool>` parameter names.** A wrong key (e.g. `query` instead of `question` for `search_docs`) fails the entire call.
+## Calling tools via the CLI
+Skills refer to Holistics tools by name with JSON parameters (e.g. tool `execute_aql` with `{ "dataset_uname": ..., "aql": ... }`). Without a direct MCP connection, call them through the CLI:
 
-Before the first call of any unfamiliar tool in a session:
-1. Run `holistics mcp <tool> --help` or native MCP to read its input schema.
-2. Construct the payload using exactly the documented property names.
+* `holistics mcp` — list the tools.
+* `holistics mcp <tool> --help` — the tool's input schema (property names, which are required).
+* `holistics mcp <tool> '<json>'` or JSON on stdin — call it.
+
+**Parameters are ONE JSON object** — never `key=value` arguments or flags (`holistics mcp execute_aql dataset_uname=x ...` fails with "too many arguments").
+
+**Never guess parameter names or skip required ones.** A wrong key (e.g. `query` instead of `question` for `search_docs`) or a missing required one (e.g. `refresh_cache` for `execute_aql`) fails the whole call. Before the first call of a tool in a session, read its `--help` and use exactly the documented property names.
+
+**Pass AQL / AML payloads through a JSON file.** AQL and AML contain single quotes and newlines, which break shell quoting. Write the parameters as one JSON object to a file in your scratchpad (or another temp location your runtime lets you use without approval) with your file-writing tool, then pipe it in. Only JSON escaping applies — newlines as `\n`, double quotes as `\"`; single quotes need none:
+
+```sh
+cat <scratchpad>/viz-params.json | holistics mcp execute_viz
+```
+
+where the file holds e.g. `{"dataset_uname": "ecommerce", "title": "Orders by status", "viz": "DataTable {\n  dataset: ecommerce\n  fields: [r(orders.status)]\n}"}`. Stdin must be that JSON object — piping a raw `.aml` file fails. Overwrite the same file on later calls rather than deleting it.
+
+Short payloads without single quotes can go inline as one single-quoted argument: `holistics mcp fetch_dataset '{"dataset_uname": "ecommerce"}'`.
+
+Avoid heredocs and files outside your allowed directories for the payload: Claude Code asks for approval on every such call.
+
+The `⚠ Code sync is not running` line some calls print is a reminder that the cloud may not have your latest local edits (see `sync-code` above), not an error from the tool.

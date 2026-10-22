@@ -36,7 +36,7 @@ Run it with tool `execute_viz`:
 { "dataset_uname": "<dataset>", "title": "<short title>", "viz": "<Viz AML>" }
 ```
 
-It reports invalid properties and unknown fields with exact messages (e.g. `Property 'single_cell_display' does not exist on type 'PieChart'`), and otherwise returns the rendered data. Fix every error and re-run. Inside a `page.aml`, also validate the file with `holistics aml validate`.
+It reports invalid properties and unknown fields with exact messages (e.g. `Property 'single_cell_display' does not exist on type 'PieChart'`), and otherwise returns the rendered data. Fix every error and re-run. Inside a `page.aml`, also validate the file with `holistics aml validate`. Calling it through the `holistics mcp` CLI? Follow *Calling tools via the CLI* in the `setup-amql-development` skill.
 
 ## Sub-agent or inline?
 You can write the Viz yourself or hand it to a sub-agent — a `viz-writer` sub-agent if available, otherwise a generic one told to use this skill. It writes the Viz, checks it with `execute_viz`, and returns only the final Viz AML. Decide per task:
