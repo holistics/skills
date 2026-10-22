@@ -32,3 +32,5 @@ Positive AQL idioms.
 * `ai_functions` — AQL AI functions: `ai_complete`, `ai_classify`, `ai_summarize`, `ai_similarity`. Snowflake/Databricks only.
 * `role_playing_via_model` — Filter directly through the role-playing model (e.g. `parent_categories.name == ...`).
 * `role_playing_via_lookup` — Last-resort: build an ID metric and use `field in (ids)` when no role-playing model exists.
+* `param_input` — Set dataset params via the `explore.params { ... }` block.
+* `param_conditioned_expressions` — Condition a dimension/metric on a param's selected values.
