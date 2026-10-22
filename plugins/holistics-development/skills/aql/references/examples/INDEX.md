@@ -67,14 +67,21 @@ One row per example. Open `examples/<id>.md` for the full example (dataset field
 | 57 | good | List users who write reviews consistently. | time_gap_analysis | window_navigation, fn:date_diff, nested_aggregation, aggregate_on_window_function |  |
 | 58 | good | List folders inside "Homework" | role_playing_relation | role_playing_via_model, explore_filters |  |
 | 59 | good | List folders inside "Homework" | role_playing_relation | role_playing_via_lookup, subset_by_row_filter, subset_as_table_metric, filter_by_subset, explore_filters |  |
-| 60 | bad | Top 3 most expensive products | top_n | fn:rank, explore_filters | rank_on_dim_not_metric |
-| 61 | bad | Compare product prices | simple_listing |  | unaggregated_dim_in_explore_measures |
-| 62 | bad | List cities with user count | simple_listing |  | unaggregated_dim_in_explore_measures |
-| 63 | bad | List orders with their revenue (value - discount). | combine_metric_and_dim |  | combine_unaggregated_dim_with_metric |
-| 64 | bad | List orders with their revenue (order's total price - discount). | combine_metric_and_dim | nested_aggregation | missing_pipe_precedence_parens |
-| 65 | bad | List orders that belong to users who signed up in 2024. | simple_listing | explore_filters | manual_join_attempt |
-| 66 | bad | Order count by user | simple_listing |  | double_aggregating_measures |
-| 67 | bad | Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters | double_aggregating_measures |
-| 68 | bad | Total and Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | extra_dim_changes_explore_grain |
-| 69 | bad | Average order count of top 3 cities (with highest revenue) in each country. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | wrong_inner_grain_in_nested_aggregation |
-| 70 | bad | Top 10 products (dense ranking) with highest order count in last quarter, compare their order count in the same quarter of 3 previous years | top_n, period_compare | fn:top, fn:relative_period, fn:where, filter_by_subset, subset_as_table_metric, explore_filters | ranking_grain_mismatch |
+| 60 | good | Monthly revenue of the product categories selected in the dashboard's category param: Books and Toys | simple_listing | param_input |  |
+| 61 | good | Revenue by country in the last month | simple_listing | param_input |  |
+| 62 | good | Show the metric picked in the metric selector param, broken down by country | simple_listing | param_conditioned_expressions |  |
+| 63 | good | Revenue of the genders selected in the gender param, by month | simple_listing | param_conditioned_expressions, fn:where |  |
+| 64 | good | Top products by revenue, where the number of products comes from a param | top_n | param_conditioned_expressions, fn:top, filter_by_subset |  |
+| 65 | bad | Top 3 most expensive products | top_n | fn:rank, explore_filters | rank_on_dim_not_metric |
+| 66 | bad | Compare product prices | simple_listing |  | unaggregated_dim_in_explore_measures |
+| 67 | bad | List cities with user count | simple_listing |  | unaggregated_dim_in_explore_measures |
+| 68 | bad | List orders with their revenue (value - discount). | combine_metric_and_dim |  | combine_unaggregated_dim_with_metric |
+| 69 | bad | List orders with their revenue (order's total price - discount). | combine_metric_and_dim | nested_aggregation | missing_pipe_precedence_parens |
+| 70 | bad | List orders that belong to users who signed up in 2024. | simple_listing | explore_filters | manual_join_attempt |
+| 71 | bad | Order count by user | simple_listing |  | double_aggregating_measures |
+| 72 | bad | Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters | double_aggregating_measures |
+| 73 | bad | Total and Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | extra_dim_changes_explore_grain |
+| 74 | bad | Average order count of top 3 cities (with highest revenue) in each country. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | wrong_inner_grain_in_nested_aggregation |
+| 75 | bad | Top 10 products (dense ranking) with highest order count in last quarter, compare their order count in the same quarter of 3 previous years | top_n, period_compare | fn:top, fn:relative_period, fn:where, filter_by_subset, subset_as_table_metric, explore_filters | ranking_grain_mismatch |
+| 76 | bad | Monthly revenue for the product categories selected in the category param | simple_listing | param_input, explore_filters | param_set_outside_params_block |
+| 77 | bad | Revenue of the gender selected in the gender param | simple_listing | param_conditioned_expressions, fn:where | param_as_scalar |

@@ -105,14 +105,7 @@ This calculates the average order discount per year.
 **Caveat**: **CANNOT** use `date_trunc()`, `year()`, etc. inside `explore.filters`.
 
 ## 4. Explore Filters
-
-Explore-level filtering uses two blocks (same syntax, both AND-combined, both applied to all explore measures):
-* `explore.filters {}` — conditions on **dimensions** (like SQL `WHERE`). E.g. `orders.status == 'delivered'`.
-* `explore.having {}` — conditions on **metrics / measures / aggregations** (like SQL `HAVING`). E.g. `order_count > 10`.
-
-Put each condition in the block matching its left operand — dimension conditions in `filters`, metric conditions in `having`.
-
-Filter expressions use AQL Operators:
+Filter expressions use [AQL Operators](https://docs.holistics.io/reference/aql/operator):
 ```aql
 orders.created_at > @2024
 users.email like '%.com'
@@ -174,7 +167,7 @@ For date/time filtering, you can use time expressions via this syntax `matches @
 <description>Orders that are **not** created in 2018 and 2019</description>
 </example>
 
-Examples for filtering on metrics (metric conditions go in `explore.having`):
+Examples for filtering with metrics:
 ```aql
 metric delivered_orders = orders | count(orders.id) | where(orders.status == 'delivered');
 metric cancelled_orders = orders | count(orders.id) | where(orders.status == 'cancelled');
@@ -187,7 +180,7 @@ explore {
   dimensions {
     product_name: products.name,
   }
-  having {
+  filters {
     orders_diff > 10,
   }
   sorts {
@@ -542,9 +535,6 @@ Some nested aggregation examples:
 
 Filter on aggregation can be performed by `unique()` **followed by** `filter()`.
 
-To filter the **explore result** by a metric/aggregation, use the `explore.having {}` block instead (see §4) — e.g. `having { order_count > 10 }`.
-
-
 ## 14. Window functions
 ### Window functions are **metrics**
 => Either
@@ -842,6 +832,55 @@ explore {
 }
 ```
 
+## 18. Params
+**Params** are a **third kind of field** in the dataset, besides dimensions and measures.
+A param holds **values chosen by the user** (e.g. a dashboard filter or a metric selector), **NOT** data read from a table.
+
+A param reference (e.g. `orders.gender_param`) evaluates to the **list of values set for that param** (**empty** when unset)
+=> A param is a **list**, **NOT** a scalar.
+
+### Setting params
+Params can **ONLY** be set in the `explore.params` block, **NEVER** in `explore.filters`:
+```aql
+explore {
+  dimensions {
+    month: orders.created_at | month(),
+  }
+  measures {
+    revenue: revenue,
+  }
+  params {
+    orders.gender_param is 'female',
+    products.category_param in ['Books', 'Toys'],
+    orders.date_param matches @(last month),
+  }
+}
+```
+Operators and time expressions work like in **Explore Filters**: `in`/`not in` take a list, the other operators take a single value.
+
+### When to set params
+**Why it matters**: keep the data volume small. Params are often how a model limits the data it reads (e.g. a `time_period_param` that limits the period read from a large data volume).
+So, when the question has a filter condition and a model you query has a param for that same condition, set the condition on that param in `explore.params` too, even if the user never mentions the param.
+* Set the param only when its name, label or r relevant descriptions/instructions clearly say it covers the same condition (e.g. a model description saying "the period goes through `period_param`"). If unclear, do NOT guess: filter the dimension only. In your answer, name the param you did not set and why (e.g. "`date_param` may limit the data read, but its meaning is unclear"), so the user can confirm it..
+* When you set a param the user did not ask for, say so in your answer (e.g. in `understanding`): which param, what value, and that it is there to limit the data read. If the param covers a different condition than assumed (e.g. payment date vs order date), the result can miss rows, so the user needs to know.
+
+### Reading params
+* Membership: `orders.gender in orders.gender_param`, `'Revenue' in param_model.metric_selector`
+* Single value: `orders.gender_param | first()` -> the first value set, or `null` when unset
+
+**IMPORTANT**: **CANNOT** compare a param directly (`==`, `is`, `>`, etc.). Use `in`, or pipe through `first()` first.
+
+```aql
+metric selected_metric = case(when: 'Revenue' in param_model.metric_selector, then: revenue, else: order_count);
+metric revenue_of_selected_genders = revenue | where(orders.gender in orders.gender_param);
+metric revenue_of_first_selected_gender = revenue | where(orders.gender == (orders.gender_param | first()));
+```
+
+`first()` returns a **constant**, so it also works where a constant argument is expected,
+e.g. `top(first(products.top_n_param), products.name, by: revenue)`.
+
+**NOTE**: A param is not a data field: it **CANNOT** be put in `explore.dimensions`, nor used as a filter in `explore.filters`.
+
 # Glossary
 Aggregator functions:
 * count()
@@ -948,6 +987,7 @@ Text functions:
 
 Miscellaneous functions:
 * cast()
+* first(): first value of a param
 
 AI functions (Snowflake/Databricks only):
 * ai_complete(model, prompt): Query an AI model and return the generated response. (Replaces deprecated `ai_query()`.)
@@ -1104,9 +1144,8 @@ metric total_area =
   | sum(square.area);
 ```
 
-
-`explore.filters` filters on **dimensions** (acts like `where()`); `explore.having` filters on **metrics/measures/aggregations** (acts like `filter()`). Both apply to **all** explore measures — prefer them over local `where()`/`filter()` for explore-wide filtering.
-
+`explore.filters` is a smart shortcut that can act like `where()` or `filter()` depending on the left operand.
+Prefer using `explore.filters` (instead of local `where()` or `filter()`) when the filtering need to be applied to **all** explore measures.
 
 ### Avoid <= and >=
 **Avoid** using `<=` and `>=` whenever possible!
@@ -1204,7 +1243,7 @@ explore {
   measures {
     order_count: order_count,
   }
-  having {
+  filters {
     user_count > 0, // added (hidden) metric on one-side model
   }
 }
@@ -1291,17 +1330,24 @@ One row per example. Open `examples/<id>.md` for the full example (dataset field
 | 57 | good | List users who write reviews consistently. | time_gap_analysis | window_navigation, fn:date_diff, nested_aggregation, aggregate_on_window_function |  |
 | 58 | good | List folders inside "Homework" | role_playing_relation | role_playing_via_model, explore_filters |  |
 | 59 | good | List folders inside "Homework" | role_playing_relation | role_playing_via_lookup, subset_by_row_filter, subset_as_table_metric, filter_by_subset, explore_filters |  |
-| 60 | bad | Top 3 most expensive products | top_n | fn:rank, explore_filters | rank_on_dim_not_metric |
-| 61 | bad | Compare product prices | simple_listing |  | unaggregated_dim_in_explore_measures |
-| 62 | bad | List cities with user count | simple_listing |  | unaggregated_dim_in_explore_measures |
-| 63 | bad | List orders with their revenue (value - discount). | combine_metric_and_dim |  | combine_unaggregated_dim_with_metric |
-| 64 | bad | List orders with their revenue (order's total price - discount). | combine_metric_and_dim | nested_aggregation | missing_pipe_precedence_parens |
-| 65 | bad | List orders that belong to users who signed up in 2024. | simple_listing | explore_filters | manual_join_attempt |
-| 66 | bad | Order count by user | simple_listing |  | double_aggregating_measures |
-| 67 | bad | Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters | double_aggregating_measures |
-| 68 | bad | Total and Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | extra_dim_changes_explore_grain |
-| 69 | bad | Average order count of top 3 cities (with highest revenue) in each country. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | wrong_inner_grain_in_nested_aggregation |
-| 70 | bad | Top 10 products (dense ranking) with highest order count in last quarter, compare their order count in the same quarter of 3 previous years | top_n, period_compare | fn:top, fn:relative_period, fn:where, filter_by_subset, subset_as_table_metric, explore_filters | ranking_grain_mismatch |
+| 60 | good | Monthly revenue of the product categories selected in the dashboard's category param: Books and Toys | simple_listing | param_input |  |
+| 61 | good | Revenue by country in the last month | simple_listing | param_input |  |
+| 62 | good | Show the metric picked in the metric selector param, broken down by country | simple_listing | param_conditioned_expressions |  |
+| 63 | good | Revenue of the genders selected in the gender param, by month | simple_listing | param_conditioned_expressions, fn:where |  |
+| 64 | good | Top products by revenue, where the number of products comes from a param | top_n | param_conditioned_expressions, fn:top, filter_by_subset |  |
+| 65 | bad | Top 3 most expensive products | top_n | fn:rank, explore_filters | rank_on_dim_not_metric |
+| 66 | bad | Compare product prices | simple_listing |  | unaggregated_dim_in_explore_measures |
+| 67 | bad | List cities with user count | simple_listing |  | unaggregated_dim_in_explore_measures |
+| 68 | bad | List orders with their revenue (value - discount). | combine_metric_and_dim |  | combine_unaggregated_dim_with_metric |
+| 69 | bad | List orders with their revenue (order's total price - discount). | combine_metric_and_dim | nested_aggregation | missing_pipe_precedence_parens |
+| 70 | bad | List orders that belong to users who signed up in 2024. | simple_listing | explore_filters | manual_join_attempt |
+| 71 | bad | Order count by user | simple_listing |  | double_aggregating_measures |
+| 72 | bad | Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters | double_aggregating_measures |
+| 73 | bad | Total and Average order revenue of top 3 oldest users in each city. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, fn:date_diff, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | extra_dim_changes_explore_grain |
+| 74 | bad | Average order count of top 3 cities (with highest revenue) in each country. Revenue is price - discount (discount is applied on each item). | nested_aggregation, top_n_per_group, multi_model_metric | fn:rank, subset_by_aggregate_filter, filter_by_subset, metric_on_many_side, explore_filters, nested_aggregation | wrong_inner_grain_in_nested_aggregation |
+| 75 | bad | Top 10 products (dense ranking) with highest order count in last quarter, compare their order count in the same quarter of 3 previous years | top_n, period_compare | fn:top, fn:relative_period, fn:where, filter_by_subset, subset_as_table_metric, explore_filters | ranking_grain_mismatch |
+| 76 | bad | Monthly revenue for the product categories selected in the category param | simple_listing | param_input, explore_filters | param_set_outside_params_block |
+| 77 | bad | Revenue of the gender selected in the gender param | simple_listing | param_conditioned_expressions, fn:where | param_as_scalar |
 
 ---
 
