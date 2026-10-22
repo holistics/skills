@@ -10,7 +10,7 @@ This skill orchestrates a migration. It does **not** author AML/AQL by hand. All
 - **Prereqs:** Before writing anything, load the [`setup-amql-development`](../../../holistics-development/skills/setup-amql-development) skill first. It prepares the necessary tools such as `holistics aml validate`, `holistics aml compile`, `holistics sync-code`, `holistics mcp validate_aql`, `holistics mcp execute_aql`, etc., to let you work efficiently and accurately.
 - **For every AML/AQL change**, defer to [`develop-amql`](../../../holistics-development/skills/develop-amql) (models, datasets, dashboards), [type references](../../../holistics-development/references), and [`write-aql`](../../../holistics-development/skills/write-aql) (metrics). They carry the AQL references and the validate workflow.
 - **NEVER** guess AML keys, AQL function names, or operator semantics. Use `holistics mcp search_docs '{"question": "..."}'` before writing anything novel.
-- **NEVER** write AQL from memory or DAX/SQL intuition. Write it through the `write-aql` skill (AQL references first, then `validate_aql`), with the original DAX, the model schema, and the business intent as context.
+- **NEVER** write AQL from memory or DAX/SQL intuition. Write it through the `write-aql` skill, with the original DAX, the model schema, and the business intent as context.
 - **Validate every change** with `holistics aml validate <files>` after every edit, and re-run `holistics mcp validate_aql '{"aql": "...", "dataset_uname": "..."}'` for every metric.
 - **Value parity** is non-negotiable: use `holistics mcp execute_aql` (or the `analyze-data` skill) to query Holistics and compare to Power BI for 5–10 dimension combinations per measure.
 - Verify warehouse access before starting. Holistics runs live queries, so Excel and other file-only Power BI sources must land in a warehouse first (Postgres, BigQuery, Snowflake, Redshift, etc.). Use `holistics mcp list_data_sources '{}'` and `holistics mcp read_data_source_table_schema` to confirm the source landed correctly.
@@ -176,7 +176,7 @@ This plugin orchestrates skills from the `holistics-development` and `holistics-
 - `setup-holistics-cli` — install / authenticate the CLI; provides `holistics aml validate`, `holistics mcp`, `holistics sync-code`.
 - `setup-amql-development` — repo conventions and the validate-as-you-go loop.
 - `develop-amql` — author AML models, datasets, and dashboards.
-- `write-aql` — write and validate AQL (or delegate to `generate_aql` when opted in).
+- `write-aql` — write AQL (via `generate_aql`, or self-authored when opted in).
 - `search-docs` — look up Holistics syntax and concepts.
 - `visualize-data` — rebuild dashboards via `generate_viz` / `execute_viz`.
 - `analyze-data` — run parity comparisons and explain result deltas.

@@ -1,6 +1,6 @@
 ---
 name: viz-writer
-description: Writes and checks a Holistics Viz (chart, table, pivot, KPI, map, MarkdownViz) in an isolated context, and returns only the final Viz AML for the caller to use. Delegate when writing several independent vizzes in parallel (e.g. a dashboard's blocks), or when keeping the Viz references out of the main context is worth starting a separate agent.
+description: Writes and checks a Holistics Viz (chart, table, pivot, KPI, map, MarkdownViz) in an isolated context, and returns only the final Viz AML for the caller to use. Only in self authoring mode (see the viz skill). Delegate when writing several independent vizzes in parallel (e.g. a dashboard's blocks), or when keeping the Viz references out of the main context is worth starting a separate agent.
 ---
 
 You are a Viz sub-agent. You write a Holistics Viz AML for the caller's request, check it with the `execute_viz` tool, and return the finished Viz.
