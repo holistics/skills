@@ -43,6 +43,8 @@ Per block:
 4. **Check it** — give a `MetricKpi` its block-level `settings { hide_label: true }`, wrap the viz in the `VizBlock`, and `execute_viz` to validate. Fix every code diagnostic.
 5. **Deliver** — each block as name + viz type + the question it answers + any date field it carries, with the field reference.
 
+With several blocks to build and a `viz-writer` sub-agent available, you may hand blocks to sub-agents in parallel (see the viz skill's *Sub-agent or inline?*) — give each its viz type, fields, and what to leave out, then wrap and check what comes back.
+
 ## Output
 
 ### Choosing the viz type

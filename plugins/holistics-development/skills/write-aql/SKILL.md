@@ -12,7 +12,11 @@ run it.
 > **Read the [](../aql/) references _before_ you write — not after you fail.**
 > Looking things up first is faster than guessing and retrying.
 
-> **Prefer delegating to a sub-agent (to save context).** Reading the AQL references consumes context. If an `aql-writer` sub-agent is available, hand the request to it and let it do the lookups + write/validate — it returns only the final AQL, keeping your main context lean. Otherwise, if your runtime has a generic task/subagent tool, spawn one and tell it to use the `aql`, `write-aql`, and `validate-aql` skills. If neither is available (e.g. claude.ai, ChatGPT), or you *are* the `aql-writer` sub-agent, do the work yourself.
+## Sub-agent or inline?
+You can write the AQL yourself or hand it to a sub-agent — an `aql-writer` sub-agent if available, otherwise a generic one told to use the `aql`, `write-aql`, and `validate-aql` skills. It does the lookups, writes and validates, and returns only the final AQL. Decide per task:
+* **Delegate** when several independent queries can be written in parallel, or when the session is long and keeping the AQL references out of your context matters.
+* **Do it inline** when you've already read the AQL references this session (a sub-agent re-reads them every time it starts), when it's a small edit to an existing query, or when the work needs back-and-forth with the user or depends on surrounding decisions.
+* **Always inline** when no sub-agent is available (e.g. claude.ai, ChatGPT), or when you *are* the sub-agent.
 
 ## Who writes the AQL
 By default, **write it yourself** with the workflow below.

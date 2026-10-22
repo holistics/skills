@@ -31,5 +31,11 @@ Run it with tool `execute_viz`:
 
 It reports invalid properties and unknown fields with exact messages (e.g. `Property 'single_cell_display' does not exist on type 'PieChart'`), and otherwise returns the rendered data. Fix every error and re-run. Inside a `page.aml`, also validate the file with `holistics aml validate`.
 
+## Sub-agent or inline?
+You can write the Viz yourself or hand it to a sub-agent — a `viz-writer` sub-agent if available, otherwise a generic one told to use this skill. It writes the Viz, checks it with `execute_viz`, and returns only the final Viz AML. Decide per task:
+* **Delegate** when several independent vizzes can be written in parallel (e.g. a dashboard's blocks), or when the session is long and keeping the Viz references out of your context matters.
+* **Do it inline** when you've already read the Viz references this session (a sub-agent re-reads them every time it starts), when it's a small edit to an existing Viz, or when the work needs back-and-forth with the user or depends on surrounding decisions.
+* **Always inline** when no sub-agent is available (e.g. claude.ai, ChatGPT), or when you *are* the sub-agent.
+
 ## Delegating to Holistics AI
 Use `generate_viz` instead of writing the Viz yourself when the user asks for Holistics AI, the project's instructions (e.g. `CLAUDE.md`, `AGENTS.md`) say to use it, or the Viz still fails after ~3 fix rounds. It needs an AQL explore (`aql`); pass your last attempt as `current_viz` and its errors in `current_result`.
