@@ -1,5 +1,5 @@
 # Data format
-A format is a pattern string on a viz field's `format` block. Below are the common cases. For anything else (the standard currency list, the full syntax), search the docs for number formats or date formats.
+A format is a pattern string on a viz field's `format` block. Below are the common cases. For anything else (the standard currency list, the full syntax), see the full docs: [Number format](https://docs.holistics.io/reference/aml/number-format), [Date format](https://docs.holistics.io/reference/aml/date-format), and [Data format](https://docs.holistics.io/reference/aml/data-format).
 
 ## Date patterns
 Parts: `dd` day, `LL` month as a number, `LLL` month abbreviated, `yyyy` year. Separate them with

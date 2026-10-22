@@ -1,6 +1,3 @@
-// Synced 2026-08-20 from the aml repo: aml-definition/viz.aml
-// Local edit: the @doc annotation on MarkdownViz.content. Nothing else.
-
 Type Operator = 'is' | 'is_not' | 'contains' | 'does_not_contain' | 'starts_with' | 'ends_with' | 'is_null' | 'not_null' | 'matches_user_attribute' | 'top' | 'bottom' | 'matches' | 'last' | 'next' | 'between' | 'before' | 'after' | 'match_ranges' | 'less_than' | 'greater_than'
 
 Type Modifier = 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour' | 'minute';
@@ -177,6 +174,7 @@ Type DataTable (elem_name_as: 'uname') {
   settings(optional) {
     pagination_size(optional): Number
     show_row_number(optional): Boolean
+    show_field_description(optional): Boolean
     show_row_with_no_data(optional): Boolean
     @doc Deprecated. Use "wrap_header_text" and "wrap_cell_text" instead;;
     row_height(optional): 'single_line' | 'multiple_lines'
@@ -224,6 +222,7 @@ Type PivotTable (elem_name_as: 'uname') {
     show_row_total(optional): Boolean
     show_column_total(optional): Boolean
     show_sub_total(optional): Boolean
+    show_field_description(optional): Boolean
     conditional_formats(optional): List[ConditionalFormat]
     sorts(optional): List[SortSetting]
     pop(optional): VizPopSettings
@@ -922,7 +921,7 @@ Type GaugeChart (elem_name_as: 'uname') {
   }
 }
 
-Type MapTileProvider = 'light' | 'dark' | 'street' | 'satellite' | 'outdoor' | 'onemap' | 'onemap_landlot'
+Type MapTileProvider = 'auto' | 'light' | 'dark' | 'street' | 'satellite' | 'outdoor' | 'onemap' | 'onemap_landlot'
 
 Type Heatmap (elem_name_as: 'uname') {
   dataset: String | Dataset
@@ -993,7 +992,8 @@ Type PointMap (elem_name_as: 'uname') {
     }
     scale(optional): 'linear' | 'logarithmic'
     legend_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
@@ -1073,14 +1073,16 @@ Type FilledMap (elem_name_as: 'uname') {
       }
     }
     legend_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
       }
     }
     location_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
@@ -1120,7 +1122,6 @@ Type MarkdownViz (elem_name_as: 'uname') {
   columns(optional): List[VizField]
   values(optional): List[VizField]
 
-  @doc Refer to Dynamic Content Blocks for the content syntax and usage;;
   content: Heredoc['md']
 
   settings(optional) {

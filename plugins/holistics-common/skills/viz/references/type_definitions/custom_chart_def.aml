@@ -1,5 +1,3 @@
-// Synced 2026-08-20 from the aml repo: aml-definition/custom_chart_def.aml
-
 Type CustomChartDef {
   label: String
   description(optional): String
