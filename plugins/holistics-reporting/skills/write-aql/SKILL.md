@@ -16,7 +16,7 @@ Write AQL yourself (*Self mode* below) **only** when the authoring mode is `self
 **Decide the mode now, before anything else. In self mode, follow *Self mode* and do NOT call `generate_aql`.**
 
 ## Prerequisites
-* Set up Holistics MCP
+* Set up Holistics MCP. If you call the tools through the `holistics mcp` CLI instead, follow *Calling tools via the CLI* in the `setup-amql-development` skill — parameters are one JSON object (for AQL/AML, a JSON file piped on stdin), never `key=value`.
 * Know the dataset. Use `fetch_dataset` to list its models, fields, and metrics — that's your `dataset_fields`. Use only those, with their **EXACT** names. In an AMQL repo, also read the dataset/model `.aml` files for definitions and descriptions.
 
 ## Holistics AI mode (default)

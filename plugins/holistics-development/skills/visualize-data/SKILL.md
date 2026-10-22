@@ -8,7 +8,7 @@ description: Create charts, tables, and visualizations from queries. Use this wh
 * Users might want to save the visualization for long-term use, so make it nice.
 
 ## Pre-requisites
-* Set up Holistics MCP
+* Set up Holistics MCP. If you call the tools through the `holistics mcp` CLI instead, follow *Calling tools via the CLI* in the `setup-amql-development` skill — parameters are one JSON object (for AQL/AML, a JSON file piped on stdin), never `key=value`.
 
 ## Authoring mode
 Plugin setting: `${user_config.authoring_mode}`
