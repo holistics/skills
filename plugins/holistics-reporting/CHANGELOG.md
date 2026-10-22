@@ -1,3 +1,16 @@
+## [0.2.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.1.2...holistics-reporting-v0.2.0) (2026-10-22)
+
+### Features
+
+* add skill to author viz ([1743d19](https://github.com/holistics/skills/commit/1743d19e184b0230e9cab11ba5592fcceb719c19))
+* **plugins.development:** improving CLI calling ([50e23f5](https://github.com/holistics/skills/commit/50e23f5121a1e0a6dd4dc026fe94b0de13a8a67d))
+* **plugins.development:** local aql skills ([04d5471](https://github.com/holistics/skills/commit/04d5471fc9bd484948de163122fd6ee3c888aa10))
+* update AML definitions ([bd691f2](https://github.com/holistics/skills/commit/bd691f2b26192f1c66936821f2147b96f66f93e1))
+
+### Bug Fixes
+
+* **native.system,plugins.common,plugins.development:** split autorun into on_open and on_changes ([cbcdc37](https://github.com/holistics/skills/commit/cbcdc379f259c0c7bcc40e785ab8c01cfb188554))
+
 ## [0.1.2](https://github.com/holistics/skills/compare/holistics-reporting-v0.1.1...holistics-reporting-v0.1.2) (2026-06-19)
 
 ### Bug Fixes
