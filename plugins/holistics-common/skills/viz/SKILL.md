@@ -15,8 +15,8 @@ the knowledge base you consult while writing one; it doesn't run anything.
 1. **`references/guide.md` — read this first, before writing any Viz.** Field references (`r(...)` vs calculations), converting an AQL explore into a Viz, params, the rules for fitting dimensions into viz slots, and formatting defaults.
 2. **`references/type_definitions/viz.aml` — the schema.** Find your viz type's block and use only its properties. `conditional_format.aml`, `action.aml`, and `custom_chart_def.aml` define the types it refers to.
 3. **`references/examples.md` — worked examples.** Request → Viz pairs across viz types, BAD examples, and common errors with their fixes.
-4. **`references/data_format.md`** — the common date and number format patterns. For anything rarer (currency list, full syntax), use `search_docs`.
-5. **`references/dynamic_content_blocks.md`** — only for `MarkdownViz` (data-driven HTML/Markdown).
+4. **`references/data_format.md`** — the common date and number format patterns, with links to the full format docs for anything rarer (currency list, full syntax).
+5. **`MarkdownViz`** (data-driven HTML/Markdown) — its template syntax is in the public docs: [syntax reference](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference) and [getting started](https://docs.holistics.io/docs/charts/dynamic-content-blocks/getting-started).
 
 ## Where the fields come from
 * Use `fetch_dataset` for the dataset's models, fields, and metrics — the "dataset fields" the references mention. Reference only fields that exist there, or Viz `calculation`s you declare.
