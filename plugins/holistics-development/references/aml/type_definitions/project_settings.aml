@@ -1,4 +1,7 @@
 Type ProjectSettings {
+  viz(optional) {
+    default_color_palette(optional): ColorPalette
+  }
   dashboard(optional) {
     default_template(optional): Dashboard
   }

@@ -81,6 +81,7 @@ Type MovingCalculationField {
     next(optional): Number
   }
   null_if_not_enough_values(optional): Boolean
+  regression(optional): 'linear' | 'logarithmic' | 'power' | 'exponential'
 }
 
 Type PeriodOverPeriodComparison {
@@ -99,14 +100,16 @@ Type AlignmentPosition = 'left' | 'right' | 'center'
 Type ConstantVizField {
   value: Number
   label(optional): String
-  format(optional) {
-    type: 'auto' | 'text' | 'html' | 'date' | 'number' | 'datetime'
-    pattern(optional): String
-    separator(optional): String
-    group_separator(optional): String
-    decimal_separator(optional): String
-  }
+  format(optional): FieldFormat
   uname(optional): String
+}
+
+Type FieldFormat {
+  type: 'auto' | 'text' | 'html' | 'date' | 'number' | 'datetime' | 'json'
+  pattern(optional): String
+  separator(optional): String
+  group_separator(optional): String
+  decimal_separator(optional): String
 }
 
 Type VizFieldFull {
@@ -114,13 +117,7 @@ Type VizFieldFull {
   label(optional): String
   transformation(optional):  String
   aggregation(optional): String
-  format(optional) {
-    type: 'auto' | 'text' | 'html' | 'date' | 'number' | 'datetime' | 'json'
-    pattern(optional): String
-    separator(optional): String
-    group_separator(optional): String
-    decimal_separator(optional): String
-  }
+  format(optional): FieldFormat
   analytic(optional): RegressionLine | ReferenceLine | PercentOfTotalField | MovingCalculationField | PeriodOverPeriodComparison
   action(
     elem_name_as: 'uname',
@@ -155,31 +152,29 @@ Type ColumnStyle {
   width(optional): Number
 }
 
+Type VizCalculation {
+  label(optional): String
+  description(optional): String
+  formula: Heredoc['aml' | 'sql' | 'aql']
+  calc_type: 'dimension' | 'measure'
+  data_type: DataType
+  model(optional): String | Model
+  hidden(default: false): Boolean
+  format(optional): FieldFormat
+}
+
 Type DataTable (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-    hidden(default: false): Boolean
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   fields: List[VizField]
   settings(optional) {
     pagination_size(optional): Number
     show_row_number(optional): Boolean
+    show_field_description(optional): Boolean
     show_row_with_no_data(optional): Boolean
     @doc Deprecated. Use "wrap_header_text" and "wrap_cell_text" instead;;
     row_height(optional): 'single_line' | 'multiple_lines'
@@ -206,24 +201,11 @@ Type DataTable (elem_name_as: 'uname') {
 
 Type PivotTable (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   rows(optional): List[VizField]
   columns(optional): List[VizField]
   values(optional): List[VizField]
@@ -240,6 +222,7 @@ Type PivotTable (elem_name_as: 'uname') {
     show_row_total(optional): Boolean
     show_column_total(optional): Boolean
     show_sub_total(optional): Boolean
+    show_field_description(optional): Boolean
     conditional_formats(optional): List[ConditionalFormat]
     sorts(optional): List[SortSetting]
     pop(optional): VizPopSettings
@@ -272,24 +255,11 @@ Type LineFamilySort {
 }
 Type CombinationChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_axis(optional): VizField
   legend(optional): VizField
   y_axis(multiple: true, unique_elem_name: false) {
@@ -299,7 +269,7 @@ Type CombinationChart (elem_name_as: 'uname') {
       field: VizField
       settings(optional) {
         color(optional): String
-        color_palette(optional): ColorPalette
+        color_palette(optional): ColorPalette | LegacyColorPalette
         line_style(optional): LineStyle
         line_interpolation(optional): LineInterpolation
         point(multiple: true) {
@@ -346,24 +316,11 @@ Type CombinationChart (elem_name_as: 'uname') {
 }
 Type LineChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_axis(optional): VizField
   legend(optional): VizField
   y_axis(multiple: true, unique_elem_name: false) {
@@ -372,7 +329,7 @@ Type LineChart (elem_name_as: 'uname') {
       field: VizField
       settings(optional) {
         color(optional): String
-        color_palette(optional): ColorPalette
+        color_palette(optional): ColorPalette | LegacyColorPalette
         line_style(optional): LineStyle
         line_interpolation(optional): LineInterpolation
         point(multiple: true) {
@@ -419,24 +376,11 @@ Type LineChart (elem_name_as: 'uname') {
 }
 Type AreaChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_axis(optional): VizField
   legend(optional): VizField
   y_axis(multiple: true, unique_elem_name: false) {
@@ -445,7 +389,7 @@ Type AreaChart (elem_name_as: 'uname') {
       field: VizField
       settings(optional) {
         color(optional): String
-        color_palette(optional): ColorPalette
+        color_palette(optional): ColorPalette | LegacyColorPalette
         line_style(optional): LineStyle
         line_interpolation(optional): LineInterpolation
         point(multiple: true) {
@@ -492,24 +436,11 @@ Type AreaChart (elem_name_as: 'uname') {
 }
 Type ColumnChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_axis(optional): VizField
   legend(optional): VizField
   y_axis(multiple: true, unique_elem_name: false) {
@@ -518,7 +449,7 @@ Type ColumnChart (elem_name_as: 'uname') {
       field: VizField
       settings(optional) {
         color(optional): String
-        color_palette(optional): ColorPalette
+        color_palette(optional): ColorPalette | LegacyColorPalette
         line_style(optional): LineStyle
         line_interpolation(optional): LineInterpolation
         point(multiple: true) {
@@ -563,24 +494,11 @@ Type ColumnChart (elem_name_as: 'uname') {
 }
 Type BarChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_axis(optional): VizField
   legend(optional): VizField
   y_axis(multiple: true, unique_elem_name: false) {
@@ -589,7 +507,7 @@ Type BarChart (elem_name_as: 'uname') {
       field: VizField
       settings(optional) {
         color(optional): String
-        color_palette(optional): ColorPalette
+        color_palette(optional): ColorPalette | LegacyColorPalette
         line_style(optional): LineStyle
         line_interpolation(optional): LineInterpolation
         point(multiple: true) {
@@ -641,30 +559,17 @@ Type PieFamilySort {
 
 Type PieChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   legend(optional): VizField
   series(multiple: true, unique_elem_name: false) {
     field: VizField
     settings(optional) {
       color(optional): String
-      color_palette(optional): ColorPalette
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color(optional): String
@@ -695,30 +600,17 @@ Type PieChart (elem_name_as: 'uname') {
 }
 Type PyramidChart {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   legend(optional): VizField
   series(multiple: true, unique_elem_name: false) {
     field: VizField
     settings(optional) {
       color(optional): String
-      color_palette(optional): ColorPalette
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color(optional): String
@@ -748,30 +640,17 @@ Type PyramidChart {
 }
 Type FunnelChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   legend(optional): VizField
   series(multiple: true, unique_elem_name: false) {
     field: VizField
     settings(optional) {
       color(optional): String
-      color_palette(optional): ColorPalette
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color(optional): String
@@ -802,24 +681,11 @@ Type FunnelChart (elem_name_as: 'uname') {
 
 Type BubbleChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_col: VizField
   y_col: VizField
   z_col: VizField
@@ -835,24 +701,11 @@ Type BubbleChart (elem_name_as: 'uname') {
 
 Type ScatterChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   x_col: VizField
   y_col: VizField
   group_col(optional): VizField
@@ -867,24 +720,11 @@ Type ScatterChart (elem_name_as: 'uname') {
 
 Type RetentionHeatmap (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   cohort: VizField
   cohort_size(optional): VizField
   cohort_duration: VizField
@@ -902,24 +742,11 @@ Type RetentionHeatmap (elem_name_as: 'uname') {
 
 Type ConversionFunnel  (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   breakdown_by(optional): VizField
   values: List[VizField]
   settings(optional) {
@@ -954,24 +781,11 @@ Type MetricHeading {
 }
 Type MetricSheet (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   date_field: VizField
   rows: List[MetricSeries | MetricHeading]
   settings(optional) {
@@ -1006,24 +820,11 @@ Type VizAggregateAwareness {
 
 Type MetricKpi (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   value: VizField
   compare_value(optional): VizField | VizPopSettings
   settings(optional) {
@@ -1055,24 +856,11 @@ Type MetricKpi (elem_name_as: 'uname') {
 
 Type RadarChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   label(optional): String
   x_axis(optional): VizField
   legend(optional): VizField
@@ -1097,24 +885,11 @@ Type RadarChart (elem_name_as: 'uname') {
 
 Type WordCloud (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   words: VizField
   weight: VizField
   settings(optional) {
@@ -1126,24 +901,11 @@ Type WordCloud (elem_name_as: 'uname') {
 
 Type GaugeChart (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   value: VizField
   max_value: VizField
   settings(optional) {
@@ -1159,28 +921,15 @@ Type GaugeChart (elem_name_as: 'uname') {
   }
 }
 
-Type MapTileProvider = 'light' | 'dark' | 'street' | 'satellite' | 'outdoor' | 'onemap' | 'onemap_landlot'
+Type MapTileProvider = 'auto' | 'light' | 'dark' | 'street' | 'satellite' | 'outdoor' | 'onemap' | 'onemap_landlot'
 
 Type Heatmap (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   lat: VizField
   lng: VizField
   value(optional): VizField
@@ -1220,24 +969,11 @@ Type Heatmap (elem_name_as: 'uname') {
 
 Type PointMap (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   lat: VizField
   lng: VizField
   legend(optional): VizField
@@ -1256,7 +992,8 @@ Type PointMap (elem_name_as: 'uname') {
     }
     scale(optional): 'linear' | 'logarithmic'
     legend_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
@@ -1293,24 +1030,11 @@ Type CustomMapLocation {
 
 Type FilledMap (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   location(multiple: true, unique_elem_name: false) {
     field: VizField
     location_type(optional): 'country' | 'city' | 'continent' | 'state' | 'none' | CustomMapLocation
@@ -1349,14 +1073,16 @@ Type FilledMap (elem_name_as: 'uname') {
       }
     }
     legend_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
       }
     }
     location_colors (optional) {
-      color: String
+      color(optional): String
+      color_palette(optional): ColorPalette | LegacyColorPalette
       point(multiple: true) {
         value: String | Number | Boolean
         color: String
@@ -1368,26 +1094,14 @@ Type FilledMap (elem_name_as: 'uname') {
 }
 
 Type CustomChart {
-  custom_chart_id: Number
+  custom_chart_id(optional): Number
+  custom_chart(optional): CustomChartDef
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   field (elem_name_as: 'uname', body_as: 'val', multiple: true, unique_elem_name: true) : VizField
   setting (elem_name_as: 'uname', body_as: 'val', multiple: true, unique_elem_name: true) : Boolean | String | Number
   settings(optional) {
@@ -1399,24 +1113,11 @@ Type CustomChart {
 
 Type MarkdownViz (elem_name_as: 'uname') {
   dataset: String | Dataset
-  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
-    label(optional): String
-    description(optional): String
-    formula: Heredoc['aml' | 'sql' | 'aql']
-    calc_type: 'dimension' | 'measure'
-    data_type: DataType
-    model(optional): String | Model
-  }
+  calculation(elem_name_as: 'uname', multiple: true, unique_elem_name: true): VizCalculation
   conditions(optional): List[String]
+  having_conditions(optional): List[String]
   filter_groups(optional): List[FilterGroup]
-  filter(multiple: true) {
-    field: VizFieldRef
-    aggregation(optional): AggregationType
-    operator: Operator
-    value: String | Number | Boolean | List[String | Number | Boolean]
-    modifier(optional): Modifier
-    options(optional): ConditionOptions
-  }
+  filter(multiple: true): VizFilter
   rows(optional): List[VizField]
   columns(optional): List[VizField]
   values(optional): List[VizField]

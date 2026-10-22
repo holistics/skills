@@ -1,7 +1,7 @@
 {
   "name": "holistics-reporting",
   "description": "Skills for exploring and analyzing data in Holistics using published analytics.",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "author": {
     "name": "Holistics"
   },
@@ -14,5 +14,17 @@
     "reporting",
     "bi",
     "dashboards"
-  ]
+  ],
+  "userConfig": {
+    "authoring_mode": {
+      "type": "string",
+      "title": "AQL & Viz authoring",
+      "description": "holistics-ai: Holistics AI writes AQL and Viz (generate_aql, generate_viz). self: the agent writes them from the bundled references and validates them.",
+      "options": [
+        "holistics-ai",
+        "self"
+      ],
+      "default": "holistics-ai"
+    }
+  }
 }

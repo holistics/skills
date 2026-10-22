@@ -1,0 +1,15 @@
+# Copied from upstream; not synced automatically.
+# To update: re-copy from the sources below and bump their commits.
+
+# SKILL.md and references/aql/ (per-function docs) — verbatim
+repo: git@github.com:anfra-ai/skills.git
+path: plugins/anfra-development/skills/aql
+commit: c080a59db26b00c8abea43b07d9db47ca75a736e
+copied: 2026-09-25
+
+# references/aqlearn.md and references/examples/ — exported, from holistics/ai apps/orca:
+#   .venv/bin/python bin/export_skill_references.py aql <this skill>/references
+repo: git@github.com:holistics/ai.git
+path: apps/orca/orca/agent/aqua/prompts/{aqlearn,examples}
+commit: 944a9f0aa00eae8fdb5179c0eed256922d1c798e
+exported: 2026-10-22

@@ -30,6 +30,8 @@ Quick guidance on picking a `type`:
 ```
 plugins/
   holistics-common/       # Shared source of truth for Holistics- skills and references
+    agent-templates/      # Sub-agent sources; rendered into agents/ by build-agents.js
+    agents/               # Generated — do not edit
     references/
     skills/
   holistics-development/  # Plugin for Holistics development workflows
@@ -38,6 +40,7 @@ plugins/
   analytics/              # Plugin for generic analytics workflows (not Holistics-specific)
     skills/
 scripts/
+  build-agents.js         # Render agent-templates/ into agents/ (--check to verify)
   bump.js                 # Bump plugin version and update CHANGELOG
   create-link.sh          # Add a shared skill/reference to a plugin
   sync-links.sh           # Sync all (or one) linked directories from source
@@ -81,6 +84,8 @@ This copies the source into the destination, writes the `.link` file, and runs a
 
 Delete the synced directory (the one containing the `.link` file) from the consumer. If no plugin still uses it, also delete the source.
 
+The pre-commit hook asks you to confirm any removed `.link` file. Committing from somewhere without a terminal (e.g. an IDE), confirm it up front instead: `VALIDATE_LINKS_IGNORE_REMOVALS=1 git commit ...`.
+
 **Verify everything is in sync**
 
 ```bash
@@ -88,6 +93,34 @@ pnpm validate-links  # runs automatically as a pre-commit hook
 ```
 
 This checks that each linked directory matches its source and warns about missing sources.
+
+## Native skills that diverge from plugins
+
+Native skills can't read plugin settings (`${user_config.*}`) or files bundled next to a skill, so a plugin skill that depends on either can't be linked into `native-skills/`. These are kept as separate copies — when changing what both share (e.g. dashboard conventions), edit both:
+
+* `native-skills/system/holistics-common/build-visualizations/` — always uses `generate_aql` → `generate_viz`; the plugin version (`plugins/holistics-development/skills/build-visualizations/`) adds the authoring-mode switch and the `viz` skill.
+
+## Sub-agents
+
+Sub-agents (Claude Code `agents/*.md`) are generated from `plugins/<plugin>/agent-templates/*.md`. A template line `<!-- include: <path> -->` is replaced with that file's contents (path relative to the plugin), so an agent can preload skill references without a hand-maintained copy.
+
+After editing a template or an included file, run `pnpm build-agents`, then `pnpm sync-links`. The pre-commit hook runs `pnpm build-agents --check` and rejects out-of-date agents.
+
+## Content copied from other repos
+
+Some sources are copied from another repo and are **not** synced automatically. Each carries an `.upstream` file recording the origin repo, path, commit, and any transformation applied.
+
+* `plugins/holistics-common/skills/aql/` — `SKILL.md` and per-function docs from [anfra-ai/skills](https://github.com/anfra-ai/skills); `aqlearn.md` and the worked examples exported from the Holistics AI agent's AQL prompts (Aqua), which are the source of truth for Holistics AQL.
+* `plugins/holistics-common/skills/viz/references/` — exported from the Holistics AI agent's Viz prompt, docs, and AML type definitions (Vivid).
+
+Exports run from the `holistics/ai` repo, in `apps/orca`:
+
+```bash
+.venv/bin/python bin/export_skill_references.py aql <this repo>/plugins/holistics-common/skills/aql/references
+.venv/bin/python bin/export_skill_references.py viz <this repo>/plugins/holistics-common/skills/viz/references
+```
+
+Then bump the commit in `.upstream`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
 
 ## Scripts
 

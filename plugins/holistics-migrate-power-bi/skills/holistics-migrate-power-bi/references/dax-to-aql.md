@@ -1,6 +1,6 @@
 # DAX → AQL pattern catalogue
 
-For every translation, feed the DAX, the source model schema, and the intent to `generate_aql`; do not hand-write AQL. The snippets below show the target shape for review — the actual function names and operators must be confirmed via `search_docs` or `validate_aql`.
+For every translation, write the AQL through the `write-aql` skill from the DAX, the source model schema, and the intent; do not write AQL from memory. The snippets below show the target shape for review — the actual function names and operators must be confirmed via `search_docs` or `validate_aql`.
 
 **Before writing or reviewing any AQL, read these references:**
 
@@ -378,7 +378,7 @@ Same shape works for "average daily order count", "best month for revenue", etc.
    - branching → `case(when:, then:, else:)`
    - ranking → `rank(order:, partition:)`
 3. Choose the target shape: prefer a `metric @aql` first; fall back to a `measure @sql` only when AQL truly lacks the primitive.
-4. Call `generate_aql` with the DAX, the intent, and the model schema as natural-language context.
+4. Write the AQL with the `write-aql` skill, using the DAX, the intent, and the model schema as context.
 5. Run `holistics aml validate` and `holistics mcp validate_aql` (CLI).
 6. Compare values against Power BI (see [](./validation.md)).
 7. If values disagree near `of_all` / `rank` / window functions, re-read the [pipeline order of operations](https://docs.holistics.io/docs/as-code/aql/order-of-operations) — step 4 (filter pruning) and step 3 (window in dimensions) cover most surprises.
