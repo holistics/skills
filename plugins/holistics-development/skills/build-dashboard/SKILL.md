@@ -257,6 +257,20 @@ block <x>: TextBlock { content: @md ## Section heading ;; }
 
 When a block displays dynamic, real-time data values, use a data visualization block (`MetricKpi` or standard chart) instead of a `TextBlock`.
 
+### Layout — `TabLayout` by default, `HTMLLayout` for custom formats
+
+`TabLayout` covers standard dashboards, and users can rearrange its blocks in the GUI editor. `HTMLLayout` gives full control over format and presentation (any HTML and CSS around the blocks), but the dashboard can then only be edited in code. Use it only when the request needs a format or presentation a tab canvas can't produce, for example:
+
+* A printable or paginated report (A4 pages, PDF export, headers and footers)
+* Slides
+* A heavily styled or editorial layout, such as a newsletter with narrative between the charts
+
+Or when the user asks for an HTML layout. Don't switch just to make a standard dashboard look nicer, and keep `TabLayout` when the user needs tabs. When you choose `HTMLLayout`, say in the plan that the dashboard will be code-only.
+
+Before writing an `HTMLLayout`, read [HTML layout](https://docs.holistics.io/docs/dashboards/html-layout) (start from the closest example under *Examples*, and check *Limitations*) and the [AML reference](https://docs.holistics.io/reference/aml/html-layout).
+
+Give each block's container a fixed `height`, not only `min-height`. In an export, a container without a height grows to fit its content and stretches the dashboard into one long page.
+
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
