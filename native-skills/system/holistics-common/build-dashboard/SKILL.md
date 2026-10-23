@@ -53,7 +53,7 @@ The minimum requirement is a **quality standard, not a fixed layout**. A dashboa
   *A KPI row is not the default opening; non-monitoring dashboards rarely need one, and detail tables should only be included when row-level lookup is explicitly required.*
 * **Data-driven scope** — Use `fetch_dataset` to examine available fields and metrics. Let the user's ranked questions determine which metrics merit a section.
 * **Proportional depth** — Broad requests require wider, shallower sections; narrow requests require deep, focused sections.
-* **Real data & interactive controls** — Wire real fields and metrics. KPI comparisons must reference the dashboard's Period Comparison control rather than static values. Always wire dashboard controls explicitly and apply a theme (default: `theme: H.themes.classic`).
+* **Real data & interactive controls** — Wire real fields and metrics. KPI comparisons must reference the dashboard's Period Comparison control rather than static values. Always wire dashboard controls explicitly and apply a theme (default: `theme: DynamicPageTheme { light: H.themes.vanilla, dark: H.themes.charcoal }`).
 * **Grid layout** — Stack sections vertically by priority. Within each section, place 1–4 blocks per row (full-width for hero trends/tables; 2–3 columns for side-by-side comparisons). Maintain consistent grid alignment and sizing based on visual hierarchy. Each tab must be a self-contained canvas.
 
 If the user gives a tight instruction ("just build one chart for X"), stick strictly to their scope, mention potential additions, and complete the request.
@@ -145,7 +145,10 @@ Use the correct `ref:` syntax based on the field type:
 ```aml
 Dashboard sales_overview {
   title: 'Sales Overview'
-  theme: H.themes.classic
+  theme: DynamicPageTheme {
+    light: H.themes.vanilla
+    dark: H.themes.charcoal
+  }
   settings {                                           // no timezone — follows the Organization Timezone
     autorun_on_open: true
     autorun_on_changes: true
