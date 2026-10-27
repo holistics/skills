@@ -19,14 +19,28 @@ References, read when a step needs them:
 - [example.html](references/example.html): a complete app in the default Holistics look. Start the file from its
   skeleton.
 
-## 1. Collect the snapshot and the idea
+## 1. Collect the datasets and the idea
 
-You need the user's **data snapshot** (the datasets, fields and metrics they can use) and a
-**description** of the app. The invocation may hold both, one, or neither, so check before asking.
-A snapshot is JSON with `user` and `datasets`; the rest of the invocation is the description.
+You need the **datasets** the app may use (their fields and metrics) and a **description** of the
+app. The invocation may hold a data snapshot, a description, both or neither, so check before
+asking. A snapshot is JSON with `user` and `datasets`; when one is there, use it, and the rest of
+the invocation is the description.
 
-1. **No snapshot:** ask for it first. Send the user this message as written, with the script right
-   under the message's step 2 so it sits next to the step that uses it:
+1. **No description:** ask what the app should show and who it's for, in one short question. Don't
+   suggest app ideas unless the user asks for them.
+2. **No snapshot, Holistics MCP server connected:** read the datasets through it rather than asking
+   for a snapshot, which saves the user copying code and JSON back and forth.
+   1. With the description in hand, call `list_datasets` and shortlist the datasets that fit. Skip
+      ones tagged `Archived` or `Deprecated` or similar.
+   2. In one message, show the shortlist, name the server, and ask the user to confirm both the
+      datasets and that the app will live in that server's workspace (it may point at a different
+      one).
+   3. Call `fetch_dataset` for each. Its `relationships` show which models join, and its
+      descriptions carry the modeler's caveats on grain, fan-out and which date to use: follow
+      them.
+3. **No snapshot and no MCP server**, or the server points at another workspace: ask for the
+   snapshot. Send the user this message as written, with the script right under the message's
+   step 2 so it sits next to the step that uses it:
 
    > 1. Open a Data App in the workspace the app will live in, or create one,
    >    and click **Edit app**.
@@ -56,31 +70,17 @@ A snapshot is JSON with `user` and `datasets`; the rest of the invocation is the
    > - If you already know which datasets the app needs, delete the others before pasting.
    > - If you already know what the app should show and who it's for, include that with the JSON.
 
-   <!-- The in-app guide shows the same script. Change both together. -->
-
-2. **No description:** ask what the app should show and who it's for, in one short question. Don't
-   suggest app ideas unless the user asks for them.
-
-Use a connected Holistics MCP server only when the user asks, since it may point at a different
-workspace:
-
-1. Name the server you will call and get a yes.
-2. With the description in hand, call `list_datasets` and shortlist the datasets that fit. Skip
-   ones tagged `Archived` or `Deprecated` or similar. Confirm the shortlist with the user.
-3. Call `fetch_dataset` for each. Its `relationships` show which models join, and its descriptions
-   carry the modeler's caveats on grain, fan-out and which date to use: follow them.
-
 Whichever source you use:
 
 - A dataset's key (`uname` from MCP) is what `dataset:` takes.
 - A field is `model.field` (`orders.created_at`); a dataset metric is its bare name.
-- A measure (marked `(measure)` in the snapshot) is already aggregated: select it as-is, never wrap
-  it in `sum()`.
+- A field marked `(measure)` in the snapshot is a measure (`orders.total_revenue`); the
+  [aql](../aql/) skill covers how to use one.
 - If a number the app needs has no field or metric, declare it as a query-local metric in the AQL.
   If AQL can't express it, tell the user it needs adding to the dataset; never compute it in
   JavaScript.
 
-Done when you hold a description and the environment of every dataset the app may use.
+Done when you hold a description and the fields and metrics of every dataset the app may use.
 
 ## 2. Agree on the design
 
@@ -105,28 +105,29 @@ Done when you hold a description and the environment of every dataset the app ma
 ## Look and feel
 
 An app must look finished without the user asking: no native controls, default buttons or unstyled
-text.
+text. In every look (default, creative or their own design):
 
-- **Their own design:** follow it, and skip the defaults below.
-- **Creative:** your own palette, type and layout, keeping readable contrast, tabular numerals,
-  light and dark (`prefers-color-scheme`), and styled loading, empty and error states.
-- **Default style (Holistics):** start from the example, which maps Holistics' in-app tokens onto
-  [Basecoat UI](https://basecoatui.com). Use its tokens as CSS variables, Inter, its text sizes
-  (24px page title, 14px card titles and body, 12px captions), 32px controls, one Blue 600 primary
-  action and the chart palette (Blue 600 first). Green, purple and amber belong in charts and
-  status, never on actions.
-
-In every look:
-
-- Use Basecoat, with pinned CDN CSS and JS as in the example; shadcn only for a React or Vue app.
-- Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values), never
+- A filter is a styled dropdown with search, multi-select for several values, never
   `<select multiple>`. For dates, two styled `<input type="date">` and preset buttons, as in the
   example.
-- Basecoat `.card` is a flex column that clips overflow. On a filter bar card set
-  `flex-direction: row; align-items: flex-end; overflow: visible` (as `.card.filters` in the
-  example), or the controls drift right and dropdowns get cut off.
-- Charts: follow a `dataviz` skill if one is available. Give ECharts hex colors: it cannot parse
-  `oklch`.
+- Give ECharts hex colors: it cannot parse `oklch`.
+
+Then by look:
+
+- **Default style (Holistics):** start from the example, which maps Holistics' in-app tokens onto
+  [Basecoat UI](https://basecoatui.com), with pinned CDN CSS and JS. Use its tokens as CSS
+  variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
+  32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
+  and amber belong in charts and status, never on actions.
+  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values).
+  - Basecoat `.card` is a flex column that clips overflow. On a filter bar card set
+    `flex-direction: row; align-items: flex-end; overflow: visible` (as `.card.filters` in the
+    example), or the controls drift right and dropdowns get cut off.
+- **Creative:** your own palette, type and layout, in Basecoat or your own CSS, keeping readable
+  contrast, tabular numerals, light and dark (`prefers-color-scheme`), and styled loading, empty
+  and error states.
+- **Their own design:** follow it. Take only the SDK wiring and the sandbox rules from the example,
+  not its look.
 
 ## 3. Write the file
 
@@ -139,8 +140,10 @@ theme) apart from the SDK wiring.
 selection, sorts, date drills, page) to the query's `explore { }` before it runs, so a pipe-style
 query fails as soon as a reader touches a control, sort or date drill mapped to it. Nothing a reader
 changes goes in the AQL text: static conditions go in `filters`; a reader's choice is a control
-(`createFilter` + `mapControl`). A Data App can't run a pivot query (`rows { }` / `columns { }`):
-query flat rows and pivot them in the app.
+(`createFilter` + `mapControl`). Write flat table queries, not pivot queries (`rows { }` /
+`columns { }`): pivot the rows in the app when it needs a pivot. Alias every dimension and measure
+(`region: users.region`, `revenue: orders.total_revenue`): sorts, date drills, cross-filters and
+row keys all go by the alias.
 
 **The sandbox** allows scripts only, has an opaque origin and a content policy:
 
@@ -177,8 +180,6 @@ and gives the user a handle for each part to hand back to you.
   rebuild the chart, which would replay its entry animation on every click. With ECharts, merge a
   selection with a plain `setOption(option)` and keep `replaceMerge` for a new result.
 - Put on the page the definitions, dates and rounding a reader needs to trust a number.
-- Log `result.columns`, `result.rows[0]` and `result.debug?.executedAql` on each query's first
-  success.
 
 Record **generation metadata** in `<head>`, as the first child after `<meta charset>`:
 
@@ -228,9 +229,9 @@ the file on the clipboard and say so. Give the whole file in one code block only
 write files.
 
 When a browser is available to you (headless Chrome, Playwright), render the file once before
-handing over, with a stub `Anfra` built from the snapshot: its `datasets` and `user`, and a
-`createApp` whose queries return one made-up row. That catches syntax errors, crashes and broken
-layout. It says nothing about the AQL, which only the real SDK checks.
+handing over, with a stub `Anfra` built from the snapshot or the MCP datasets: their `datasets`
+and `user`, and a `createApp` whose queries return one made-up row. That catches syntax errors,
+crashes and broken layout. It says nothing about the AQL, which only the real SDK checks.
 
 Then give the user these steps: in the Data App, click **Edit app**, replace everything in the
 **Code** tab with the file, select **Update preview**, and try every control and click. Select

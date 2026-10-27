@@ -122,6 +122,8 @@
     .caption { font-size: 12px; line-height: 16px; color: var(--muted-foreground); }
     .header { margin-bottom: 16px; }
     .btn, .input { height: 32px; font-size: 14px; }
+    /* The multi-select's chip box defaults to 36px: bring it to 32px, growing as chips wrap. */
+    .combobox-chips { min-height: 32px; padding-block: 5px; }
     .card { border-radius: 12px; box-shadow: none; position: relative; }
     .card > header { padding-bottom: 0; }
     .card h2 { font-size: 14px; line-height: 20px; font-weight: 500; }
@@ -277,9 +279,18 @@
     const moneyShort = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, notation: 'compact', maximumFractionDigits: 1 });
     // Numbers arrive as strings: convert for charts and math, keeping null as a gap (Number(null) is 0).
     const num = (value) => (value == null ? null : Number(value));
+    // A period label that follows the grain: "Jan 2026", "Q1 2026", or a week's first day "Jan 5".
+    // Read the date part only, in UTC, so the reader's timezone can't shift it to the day before.
+    let selectedGrain = 'month';
+    let resultGrain = selectedGrain;
+    const periodLabel = (value) => {
+      const date = new Date(`${String(value).slice(0, 10)}T00:00:00Z`);
+      if (resultGrain === 'quarter') return `Q${Math.floor(date.getUTCMonth() / 3) + 1} ${date.getUTCFullYear()}`;
+      const parts = resultGrain === 'week' ? { month: 'short', day: 'numeric' } : { month: 'short', year: 'numeric' };
+      return date.toLocaleDateString(undefined, { ...parts, timeZone: 'UTC' });
+    };
     const byRegionChart = echarts.init(document.getElementById('by-region'));
     const trendChart = echarts.init(document.getElementById('trend'));
-    const logged = new Set();
 
     // The four states of a query: loading, error, no rows, success (status stays hidden).
     function renderStatus (query, elementId) {
@@ -303,13 +314,6 @@
       el.classList.toggle('visible', el.childElementCount > 0);
     }
 
-    function logFirstResult (query) {
-      if (query.state !== 'success' || logged.has(query.name)) return;
-      logged.add(query.name);
-      console.log(query.name, 'columns', query.result.columns, 'first row', query.result.rows[0],
-        'executed AQL', query.result.debug?.executedAql);
-    }
-
     function axisStyle (theme) {
       return {
         axisLabel: { color: theme.text },
@@ -321,8 +325,6 @@
     function render () {
       renderStatus(byRegion, 'by-region-status');
       renderStatus(trend, 'trend-status');
-      logFirstResult(byRegion);
-      logFirstResult(trend);
       const theme = chartTheme();
 
       if (byRegion.result) {
@@ -348,12 +350,14 @@
       }
 
       if (trend.result) {
+        // Label by the grain the shown rows came back in, not a grain still loading.
+        if (trend.state === 'success') resultGrain = selectedGrain;
         const rows = trend.result.rows;
         trendChart.setOption({
           textStyle: { color: theme.text },
           grid: { left: 8, right: 16, top: 16, bottom: 8, containLabel: true },
           tooltip: { trigger: 'axis', valueFormatter: (v) => money.format(v) },
-          xAxis: { type: 'category', data: rows.map((row) => String(row.period).slice(0, 10)), ...axisStyle(theme) },
+          xAxis: { type: 'category', data: rows.map((row) => periodLabel(row.period)), ...axisStyle(theme) },
           yAxis: { type: 'value', axisLabel: { color: theme.text, formatter: (v) => moneyShort.format(v) }, splitLine: axisStyle(theme).splitLine },
           series: [{
             type: 'line', smooth: true, showSymbol: false,
@@ -449,7 +453,8 @@
           other.dataset.variant = on ? 'secondary' : 'outline';
           other.setAttribute('aria-pressed', String(on));
         });
-        grain.setGrain(button.dataset.grain);
+        selectedGrain = button.dataset.grain;
+        grain.setGrain(selectedGrain);
         app.execute();
       });
     });

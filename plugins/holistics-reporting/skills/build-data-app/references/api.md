@@ -108,8 +108,7 @@ query.result.rows    // [{ month: '2026-01-01', total: '1234.5' }, ...]
 - Row keys are the **aliases your AQL declared** (`month`, `total`), matching `column.name`.
   `column.fieldName` is the underlying field, which you only need for debugging.
 - Values are raw, never formatted. Format numbers and dates yourself (`Intl.NumberFormat`,
-  `toLocaleDateString`). Log `rows[0]` on first success to confirm the value types rather than
-  guessing.
+  `toLocaleDateString`).
 - **Every number arrives as a string**, with every digit: `"9007199254740993"`, `"97537.24"`, and
   a float's `"NaN"`, `"Infinity"` or `"-Infinity"`. Dates arrive as ISO strings
   (`"2025-06-01T00:00:00Z"`), `null` as `null`.
