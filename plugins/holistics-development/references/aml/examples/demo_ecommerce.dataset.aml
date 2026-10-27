@@ -20,7 +20,6 @@ const products_detail = [
   r(ecommerce_products.price),
 ]
 
-@tag('1️⃣ Trust/Endorsed')
 Dataset demo_ecommerce {
   label: '[Demo] Ecommerce Official (2025)'
   description: '''
