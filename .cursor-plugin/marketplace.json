@@ -25,6 +25,11 @@
       "description": "Skills for migrating Power BI semantic models, reports, and DAX measures to Holistics AMQL projects."
     },
     {
+      "name": "holistics-migrate-looker",
+      "source": "plugins/holistics-migrate-looker",
+      "description": "Skills for migrating Looker views, Explores, and dashboards to Holistics AMQL projects."
+    },
+    {
       "name": "analytics",
       "source": "plugins/analytics",
       "description": "Generic skills for analytics workflows: data exploration, analysis, and reporting across BI tools."
