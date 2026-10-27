@@ -139,7 +139,8 @@ theme) apart from the SDK wiring.
 selection, sorts, date drills, page) to the query's `explore { }` before it runs, so a pipe-style
 query fails as soon as a reader touches a control, sort or date drill mapped to it. Nothing a reader
 changes goes in the AQL text: static conditions go in `filters`; a reader's choice is a control
-(`createFilter` + `mapControl`).
+(`createFilter` + `mapControl`). A Data App can't run a pivot query (`rows { }` / `columns { }`):
+query flat rows and pivot them in the app.
 
 **The sandbox** allows scripts only, has an opaque origin and a content policy:
 
