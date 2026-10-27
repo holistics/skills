@@ -1,0 +1,470 @@
+<!doctype html>
+<!--
+  A complete Data App: a region multi-select, a date range, a date grain switch, a bar chart that
+  cross-filters a trend line. Dataset `ecommerce` and the `orders` / `users` fields are placeholders:
+  replace them with names from the user's data snapshot.
+
+  Two layers, change one without the other:
+  - Design layer: the Basecoat links, the <style> block (Holistics' in-app tokens mapped onto
+    Basecoat's variables), the markup classes, and chartTheme().
+  - SDK wiring: everything in the last <script> that touches `app`, a query, a filter or a drill.
+  This is the default Holistics look. Only replace it if the user asked for another design.
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="application/json" id="data-app-metadata">
+  {
+    "prompt": "Sales overview: revenue by region as a bar chart that filters a revenue trend, with region and date filters and a week/month/quarter switch",
+    "model": null,
+    "effort": null,
+    "createdAt": null,
+    "updatedAt": null
+  }
+  </script>
+  <script>
+    // Error banner: shows any script error on the page, so a broken paste or a crash never leaves a
+    // silent blank page. Keep it first, before every other script, so it sees their errors too.
+    (() => {
+      const show = (text) => {
+        let banner = document.getElementById('app-error-banner');
+        if (!banner) {
+          banner = document.createElement('div');
+          banner.id = 'app-error-banner';
+          banner.setAttribute('role', 'alert');
+          banner.style.cssText = 'position:fixed;inset:0 0 auto 0;z-index:2147483647;padding:8px 16px;' +
+            'background:#E53E3E;color:#FFFFFF;font:13px/18px system-ui,sans-serif;white-space:pre-wrap';
+          (document.body || document.documentElement).append(banner);
+        }
+        banner.textContent += (banner.textContent ? '\n' : '') + text;
+      };
+      window.addEventListener('error', (event) => {
+        show(`Script error${event.lineno ? ` on line ${event.lineno}` : ''}: ${event.message}`);
+      });
+      window.addEventListener('unhandledrejection', (event) => {
+        show(`Unhandled error: ${event.reason?.message ?? event.reason}`);
+      });
+    })();
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sales Overview</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/inter@5.2.5/index.css"
+    integrity="sha384-ZTIcl2CmY0wyM9ANOhomBco7rEUIlWztf6lGcLKCocKUrIgGCsfisuZyE+hadW8K" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css"
+    integrity="sha384-XWKdrxzE2X33lI8Q03C9fIbqdLWV11whVNycR2/3bMNJY73EEQOa7rmN+SeiSCor" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/all.min.js"
+    integrity="sha384-rD2ZCuReXV7nIneJcn1lsTn6yOv87YARLQyUsemVAxrYYHdy5hcAW8XZEQxx87Dj" crossorigin="anonymous" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"
+    integrity="sha384-C2iskrW/uPW46KzOjrvJIQo4YkV8lkD+QS0CrDN18IIPIpT/g2USu8bTP3nvmIAD" crossorigin="anonymous"></script>
+  <style>
+    /* Holistics' in-app tokens on Basecoat's variables, light and dark. Blue 600 is the one
+       primary action; ECharts cannot parse oklch, so every color is hex. */
+    :root {
+      --background: #F5F8FA;          /* Gray 100: the page */
+      --foreground: #13151A;          /* Gray 900 */
+      --card: #FFFFFF;
+      --card-foreground: #13151A;
+      --popover: #FFFFFF;
+      --popover-foreground: #13151A;
+      --primary: #1B7CE4;             /* Blue 600: the one primary action */
+      --primary-foreground: #FFFFFF;
+      --secondary: #D1E5FA;           /* Blue 100: a pressed segment */
+      --secondary-foreground: #104A89;
+      --muted: #F5F8FA;
+      --muted-foreground: #4C5159;    /* Gray 700 */
+      --accent: #D1E5FA;              /* Blue 100: hover, selected */
+      --accent-foreground: #104A89;   /* Blue 800 */
+      --destructive: #E53E3E;
+      --border: #E3E7ED;              /* Gray 300 hairline */
+      --input: #CBD0D7;               /* Gray 400 */
+      --ring: #1B7CE4;
+      --radius: 0.5rem;               /* 8px */
+      /* Charts: Blue 600 first, fixed order. */
+      --chart-text: #4C5159;
+      --chart-grid: #EDF1F5;
+      --chart-cat-1: #1B7CE4; --chart-cat-2: #259B6C; --chart-cat-3: #9250E5; --chart-cat-4: #E9AB4A;
+      --chart-cat-5: #104A89; --chart-cat-6: #52C396; --chart-cat-7: #B184EC; --chart-cat-8: #8F99A3;
+    }
+    .dark {
+      --background: #05264C;          /* Dark Blue 900 */
+      --foreground: #FFFFFF;
+      --card: #0A3360;
+      --card-foreground: #FFFFFF;
+      --popover: #0A3360;
+      --popover-foreground: #FFFFFF;
+      --primary: #5EA3ED;             /* Blue 400: Blue 600 is too dark on navy */
+      --primary-foreground: #05264C;
+      --secondary: #104A89;
+      --secondary-foreground: #FFFFFF;
+      --muted: #104A89;
+      --muted-foreground: #D2D4D9;
+      --accent: #104A89;
+      --accent-foreground: #FFFFFF;
+      --destructive: #E53E3E;
+      --border: rgb(255 255 255 / 0.1);
+      --input: rgb(255 255 255 / 0.16);
+      --ring: #5EA3ED;
+      --chart-text: #D2D4D9;
+      --chart-grid: #104A89;
+      --chart-cat-1: #5EA3ED; --chart-cat-2: #52C396; --chart-cat-3: #B184EC; --chart-cat-4: #E9AB4A;
+      --chart-cat-5: #8DBEF2; --chart-cat-6: #7AD1AE; --chart-cat-7: #D0B5F4; --chart-cat-8: #B0B6BF;
+    }
+
+    /* Holistics' in-app type: 24px page title, 14px titles and body, 12px captions; one control
+       height (32px); tabular numerals. */
+    body {
+      font: 14px/20px "Inter Variable", Inter, system-ui, sans-serif;
+      font-variant-numeric: tabular-nums;
+      background: var(--background); color: var(--foreground);
+      margin: 0; padding: 24px; max-width: 1280px; margin-inline: auto;
+    }
+    h1 { font-size: 24px; line-height: 36px; font-weight: 500; margin: 0; text-wrap: balance; }
+    .caption { font-size: 12px; line-height: 16px; color: var(--muted-foreground); }
+    .header { margin-bottom: 16px; }
+    .btn, .input { height: 32px; font-size: 14px; }
+    .card { border-radius: 12px; box-shadow: none; position: relative; }
+    .card > header { padding-bottom: 0; }
+    .card h2 { font-size: 14px; line-height: 20px; font-weight: 500; }
+    /* A card header that carries the chart's own control or action, right-aligned. */
+    .card > header.with-action { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+
+    /* Filter bar: one row, wraps on narrow screens. */
+    /* Basecoat's .card is a clipped column: make the bar a row and let combobox dropdowns overflow. */
+    .card.filters { flex-direction: row; flex-wrap: wrap; gap: 16px; align-items: flex-end;
+                    justify-content: flex-start; padding: 12px 16px; margin-bottom: 16px;
+                    overflow: visible; }
+    .field-group { display: flex; flex-direction: column; gap: 8px; }
+    .field-group > label { font-weight: 500; }
+    .date-range { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .date-range .input { width: 9.5rem; }
+    .presets { display: flex; gap: 4px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    .chart { height: 320px; }
+    .status { position: absolute; inset: 56px 16px 16px; display: none; align-items: center;
+              justify-content: center; background: color-mix(in oklab, var(--card) 85%, transparent); }
+    .status.visible { display: flex; }
+    .status > * { width: 100%; }
+    .status .skeleton { height: 100%; border-radius: 8px; }
+    .status .empty { text-align: center; color: var(--muted-foreground); }
+  </style>
+</head>
+<body>
+<main data-anfra-container="page" data-anfra-label="Sales overview">
+  <div class="header" data-anfra-block="title" data-anfra-label="Title">
+    <h1>Sales overview</h1>
+    <div class="caption" id="user"></div>
+  </div>
+
+  <!-- Controls that reach several charts. A control that belongs to one chart goes in its card. -->
+  <div class="card filters" data-anfra-container="controls" data-anfra-label="Controls">
+    <div class="field-group" data-anfra-block="region-picker" data-anfra-label="Region" data-anfra-control="region">
+      <label for="region-input">Region</label>
+      <!-- Basecoat multi-select combobox: options are added once loadOptions() resolves -->
+      <div id="region-combobox" class="combobox" style="width: 260px" data-auto-highlight="true">
+        <input id="region-input" type="text" role="combobox" placeholder="All regions" autocomplete="off"
+               autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false"
+               aria-controls="region-listbox">
+        <div id="region-popover" data-popover aria-hidden="true">
+          <div role="listbox" id="region-listbox" aria-orientation="vertical" aria-multiselectable="true"
+               data-empty="No regions found."></div>
+        </div>
+        <input type="hidden" name="region" value="[]">
+      </div>
+    </div>
+
+    <div class="field-group" data-anfra-block="date-picker" data-anfra-label="Order date" data-anfra-control="dates">
+      <label for="date-from">Order date</label>
+      <div class="date-range">
+        <input id="date-from" class="input" type="date" aria-label="From">
+        <span class="caption">to</span>
+        <input id="date-to" class="input" type="date" aria-label="To">
+        <!-- Presets set the same `dates` filter, so they sit in its block. Each carries an AQL date
+             phrase; an empty one means no date filter. -->
+        <div class="presets" role="group" aria-label="Quick range">
+          <button class="btn" data-variant="outline" type="button" data-range="last 30 days" aria-pressed="false">30d</button>
+          <button class="btn" data-variant="outline" type="button" data-range="last 90 days" aria-pressed="false">90d</button>
+          <button class="btn" data-variant="outline" type="button" data-range="year to date" aria-pressed="false">YTD</button>
+          <button class="btn" data-variant="secondary" type="button" data-range="" aria-pressed="true">All</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" data-anfra-container="charts" data-anfra-label="Charts">
+    <section class="card" data-anfra-block="by-region" data-anfra-label="Revenue by region">
+      <header class="with-action">
+        <h2>Revenue by region</h2>
+        <!-- Clears this chart's selection, so it lives in this chart's block. -->
+        <button id="clear-selection" class="btn" data-variant="ghost" type="button">Clear selection</button>
+      </header>
+      <section><div id="by-region" class="chart" data-anfra-query="byRegion"></div></section>
+      <div id="by-region-status" class="status"></div>
+    </section>
+    <section class="card" data-anfra-block="trend" data-anfra-label="Revenue over time">
+      <header class="with-action">
+        <h2>Revenue over time</h2>
+        <!-- The grain drill only reaches `trend`, so it is this chart's control, in this chart's block. -->
+        <div class="button-group" id="grain-group" role="group" aria-label="Date grain" data-anfra-control="grain">
+          <button class="btn" data-variant="outline" type="button" data-grain="week">Week</button>
+          <button class="btn" data-variant="secondary" type="button" data-grain="month" aria-pressed="true">Month</button>
+          <button class="btn" data-variant="outline" type="button" data-grain="quarter">Quarter</button>
+        </div>
+      </header>
+      <section><div id="trend" class="chart" data-anfra-query="trend"></div></section>
+      <div id="trend-status" class="status"></div>
+    </section>
+  </div>
+</main>
+
+  <script>
+    // ---- Design layer: follow the OS light/dark setting (no storage: the frame is sandboxed). ----
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const applyTheme = () => document.documentElement.classList.toggle('dark', darkQuery.matches);
+    applyTheme();
+
+    function chartTheme () {
+      const css = getComputedStyle(document.documentElement);
+      const get = (name) => css.getPropertyValue(name).trim();
+      return {
+        text: get('--chart-text'),
+        grid: get('--chart-grid'),
+        cat: [1, 2, 3, 4, 5, 6, 7, 8].map((n) => get(`--chart-cat-${n}`)),
+      };
+    }
+
+    // ---- SDK wiring ----
+    const app = Anfra.createApp({ title: 'Sales Overview' });
+
+    const byRegion = app.createQuery('byRegion', {
+      dataset: 'ecommerce',
+      aql: `
+        explore {
+          dimensions { region: users.region }
+          measures { revenue: orders | sum(orders.amount) }
+          sorts { revenue desc }
+        }
+      `,
+    });
+
+    const trend = app.createQuery('trend', {
+      dataset: 'ecommerce',
+      aql: `
+        explore {
+          dimensions { period: orders.created_at }
+          measures { revenue: orders | sum(orders.amount) }
+          sorts { period asc }
+        }
+      `,
+    });
+
+    const region = app.createFilter('region', { dataset: 'ecommerce', field: 'users.region' });
+    const dates = app.createFilter('dates', { dataset: 'ecommerce', field: 'orders.created_at' });
+    const grain = app.createDateDrill('grain', { default: 'month' });
+
+    app.mapControl(region, byRegion, { field: 'users.region' });
+    app.mapControl(region, trend, { field: 'users.region' });
+    app.mapControl(dates, byRegion, { field: 'orders.created_at' });
+    app.mapControl(dates, trend, { field: 'orders.created_at' });
+    app.mapControl(grain, trend, { field: 'orders.created_at' });
+    app.mapCrossFilter(byRegion, trend);
+
+    document.getElementById('user').textContent = `Signed in as ${Anfra.user.name}`;
+
+    const CURRENCY = 'USD'; // The dataset's currency: ask the user when the snapshot doesn't say.
+    const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
+    const moneyShort = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, notation: 'compact', maximumFractionDigits: 1 });
+    // Numbers arrive as strings: convert for charts and math, keeping null as a gap (Number(null) is 0).
+    const num = (value) => (value == null ? null : Number(value));
+    const byRegionChart = echarts.init(document.getElementById('by-region'));
+    const trendChart = echarts.init(document.getElementById('trend'));
+    const logged = new Set();
+
+    // The four states of a query: loading, error, no rows, success (status stays hidden).
+    function renderStatus (query, elementId) {
+      const el = document.getElementById(elementId);
+      el.replaceChildren();
+      if (query.state === 'executing') {
+        el.append(Object.assign(document.createElement('div'), { className: 'skeleton' }));
+      } else if (query.state === 'error') {
+        const alert = Object.assign(document.createElement('div'), { className: 'alert' });
+        alert.dataset.variant = 'destructive';
+        const noAccess = query.error.name === 'PermissionError';
+        const title = document.createElement('h2');
+        title.textContent = noAccess ? "You don't have access to this data" : "Couldn't load this chart";
+        const detail = document.createElement('section');
+        detail.textContent = noAccess ? 'Ask your Holistics admin for access.' : query.error.message;
+        alert.append(title, detail);
+        el.append(alert);
+      } else if (query.state === 'success' && query.result.rows.length === 0) {
+        el.append(Object.assign(document.createElement('div'), { className: 'empty', textContent: 'No sales for these filters' }));
+      }
+      el.classList.toggle('visible', el.childElementCount > 0);
+    }
+
+    function logFirstResult (query) {
+      if (query.state !== 'success' || logged.has(query.name)) return;
+      logged.add(query.name);
+      console.log(query.name, 'columns', query.result.columns, 'first row', query.result.rows[0],
+        'executed AQL', query.result.debug?.executedAql);
+    }
+
+    function axisStyle (theme) {
+      return {
+        axisLabel: { color: theme.text },
+        axisLine: { lineStyle: { color: theme.grid } },
+        splitLine: { lineStyle: { color: theme.grid } },
+      };
+    }
+
+    function render () {
+      renderStatus(byRegion, 'by-region-status');
+      renderStatus(trend, 'trend-status');
+      logFirstResult(byRegion);
+      logFirstResult(trend);
+      const theme = chartTheme();
+
+      if (byRegion.result) {
+        const rows = byRegion.result.rows;
+        const selected = new Set(byRegion.selectedRows.map((row) => row.region));
+        // A plain setOption merges into the series the chart has: a click only restyles the bars.
+        // Rebuilding the series (replaceMerge) would replay the entry animation on every click.
+        byRegionChart.setOption({
+          textStyle: { color: theme.text },
+          grid: { left: 8, right: 8, top: 16, bottom: 8, containLabel: true },
+          tooltip: { valueFormatter: (v) => money.format(v) },
+          xAxis: { type: 'category', data: rows.map((row) => row.region), ...axisStyle(theme) },
+          yAxis: { type: 'value', axisLabel: { color: theme.text, formatter: (v) => moneyShort.format(v) }, splitLine: axisStyle(theme).splitLine },
+          series: [{
+            type: 'bar',
+            itemStyle: { color: theme.cat[0], borderRadius: [4, 4, 0, 0] },
+            data: rows.map((row) => ({
+              value: num(row.revenue),
+              itemStyle: { opacity: selected.size === 0 || selected.has(row.region) ? 1 : 0.3 },
+            })),
+          }],
+        });
+      }
+
+      if (trend.result) {
+        const rows = trend.result.rows;
+        trendChart.setOption({
+          textStyle: { color: theme.text },
+          grid: { left: 8, right: 16, top: 16, bottom: 8, containLabel: true },
+          tooltip: { trigger: 'axis', valueFormatter: (v) => money.format(v) },
+          xAxis: { type: 'category', data: rows.map((row) => String(row.period).slice(0, 10)), ...axisStyle(theme) },
+          yAxis: { type: 'value', axisLabel: { color: theme.text, formatter: (v) => moneyShort.format(v) }, splitLine: axisStyle(theme).splitLine },
+          series: [{
+            type: 'line', smooth: true, showSymbol: false,
+            lineStyle: { color: theme.cat[0], width: 2 },
+            itemStyle: { color: theme.cat[0] },
+            areaStyle: { color: theme.cat[0], opacity: 0.08 },
+            data: rows.map((row) => num(row.revenue)),
+          }],
+        });
+      }
+    }
+
+    app.subscribe(render);
+    darkQuery.addEventListener('change', () => { applyTheme(); render(); });
+
+    // A click toggles that bar in or out of the selection, so a reader can pick several regions.
+    byRegionChart.on('click', (params) => {
+      const row = byRegion.result.rows[params.dataIndex];
+      const selected = byRegion.selectedRows;
+      byRegion.select(selected.includes(row)
+        ? selected.filter((picked) => picked !== row)
+        : [...selected, row]);
+      app.execute();
+    });
+
+    // Region multi-select. The combobox element is its own instance: refresh(), clear(), setValue().
+    // Basecoat's deferred script initializes it on DOMContentLoaded, so wait for that before refresh().
+    const regionBox = document.getElementById('region-combobox');
+    const regionList = document.getElementById('region-listbox');
+    const domReady = document.readyState === 'loading'
+      ? new Promise((resolve) => document.addEventListener('DOMContentLoaded', resolve))
+      : Promise.resolve();
+    Promise.all([region.loadOptions(), domReady]).then(([options]) => {
+      regionList.replaceChildren(...options.map((value) => {
+        const option = document.createElement('div');
+        option.setAttribute('role', 'option');
+        option.dataset.value = String(value);
+        option.textContent = String(value);
+        return option;
+      }));
+      regionBox.refresh();
+    }).catch((err) => console.error('Could not load region options', err));
+    regionBox.addEventListener('change', (event) => {
+      const values = Array.isArray(event.detail.value) ? event.detail.value : [];
+      region.setCondition({ operator: 'is', values });
+      app.execute();
+    });
+
+    // Date range: two date inputs for a fixed range, or a preset for a rolling one. A preset sends its
+    // AQL date phrase, which the server resolves in the workspace timezone, so "last 30 days" stays
+    // current in a saved app. Never compute preset dates in the browser.
+    const fromInput = document.getElementById('date-from');
+    const toInput = document.getElementById('date-to');
+    const presets = document.querySelectorAll('[data-range]');
+    const allPreset = document.querySelector('[data-range=""]');
+    function pressPreset (pressed) {
+      presets.forEach((button) => {
+        const on = button === pressed;
+        button.dataset.variant = on ? 'secondary' : 'outline';
+        button.setAttribute('aria-pressed', String(on));
+      });
+    }
+    function applyDateRange () {
+      if (fromInput.value && toInput.value) {
+        dates.setCondition({ operator: 'between', values: [fromInput.value, toInput.value] });
+        pressPreset(null);
+      } else {
+        dates.setCondition({ operator: 'is', values: [] });
+        pressPreset(allPreset);
+      }
+      app.execute();
+    }
+    fromInput.addEventListener('change', applyDateRange);
+    toInput.addEventListener('change', applyDateRange);
+    presets.forEach((button) => {
+      button.addEventListener('click', () => {
+        fromInput.value = '';
+        toInput.value = '';
+        const phrase = button.dataset.range;
+        dates.setCondition(phrase
+          ? { operator: 'matches', values: [phrase] }
+          : { operator: 'is', values: [] });
+        pressPreset(button);
+        app.execute();
+      });
+    });
+
+    // Grain: a segmented control. The pressed button is the secondary variant.
+    document.querySelectorAll('[data-grain]').forEach((button) => {
+      button.addEventListener('click', () => {
+        document.querySelectorAll('[data-grain]').forEach((other) => {
+          const on = other === button;
+          other.dataset.variant = on ? 'secondary' : 'outline';
+          other.setAttribute('aria-pressed', String(on));
+        });
+        grain.setGrain(button.dataset.grain);
+        app.execute();
+      });
+    });
+
+    document.getElementById('clear-selection').addEventListener('click', () => {
+      app.clearSelection();
+      app.execute();
+    });
+
+    window.addEventListener('resize', () => {
+      byRegionChart.resize();
+      trendChart.resize();
+    });
+
+    app.execute();
+  </script>
+</body>
+</html>
