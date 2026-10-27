@@ -220,6 +220,12 @@ and the metadata block has all five fields with known values or explicit `null`s
 You can't run the app against the user's data, so check every name against the environment before
 handing over.
 
+**Save with `create_data_app` when that tool is available**, instead of handing over a file. Each
+call creates a new Data App, so check every query with `validate_aql` first. Write the document
+straight into the call (`title`, `code`, and an optional `description`) and give the user the
+returned URL in place of the paste steps below. Fixes still go back as the whole file for that Data
+App's **Code** tab, since calling `create_data_app` again makes a second Data App.
+
 **Hand over a file, not only a code block.** A long code block copied out of a terminal or chat can
 lose or break lines, and a damaged paste leaves a blank or half-styled page. When you can write
 files, save the app as one `.html` file and give its full path. Where a clipboard command exists
