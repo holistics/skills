@@ -1,3 +1,9 @@
+## [0.3.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.2.0...holistics-reporting-v0.3.0) (2026-10-27)
+
+### Features
+
+* **plugins.reporting:** add build-data-app skill ([9c5a4f9](https://github.com/holistics/skills/commit/9c5a4f92ef612b35e3d9385b5517c76ac721a145))
+
 ## [0.2.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.1.2...holistics-reporting-v0.2.0) (2026-10-22)
 
 ### Features
