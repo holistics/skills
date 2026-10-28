@@ -72,7 +72,9 @@ the invocation is the description.
 Whichever source you use:
 
 - A dataset's key (`uname` from MCP) is what `dataset:` takes.
-- A field is `model.field` (`orders.created_at`); a dataset metric is its bare name.
+- A field is `model.field`, with the model name exactly as the snapshot or `fetch_dataset` gives
+  it (`ecommerce_orders.created_at`, not `orders.created_at`); a dataset metric is its bare name.
+  A filter's or mapping's `field` is the same `model.field` the query uses.
 - A field marked `(measure)` in the snapshot is a measure (`orders.total_revenue`); the
   [aql](../aql/) skill covers how to use one.
 - If a number the app needs has no field or metric, declare it as a query-local metric in the AQL.
