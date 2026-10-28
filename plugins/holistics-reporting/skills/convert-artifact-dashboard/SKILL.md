@@ -1,5 +1,5 @@
 ---
-name: convert-claude-dashboard
+name: convert-artifact-dashboard
 description: |-
   Convert a Claude Dashboard (a claude.ai page built on `dash.data`, `dash.onData`, `dash.params`) into a Holistics Data App, keeping its page and swapping its data for Holistics datasets.
 
