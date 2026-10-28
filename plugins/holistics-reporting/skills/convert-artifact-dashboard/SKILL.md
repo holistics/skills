@@ -32,7 +32,8 @@ Map every `datasets/<id>` to a Holistics dataset as `build-data-app` describes, 
   everyone who can open the Data App.
 
 Where the user cares about the numbers matching, run each query once with `execute_aql` and compare
-to the dashboard.
+to the dashboard. `execute_aql` returns at most 100 rows, so a dashboard source built on a longer
+result was cut short: a difference there is the dashboard's, not the conversion's.
 
 ## Write the Data App
 
@@ -62,43 +63,54 @@ The Data App document is, in order:
 (() => {
   const app = Anfra.createApp({ title: 'Sales Overview' });
 
-  // One query per dashboard dataset, under the dataset's id. Alias every column with the name the
-  // dashboard's SQL returned, so the page's code reads the same row keys.
-  const queries = {
-    revenue: app.createQuery('revenue', {
-      dataset: 'ecommerce',
-      aql: `explore {
-        dimensions { month: date_trunc(orders.created_at, 'month') }
-        measures { revenue: orders | sum(orders.amount) }
-        sorts { month asc }
-      }`,
-    }),
-  };
-
   // Number columns to keep as exact strings, such as IDs: JS numbers lose digits past about 15.
   const exactColumns = new Set(['order_id']);
 
-  // One filter per field the params drive. `toCondition` gets every param, so a flag such as
-  // any_plan can switch another param's filter off.
-  const filters = {
-    region: {
-      filter: app.createFilter('region', { dataset: 'ecommerce', field: 'users.region' }),
-      toCondition: (p) => ({ operator: 'is', values: p.region == null ? [] : [p.region] }),
-    },
-    plans: {
-      filter: app.createFilter('plans', { dataset: 'ecommerce', field: 'users.plan' }),
-      toCondition: (p) => ({ operator: 'is', values: p.any_plan ? [] : p.plans }),
-    },
-    start: {
-      filter: app.createFilter('start', { dataset: 'ecommerce', field: 'orders.created_at' }),
-      toCondition: (p) => (p.start
-        ? { operator: 'after', values: [p.start] }
-        : { operator: 'last', values: [30], modifier: 'day' }),
-    },
-  };
-  app.mapControl(filters.region.filter, queries.revenue, { field: 'users.region' });
-  app.mapControl(filters.plans.filter, queries.revenue, { field: 'users.plan' });
-  app.mapControl(filters.start.filter, queries.revenue, { field: 'orders.created_at' });
+  let queries = {};
+  let filters = {};
+  let setupError = null;
+
+  // A wrong dataset or field throws while declaring. Catch it so `dash` still exists and every
+  // source reports this error, instead of each page script failing on `dash is not defined`.
+  try {
+    // One query per dashboard dataset, under the dataset's id. Alias every column with the name the
+    // dashboard's SQL returned, so the page's code reads the same row keys.
+    queries = {
+      revenue: app.createQuery('revenue', {
+        dataset: 'ecommerce',
+        aql: `explore {
+          dimensions { month: date_trunc(orders.created_at, 'month') }
+          measures { revenue: orders | sum(orders.amount) }
+          sorts { month asc }
+        }`,
+      }),
+    };
+
+    // One filter per field the params drive. `toCondition` gets every param, so a flag such as
+    // any_plan can switch another param's filter off.
+    filters = {
+      region: {
+        filter: app.createFilter('region', { dataset: 'ecommerce', field: 'users.region' }),
+        toCondition: (p) => ({ operator: 'is', values: p.region == null ? [] : [p.region] }),
+      },
+      plans: {
+        filter: app.createFilter('plans', { dataset: 'ecommerce', field: 'users.plan' }),
+        toCondition: (p) => ({ operator: 'is', values: p.any_plan ? [] : p.plans }),
+      },
+      start: {
+        filter: app.createFilter('start', { dataset: 'ecommerce', field: 'orders.created_at' }),
+        toCondition: (p) => (p.start
+          ? { operator: 'after', values: [p.start] }
+          : { operator: 'last', values: [30], modifier: 'day' }),
+      },
+    };
+    app.mapControl(filters.region.filter, queries.revenue, { field: 'users.region' });
+    app.mapControl(filters.plans.filter, queries.revenue, { field: 'users.plan' });
+    app.mapControl(filters.start.filter, queries.revenue, { field: 'orders.created_at' });
+  } catch (error) {
+    setupError = error;
+    console.error(error);
+  }
 
   const defaults = { region: null, plans: [], any_plan: true, start: null, segment: 'all' }; // from dash/params
   let paramValues = { ...defaults };
@@ -157,6 +169,7 @@ The Data App document is, in order:
 
   window.dash = {
     data (id) {
+      if (setupError) return answer({ status: 'error', data: [], message: setupError.message });
       if (calcs[id]) {
         const inputs = calcs[id].inputs.map((input) => window.dash.data(input));
         const blocked = inputs.find((input) => input.status !== 'ok');
