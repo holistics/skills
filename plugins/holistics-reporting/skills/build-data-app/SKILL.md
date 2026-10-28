@@ -130,10 +130,10 @@ Then by look:
 
 ## 3. Write the file
 
-Write the app as one HTML document the user will paste whole into the Data App's **Code** tab.
-Follow the example's skeleton: declare everything, `subscribe` a render function, `execute()`, then
-wire controls and clicks to set state and `execute()` again. Keep the look (styles, markup, chart
-theme) apart from the SDK wiring.
+Write the app as one whole HTML document, handed over as step 4 says. Follow the example's
+skeleton: declare everything, `subscribe` a render function, `execute()`, then wire controls and
+clicks to set state and `execute()` again. Keep the look (styles, markup, chart theme) apart from
+the SDK wiring.
 
 **Queries.** Write each `aql` with the [aql](../aql/) skill. The SDK applies the reader's state (filters,
 selection, sorts, date drills, page) to the query's `explore { }` before it runs, so a pipe-style
