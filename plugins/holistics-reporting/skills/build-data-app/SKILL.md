@@ -130,10 +130,10 @@ Then by look:
 
 ## 3. Write the file
 
-Write the app as one HTML document the user will paste whole into the Data App's **Code** tab.
-Follow the example's skeleton: declare everything, `subscribe` a render function, `execute()`, then
-wire controls and clicks to set state and `execute()` again. Keep the look (styles, markup, chart
-theme) apart from the SDK wiring.
+Write the app as one whole HTML document, handed over as step 4 says. Follow the example's
+skeleton: declare everything, `subscribe` a render function, `execute()`, then wire controls and
+clicks to set state and `execute()` again. Keep the look (styles, markup, chart theme) apart from
+the SDK wiring.
 
 **Queries.** Write each `aql` with the [aql](../aql/) skill. The SDK applies the reader's state (filters,
 selection, sorts, date drills, page) to the query's `explore { }` before it runs, so a pipe-style
@@ -220,6 +220,11 @@ and the metadata block has all five fields with known values or explicit `null`s
 You can't run the app against the user's data, so check every name against the environment before
 handing over.
 
+**Save with `create_data_app` when that tool is available**, instead of handing over a file. Write
+the document straight into the call (`title`, `code`, and an optional `description`) and give the
+user the returned URL in place of the paste steps below. Save every later fix to the same Data App
+by passing its `id` as `overwrite_app_id`; without it, each call makes a new one.
+
 **Hand over a file, not only a code block.** A long code block copied out of a terminal or chat can
 lose or break lines, and a damaged paste leaves a blank or half-styled page. When you can write
 files, save the app as one `.html` file and give its full path. Where a clipboard command exists
@@ -258,7 +263,7 @@ marked "Not drawn yet" has no element marked with it. When the user names a part
 (`data-anfra-block="trend"`), search the file for that attribute: it is the element they mean.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
-number means. Return the whole updated file the same way as the first (saved file, clipboard and path;
-a code block only when you can't write files), never a diff or a snippet, since the user replaces
-the whole **Code** tab. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and
+number means. Return the whole updated file the same way as the first (saved with
+`overwrite_app_id`; else saved file, clipboard and path; a code block only when you can't write
+files), never a diff or a snippet, since the whole **Code** tab is replaced. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and
 `updatedAt`, and repeat until the user says it's done.
