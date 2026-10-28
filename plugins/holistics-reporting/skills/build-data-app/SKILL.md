@@ -1,11 +1,11 @@
 ---
 name: build-data-app
-description: Build or change a Holistics Data App, one self-contained HTML file pasted into the Data App editor that queries the user's datasets through the `Anfra` SDK global and renders them with its own HTML, CSS and JS. Starts from the description and data snapshot the in-app guide gives, or collects them when the user comes here directly, then iterates on the user's test feedback.
+description: Build or change a Holistics Data App, one self-contained HTML file that queries the user's datasets through the `Anfra` SDK global and renders them with its own HTML, CSS and JS. Use when the user asks for a Data App, or a custom page, report or interactive analysis over their datasets. Do NOT trigger for a one-off chart or data question.
 ---
 
 # Building a Data App
 
-A **Data App** is one self-contained HTML file the user pastes into the Holistics Data App editor.
+A **Data App** is one self-contained HTML file stored in Holistics and edited in its Data App editor.
 It runs in a sandboxed frame where the SDK is already on the global `Anfra`. The SDK supplies
 data and state; every pixel is yours. You never run the app yourself: the user runs it and reports
 back, so their console and the editor's Inspect panel are your only debuggers.
@@ -43,8 +43,7 @@ the invocation is the description.
    step 2 so it sits next to the step that uses it:
 
    > 1. Open a Data App in the workspace the app will live in, or create one,
-   >    and click **Edit app**.
-   >    <!-- TODO: add the docs link after "create one": ([guide](<docs link>)) -->
+   >    and click **Edit**.
    > 2. Replace everything in the **Code** tab with this script, then select **Update preview**.
    >
    >    ```html
@@ -233,7 +232,7 @@ handing over, with a stub `Anfra` built from the snapshot or the MCP datasets: t
 and `user`, and a `createApp` whose queries return one made-up row. That catches syntax errors,
 crashes and broken layout. It says nothing about the AQL, which only the real SDK checks.
 
-Then give the user these steps: in the Data App, click **Edit app**, replace everything in the
+Then give the user these steps: in the Data App, click **Edit**, replace everything in the
 **Code** tab with the file, select **Update preview**, and try every control and click. Select
 **Save** whenever it looks right; they can keep refining after saving.
 
