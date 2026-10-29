@@ -10,6 +10,8 @@ It runs in a sandboxed frame where the SDK is already on the global `Anfra`. The
 data and state; every pixel is yours. You never run the app yourself: the user runs it and reports
 back, so their console and the editor's Inspect panel are your only debuggers.
 
+To export or convert a claude.ai artifact, load the `convert-artifact-dashboard` skill instead.
+
 References, read when a step needs them:
 
 - [api.md](references/api.md): every SDK call, the result shape, page structure and errors. **Read it before

@@ -3,16 +3,23 @@ name: convert-artifact-dashboard
 description: |-
   Convert a Claude Dashboard (a claude.ai page built on `dash.data`, `dash.onData`, `dash.params`) into a Holistics Data App, keeping its page and swapping its data for Holistics datasets.
 
-  Use when the user wants a Claude Dashboard moved, exported or saved to Holistics. Do not trigger when the `create_data_app` tool is not available.
+  Use when the user wants a claude.ai artifact, a Claude Dashboard or a plain HTML page, moved, exported or saved to Holistics. Do not trigger when the `create_data_app` tool is not available.
 ---
 
 # Converting a Claude Dashboard
 
-Load the `build-data-app` skill first for its SDK reference, query rules, sandbox, structure marks
-and how to save. Skip its design steps: the dashboard is the design. Keep the dashboard's own look,
-not the Holistics default style or `example.html`, and add no filter, control or chart the
-dashboard doesn't have. This skill adds what is specific to a Claude Dashboard: how to read it, how
-its sources map, and the `dash` adapter that lets its page run unchanged.
+**Check the artifact before anything else.** A Claude Dashboard reads its data through `dash.data`.
+A plain HTML artifact has its numbers written into the page, so a Data App made from it shows
+numbers that never update. If the page never calls `dash.data`, save nothing and say only: "I can
+only convert a Dashboard artifact to a Holistics Data App, and this is an HTML artifact. Do you want
+me to build it as a Dashboard artifact instead?"
+
+For a Claude Dashboard, load the `build-data-app` skill first for its SDK reference, query rules,
+sandbox, structure marks and how to save. Skip its design steps: the dashboard is the design. Keep
+the dashboard's own look, not the Holistics default style or `example.html`, and add no filter,
+control or chart the dashboard doesn't have. This skill adds what is specific to a Claude
+Dashboard: how to read it, how its sources map, and the `dash` adapter that lets its page run
+unchanged.
 
 ## Read the dashboard
 
