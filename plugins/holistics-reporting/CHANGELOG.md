@@ -1,3 +1,14 @@
+## [0.3.1](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.0...holistics-reporting-v0.3.1) (2026-10-30)
+
+### Features
+
+* **plugins.reporting:** refuse to convert a plain HTML artifact ([2c53ba8](https://github.com/holistics/skills/commit/2c53ba84c75a63f714a9368d310f69634e1f1783))
+* **plugins.reporting:** warn that an uploaded file converts as static data ([8e34c5f](https://github.com/holistics/skills/commit/8e34c5fc12d4f06953296c5c70eef2572c1b5309))
+
+### Bug Fixes
+
+* **plugins.reporting:** keep the dashboard's look when converting it to a Data App ([205b0ee](https://github.com/holistics/skills/commit/205b0ee8918de0d375d468de7598891f27423153))
+
 ## [0.3.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.2.0...holistics-reporting-v0.3.0) (2026-10-27)
 
 ### Features
