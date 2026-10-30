@@ -1,6 +1,6 @@
 ---
-name: common-analysis
-label: Common Analysis
+name: add-common-analysis
+label: Add Common Analysis
 description: |-
   Add a common analysis to a chart's series, such as a trend line or a period-over-period comparison, while keeping the series it is computed from.
 
@@ -29,7 +29,7 @@ Hard requirements:
 
 1. **Keep the existing raw series** — its metric, display type (column, line, …), and settings.
 2. **Alias the metric a second time in the AQL explore** — ask generate_aql for the same metric twice under two names (e.g. `revenue_won` and `revenue_won_trend: revenue_won`). Skip the alias only when the user asks for the trend alone.
-3. **Ask generate_viz for two y-axis series** — the raw metric with no analytic, and the alias with `analytic: RegressionLine` (`type: 'linear'` unless the user asks for another fit), displayed as a line. A column raw series with a line trend needs a `CombinationChart`.
+3. **Ask generate_viz for two y-axis series** — the raw metric with no analytic, and the alias with `analytic: RegressionLine` (`type: 'linear'` unless the user asks for another fit), displayed as a dashed line. A column raw series with a line trend needs a `CombinationChart`.
 4. **Verify before presenting** — after execute_viz, check that the result has both a raw-value column and a fitted-trend column. If one is missing, fix the explore or the `query` and run again.
 
 ## Period-over-period (PoP)
