@@ -36,8 +36,9 @@ Map every `datasets/<id>` to a Holistics dataset as `build-data-app` describes, 
   following `build-data-app`'s query rules.
 - **SQL on another connector**: rewrite it as AQL over a Holistics dataset that reaches the same
   data. If no dataset does, that source cannot be rebuilt.
-- **An attached file**: its rows exist only in the dashboard and are not copied into the Data App
-  unless the user asks; the Data App can't fetch it. If they ask, say who will see the rows:
+- **An attached file**, such as an uploaded CSV: the Data App can't fetch it. Tell the user its rows
+  can only be copied into the Data App as static data that never updates, and that live data needs a
+  Holistics dataset. Copy them only if the user still wants it, and say who will see the rows:
   everyone who can open the Data App.
 
 Where the user cares about the numbers matching, run each query once with `execute_aql` and compare
