@@ -1,3 +1,9 @@
+## [0.9.1](https://github.com/holistics/skills/compare/holistics-development-v0.9.0...holistics-development-v0.9.1) (2026-11-03)
+
+### Bug Fixes
+
+* filter on measures ([d0188b9](https://github.com/holistics/skills/commit/d0188b91c9715394ca35a5df64260841aa0fb184))
+
 ## [0.9.0](https://github.com/holistics/skills/compare/holistics-development-v0.8.0...holistics-development-v0.9.0) (2026-10-22)
 
 ### Features
