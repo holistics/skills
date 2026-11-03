@@ -11,5 +11,5 @@ copied: 2026-09-25
 #   .venv/bin/python bin/export_skill_references.py aql <this skill>/references
 repo: git@github.com:holistics/ai.git
 path: apps/orca/orca/agent/aqua/prompts/{aqlearn,examples}
-commit: 944a9f0aa00eae8fdb5179c0eed256922d1c798e
-exported: 2026-10-22
+commit: bb2912ba98f0b4c10f132b1264bf0cc0d80e1d0e
+exported: 2026-11-03

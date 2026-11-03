@@ -176,6 +176,7 @@ explore {
   measures {
     delivered_orders: delivered_orders,
     cancelled_orders: cancelled_orders,
+    orders_diff: orders_diff,
   }
   dimensions {
     product_name: products.name,
@@ -1065,8 +1066,13 @@ NOTE: The source model should be on the "many" side of the relationship.
 ### MUST use aliases in explore sorts
 We can **ONLY** use dimension and measure **aliases** inside `explore.sorts`.
 
-### Must NOT use aliases in explore filters
-We **CANNOT** use dimension and measure **aliases** inside `explore.filters`.
+### Aliases in explore filters
+* Measures: **ALWAYS** filter a measure by its **alias** in `explore.measures`, **NEVER** by its metric name. A metric used in `explore.filters` must be added to `explore.measures` first.
+  * DO: `measures { country_rank: country_rank_by_order_count }` + `filters { country_rank < 11 }`
+  * DON'T: `measures { country_rank: country_rank_by_order_count }` + `filters { country_rank_by_order_count < 11 }`
+* Dimensions: the left operand decides when the filter is applied:
+  * Model dimension (e.g. `orders.status == 'delivered'`): applied **before** aggregation, to the rows the measures aggregate.
+  * Dimension alias (e.g. `status == 'delivered'`): applied **after** aggregation, to the explore result rows.
 
 ### previous() must have order
 `order:` argument is **mandatory** in `previous()`.
@@ -1144,7 +1150,7 @@ metric total_area =
   | sum(square.area);
 ```
 
-`explore.filters` is a smart shortcut that can act like `where()` or `filter()` depending on the left operand.
+`explore.filters` is a smart shortcut that can act like `where()` or `filter()` depending on the left operand: a model dimension filters the rows **before** aggregation, a measure alias or dimension alias filters the result **after** aggregation (see "Aliases in explore filters").
 Prefer using `explore.filters` (instead of local `where()` or `filter()`) when the filtering need to be applied to **all** explore measures.
 
 ### Avoid <= and >=
@@ -1242,9 +1248,10 @@ explore {
   }
   measures {
     order_count: order_count,
+    user_count: user_count, // added metric on one-side model
   }
   filters {
-    user_count > 0, // added (hidden) metric on one-side model
+    user_count > 0,
   }
 }
 ```
