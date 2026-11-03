@@ -1,3 +1,9 @@
+## [0.3.2](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.1...holistics-reporting-v0.3.2) (2026-11-03)
+
+### Bug Fixes
+
+* filter on measures ([d0188b9](https://github.com/holistics/skills/commit/d0188b91c9715394ca35a5df64260841aa0fb184))
+
 ## [0.3.1](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.0...holistics-reporting-v0.3.1) (2026-10-30)
 
 ### Features
