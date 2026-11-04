@@ -19,11 +19,10 @@ back, so their console and the editor's Inspect panel are your only debuggers.
 References, in this file, read when a step needs them:
 
 - [SDK reference](#anfra-sdk-author-api): every SDK call, the result shape, page structure and errors. **Read it before
-  writing any code; do not invent APIs.** Only the core SDK is available: no export, render or
-  lineage.
+  writing any code; do not invent APIs.**
 - `generate_aql` drafts the query bodies; `execute_aql` runs each one before you save.
 - [Example](#example): a complete app in the default Holistics look. Start the file from its
-  skeleton.
+  skeleton; its dataset and field names are placeholders.
 
 ## 1. Collect the datasets and the idea
 
@@ -80,7 +79,8 @@ text. In every look (default, creative or their own design):
 
 - A filter is a styled dropdown with search, multi-select for several values, never
   `<select multiple>`. For dates, two styled `<input type="date">` and preset buttons, as in the
-  example.
+  example. A preset sends its date phrase (`matches`, `last 30 days`) for the server to resolve, so
+  a saved app stays current: never compute preset dates in the browser.
 - Give ECharts hex colors: it cannot parse `oklch`.
 
 Then by look:
@@ -90,7 +90,9 @@ Then by look:
   variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
   32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
   and amber belong in charts and status, never on actions.
-  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values).
+  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values). Basecoat's
+    deferred script sets them up on `DOMContentLoaded`: add the options and call `refresh()` after
+    that, as the example does.
   - Basecoat `.card` is a flex column that clips overflow. On a filter bar card set
     `flex-direction: row; align-items: flex-end; overflow: visible` (as `.card.filters` in the
     example), or the controls drift right and dropdowns get cut off.
@@ -111,7 +113,7 @@ the SDK wiring.
 holds at most 8,192 output tokens: a longer file is cut off and never saved. Aim for about 15KB of
 HTML:
 
-- Write no comments: leave out the example's and add none of your own.
+- Write no comments.
 - Keep only the CSS rules, tokens and classes the page uses.
 - Build at most 4 queries and 4 charts or tables in the first version, then offer to add more. When
   the agreed list holds more, build the first 4 and name the rest in that offer.
@@ -152,9 +154,7 @@ row keys all go by the alias.
 
 **Structure.** Mark the page as [Structure](#structure) shows: `data-anfra-container`
 and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra-query` or
-`data-anfra-control` on the element each query and control draws into. Every query and control
-sits in a block; a chart's own control goes in the chart's block. The Inspect panel shows this tree
-and gives the user a handle for each part to hand back to you.
+`data-anfra-control` on the element each query and control draws into.
 
 **Rendering.**
 
@@ -166,47 +166,29 @@ and gives the user a handle for each part to hand back to you.
   selection with a plain `setOption(option)` and keep `replaceMerge` for a new result.
 - Put on the page the definitions, dates and rounding a reader needs to trust a number.
 
-Record **generation metadata** in `<head>`, as the first child after `<meta charset>`:
-
-```html
-<script type="application/json" id="data-app-metadata">
-{
-  "prompt": "a sales overview with revenue by region and a monthly trend",
-  "model": null,
-  "effort": null,
-  "createdAt": null,
-  "updatedAt": null
-}
-</script>
-```
+Record **generation metadata** in the example's `data-app-metadata` block, the first child of
+`<head>` after `<meta charset>`. Keep it static JSON, with every `<` escaped as `\u003c` so prompt
+text cannot close the script tag:
 
 - `prompt`: the user's description, verbatim, never summarised or corrected: the invocation text
-  without any pasted snapshot, else their first message describing the app. It is fixed for the life of the file.
-- `model`: the model name or identifier explicitly supplied by the runtime or session context for
-  the latest revision. Use `null` when unavailable; do not infer it from the agent or product name.
-- `effort`: the configured reasoning effort for the latest revision, when explicitly available
-  (for example, `"high"`). Otherwise use `null`; do not estimate it from task complexity.
-- `createdAt`: the first generation's UTC timestamp in ISO 8601 format, read from an available
-  clock (for example, `"2026-09-24T14:30:00Z"`). Preserve it on later revisions.
-- `updatedAt`: the latest revision's UTC timestamp, read when producing the file. On first
-  generation, set it equal to `createdAt`. Use `null` for unavailable timestamps rather than
-  inventing a time or using the time the reader opens the app.
+  without any pasted snapshot, else their first message describing the app. It never changes.
+- `model` and `effort`: the model and reasoning effort the runtime or session explicitly gives for
+  this revision; never infer them from the agent, product or task.
+- `createdAt`: the first generation's UTC time in ISO 8601 (`"2026-09-24T14:30:00Z"`), read from a
+  clock. Kept on later revisions.
+- `updatedAt`: this revision's UTC time; on the first generation, equal to `createdAt`.
 
-Serialize the metadata as JSON, escaping every `<` as the literal JSON escape `<` so prompt
-text cannot close the script tag. Keep the block static, with no runtime script to populate it.
-When editing an older file, add missing fields using these rules; an unknown original creation
-time stays `null`.
+Any value you can't read is `null`, never a guess. When editing an older file, add the missing
+fields the same way.
 
-Done when the file fits in one reply (about 15KB, no comments, only the CSS it uses, at most 4
-queries and 4 charts or tables, one shared render helper, no unrequested controls), holds every
-entity from the agreed list within that limit, every part is marked, each query
-renders all four states and ran once through `execute_aql` without error, every CDN asset carries its hash, the example's error banner script is kept,
+Done when the file keeps to the size rules above, holds every entity from the agreed list within
+them, every part is marked, each query
+renders all four states and ran once through `execute_aql` without error, every CDN asset carries its hash, the example's error banner script is kept before every other script,
 and the metadata block has all five fields with known values or explicit `null`s.
 
 ## 4. Hand over and iterate
 
-You can't run the app against the user's data, so check every name against the environment before
-handing over.
+Check every name against the environment before handing over.
 
 **Save with `create_data_app`**: `title`, the whole document as `code`, and a one-line
 `description`; leave out `category_id`, since the user picks the folder. The chat shows the user a
@@ -238,11 +220,9 @@ A page that shows its static markup but nothing the script fills in (placeholder
 half the styles) means the script never ran. The error banner from the example names the line
 where the parser noticed, usually at or just after the problem.
 
-Read their report against [Errors](#errors): a `ValidationError` names a declaring
-line; a `QueryError` carries the server's message about the AQL, or names the bad entry
-(`filters[0].field`). Compare a misbehaving query's executed AQL with what you meant. A query
-marked "Not drawn yet" has no element marked with it. When the user names a part by its handle
-(`data-anfra-block="trend"`), search the file for that attribute: it is the element they mean.
+Read their report against [Errors](#errors), and compare a misbehaving query's
+executed AQL with what you meant. A query marked "Not drawn yet" has no element marked with it. A
+handle the user pastes is found as [Structure](#structure) says.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
 number means. Save the whole updated file with `create_data_app` and `overwrite_app_id` set to the
@@ -354,7 +334,7 @@ a bare dataset metric is an aggregate condition too.
 | `query.selectedRows` | This query's rows that are currently selected, for highlighting. |
 | `query.abort()` | Cancels this query's in-flight request. |
 | `query.subscribe(fn)` | Change listener for just this query. |
-| `query.locate()` | Scrolls to the elements marked `data-anfra-query` with this query's name and shows them for a moment. See [Structure](#structure). |
+| `query.locate()` | Scrolls to the elements marked with this query. See [Structure](#structure). |
 
 ### Result shape
 
@@ -365,16 +345,15 @@ query.result.rows    // [{ month: '2026-01-01', total: '1234.5' }, ...]
 
 - Row keys are the **aliases your AQL declared** (`month`, `total`), matching `column.name`.
   `column.fieldName` is the underlying field, which you only need for debugging.
-- Values are raw, never formatted. Format numbers and dates yourself (`Intl.NumberFormat`,
-  `toLocaleDateString`).
+- Values are raw, never formatted. Format them yourself: a number with `Intl.NumberFormat`, which
+  formats the string as it is (`money.format(row.revenue)`), and a date with `toLocaleDateString`
+  and `timeZone: 'UTC'` on its date part, so the reader's timezone can't shift it a day.
 - **Every number arrives as a string**, with every digit: `"9007199254740993"`, `"97537.24"`, and
   a float's `"NaN"`, `"Infinity"` or `"-Infinity"`. Dates arrive as ISO strings
   (`"2025-06-01T00:00:00Z"`), `null` as `null`.
 - **Decide by `column.semantic_type`, never by `typeof`**: `number`, `text`, `date`, `datetime`,
   `truefalse`, `json`, `bit` (a true or false stored as a bit: `true`/`false`, or `"1"`/`"0"`), or
   `unknown` (a type AML gives no meaning yet).
-- **Display** a number with `Intl.NumberFormat`, which formats the string as it is:
-  `money.format(row.revenue)`.
 - **Compute, chart or sort** with `Number(v)`. Never do arithmetic or `<` on the strings: `"1" + 2`
   is `"12"`, and `"10" < "9"` is true. Check for `null` first, since `Number(null)` is `0`.
   `Number(v)` keeps every digit of a `floating_point` column (`column.arrow_type.type`). An `int`
@@ -419,7 +398,7 @@ attribute each.
 | `data-anfra-block="<id>"` | any element | A block: the smallest thing a reader sees as one. Holds no container or block. |
 | `data-anfra-label="<text>"` | a container or block | Its display name in the tree. Optional. |
 | `data-anfra-query="<name>"` | any element | This element is drawn by that query. Several names space-separated. On a block's own element it means the block is drawn by it. |
-| `data-anfra-control="<name>"` | any element | The same, for a filter or date drill. A control lives in a block like a query does: its own block when it stands alone, or the block of the chart it belongs to. |
+| `data-anfra-control="<name>"` | any element | The same, for a filter or date drill. |
 
 - Names are the ones given to `createQuery`, `createFilter` and `createDateDrill`. In a file that
   creates several apps, write `app/name` with the app's index (`1/trend`); a bare name is app 0.
@@ -430,7 +409,7 @@ attribute each.
 - The markup is optional, partial, and read only while the Inspect panel is open. A mistake (an
   unknown name, a duplicate id, a block inside a block) is shown on the node in the tree, never
   thrown. Elements added later (a table drawn on the first result) appear once they exist.
-- `query.locate()` and `control.locate()` scroll to the elements marked with that entity and show
+- `query.locate()` and `control.locate()` (a filter's or date drill's) scroll to the elements marked with that entity and show
   them for a moment, for a "find on page" button of the app's own. They return `false` when
   nothing is marked yet, and never throw.
 
@@ -452,8 +431,6 @@ const tier = app.createFilter('tier', { type: 'string', options: ['Gold', 'Silve
 
 Always pass `dataset:` alongside `field:`. It is only optional when the reader can see exactly one
 dataset, which is rare.
-
-A filter, like a date drill, has `locate()` too: see [Structure](#structure).
 
 Set a filter's value with a **condition**, then call `execute()`:
 
@@ -530,11 +507,8 @@ chart.on('click', (p) => {
   aliases (dimensions only). Naming a measure, a query-local expression or an alias missing from
   the last result throws a `ValidationError`.
 - One selection per app: selecting in another query replaces it. The source query is never
-  filtered by its own selection, so its `result` is the same object after a click. Use
-  `query.selectedRows` to dim the unselected marks, and restyle the chart in place: a render that
-  rebuilds the series on every change (ECharts' `replaceMerge`, or `clear()` then `setOption`)
-  replays the chart's entry animation each time the reader clicks. Rebuild only when `result`
-  changed.
+  filtered by its own selection, so its `result` is the same object after a click: dim its
+  unselected marks with `query.selectedRows`.
 - Both queries must use the same dataset. No self-edges.
 - Clear with `app.clearSelection(); app.execute();`.
 
@@ -558,17 +532,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
 
 ```html
 <!doctype html>
-<!--
-  A complete Data App: a region multi-select, a date range, a date grain switch, a bar chart that
-  cross-filters a trend line. Dataset `ecommerce` and the `orders` / `users` fields are placeholders:
-  replace them with names from the user's data snapshot.
-
-  Two layers, change one without the other:
-  - Design layer: the Basecoat links, the <style> block (Holistics' in-app tokens mapped onto
-    Basecoat's variables), the markup classes, and chartTheme().
-  - SDK wiring: everything in the last <script> that touches `app`, a query, a filter or a drill.
-  This is the default Holistics look. Only replace it if the user asked for another design.
--->
 <html>
 <head>
   <meta charset="utf-8">
@@ -582,8 +545,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
   }
   </script>
   <script>
-    // Error banner: shows any script error on the page, so a broken paste or a crash never leaves a
-    // silent blank page. Keep it first, before every other script, so it sees their errors too.
     (() => {
       const show = (text) => {
         let banner = document.getElementById('app-error-banner');
@@ -616,42 +577,39 @@ A complete app in the default Holistics look. Start the file from its skeleton.
   <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"
     integrity="sha384-C2iskrW/uPW46KzOjrvJIQo4YkV8lkD+QS0CrDN18IIPIpT/g2USu8bTP3nvmIAD" crossorigin="anonymous"></script>
   <style>
-    /* Holistics' in-app tokens on Basecoat's variables, light and dark. Blue 600 is the one
-       primary action; ECharts cannot parse oklch, so every color is hex. */
     :root {
-      --background: #F5F8FA;          /* Gray 100: the page */
-      --foreground: #13151A;          /* Gray 900 */
+      --background: #F5F8FA;
+      --foreground: #13151A;
       --card: #FFFFFF;
       --card-foreground: #13151A;
       --popover: #FFFFFF;
       --popover-foreground: #13151A;
-      --primary: #1B7CE4;             /* Blue 600: the one primary action */
+      --primary: #1B7CE4;
       --primary-foreground: #FFFFFF;
-      --secondary: #D1E5FA;           /* Blue 100: a pressed segment */
+      --secondary: #D1E5FA;
       --secondary-foreground: #104A89;
       --muted: #F5F8FA;
-      --muted-foreground: #4C5159;    /* Gray 700 */
-      --accent: #D1E5FA;              /* Blue 100: hover, selected */
-      --accent-foreground: #104A89;   /* Blue 800 */
+      --muted-foreground: #4C5159;
+      --accent: #D1E5FA;
+      --accent-foreground: #104A89;
       --destructive: #E53E3E;
-      --border: #E3E7ED;              /* Gray 300 hairline */
-      --input: #CBD0D7;               /* Gray 400 */
+      --border: #E3E7ED;
+      --input: #CBD0D7;
       --ring: #1B7CE4;
-      --radius: 0.5rem;               /* 8px */
-      /* Charts: Blue 600 first, fixed order. */
+      --radius: 0.5rem;
       --chart-text: #4C5159;
       --chart-grid: #EDF1F5;
       --chart-cat-1: #1B7CE4; --chart-cat-2: #259B6C; --chart-cat-3: #9250E5; --chart-cat-4: #E9AB4A;
       --chart-cat-5: #104A89; --chart-cat-6: #52C396; --chart-cat-7: #B184EC; --chart-cat-8: #8F99A3;
     }
     .dark {
-      --background: #05264C;          /* Dark Blue 900 */
+      --background: #05264C;
       --foreground: #FFFFFF;
       --card: #0A3360;
       --card-foreground: #FFFFFF;
       --popover: #0A3360;
       --popover-foreground: #FFFFFF;
-      --primary: #5EA3ED;             /* Blue 400: Blue 600 is too dark on navy */
+      --primary: #5EA3ED;
       --primary-foreground: #05264C;
       --secondary: #104A89;
       --secondary-foreground: #FFFFFF;
@@ -669,8 +627,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       --chart-cat-5: #8DBEF2; --chart-cat-6: #7AD1AE; --chart-cat-7: #D0B5F4; --chart-cat-8: #B0B6BF;
     }
 
-    /* Holistics' in-app type: 24px page title, 14px titles and body, 12px captions; one control
-       height (32px); tabular numerals. */
     body {
       font: 14px/20px "Inter Variable", Inter, system-ui, sans-serif;
       font-variant-numeric: tabular-nums;
@@ -681,16 +637,12 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     .caption { font-size: 12px; line-height: 16px; color: var(--muted-foreground); }
     .header { margin-bottom: 16px; }
     .btn, .input { height: 32px; font-size: 14px; }
-    /* The multi-select's chip box defaults to 36px: bring it to 32px, growing as chips wrap. */
     .combobox-chips { min-height: 32px; padding-block: 5px; }
     .card { border-radius: 12px; box-shadow: none; position: relative; }
     .card > header { padding-bottom: 0; }
     .card h2 { font-size: 14px; line-height: 20px; font-weight: 500; }
-    /* A card header that carries the chart's own control or action, right-aligned. */
     .card > header.with-action { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
-    /* Filter bar: one row, wraps on narrow screens. */
-    /* Basecoat's .card is a clipped column: make the bar a row and let combobox dropdowns overflow. */
     .card.filters { flex-direction: row; flex-wrap: wrap; gap: 16px; align-items: flex-end;
                     justify-content: flex-start; padding: 12px 16px; margin-bottom: 16px;
                     overflow: visible; }
@@ -718,11 +670,9 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     <div class="caption" id="user"></div>
   </div>
 
-  <!-- Controls that reach several charts. A control that belongs to one chart goes in its card. -->
   <div class="card filters" data-anfra-container="controls" data-anfra-label="Controls">
     <div class="field-group" data-anfra-block="region-picker" data-anfra-label="Region" data-anfra-control="region">
       <label for="region-input">Region</label>
-      <!-- Basecoat multi-select combobox: options are added once loadOptions() resolves -->
       <div id="region-combobox" class="combobox" style="width: 260px" data-auto-highlight="true">
         <input id="region-input" type="text" role="combobox" placeholder="All regions" autocomplete="off"
                autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false"
@@ -741,8 +691,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
         <input id="date-from" class="input" type="date" aria-label="From">
         <span class="caption">to</span>
         <input id="date-to" class="input" type="date" aria-label="To">
-        <!-- Presets set the same `dates` filter, so they sit in its block. Each carries an AQL date
-             phrase; an empty one means no date filter. -->
         <div class="presets" role="group" aria-label="Quick range">
           <button class="btn" data-variant="outline" type="button" data-range="last 30 days" aria-pressed="false">30d</button>
           <button class="btn" data-variant="outline" type="button" data-range="last 90 days" aria-pressed="false">90d</button>
@@ -757,7 +705,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     <section class="card" data-anfra-block="by-region" data-anfra-label="Revenue by region">
       <header class="with-action">
         <h2>Revenue by region</h2>
-        <!-- Clears this chart's selection, so it lives in this chart's block. -->
         <button id="clear-selection" class="btn" data-variant="ghost" type="button">Clear selection</button>
       </header>
       <section><div id="by-region" class="chart" data-anfra-query="byRegion"></div></section>
@@ -766,7 +713,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     <section class="card" data-anfra-block="trend" data-anfra-label="Revenue over time">
       <header class="with-action">
         <h2>Revenue over time</h2>
-        <!-- The grain drill only reaches `trend`, so it is this chart's control, in this chart's block. -->
         <div class="button-group" id="grain-group" role="group" aria-label="Date grain" data-anfra-control="grain">
           <button class="btn" data-variant="outline" type="button" data-grain="week">Week</button>
           <button class="btn" data-variant="secondary" type="button" data-grain="month" aria-pressed="true">Month</button>
@@ -780,7 +726,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
 </main>
 
   <script>
-    // ---- Design layer: follow the OS light/dark setting (no storage: the frame is sandboxed). ----
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const applyTheme = () => document.documentElement.classList.toggle('dark', darkQuery.matches);
     applyTheme();
@@ -795,7 +740,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       };
     }
 
-    // ---- SDK wiring ----
     const app = Anfra.createApp({ title: 'Sales Overview' });
 
     const byRegion = app.createQuery('byRegion', {
@@ -833,13 +777,10 @@ A complete app in the default Holistics look. Start the file from its skeleton.
 
     document.getElementById('user').textContent = `Signed in as ${Anfra.user.name}`;
 
-    const CURRENCY = 'USD'; // The dataset's currency: ask the user when the snapshot doesn't say.
+    const CURRENCY = 'USD';
     const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
     const moneyShort = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, notation: 'compact', maximumFractionDigits: 1 });
-    // Numbers arrive as strings: convert for charts and math, keeping null as a gap (Number(null) is 0).
     const num = (value) => (value == null ? null : Number(value));
-    // A period label that follows the grain: "Jan 2026", "Q1 2026", or a week's first day "Jan 5".
-    // Read the date part only, in UTC, so the reader's timezone can't shift it to the day before.
     let selectedGrain = 'month';
     let resultGrain = selectedGrain;
     const periodLabel = (value) => {
@@ -851,7 +792,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     const byRegionChart = echarts.init(document.getElementById('by-region'));
     const trendChart = echarts.init(document.getElementById('trend'));
 
-    // The four states of a query: loading, error, no rows, success (status stays hidden).
     function renderStatus (query, elementId) {
       const el = document.getElementById(elementId);
       el.replaceChildren();
@@ -889,8 +829,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       if (byRegion.result) {
         const rows = byRegion.result.rows;
         const selected = new Set(byRegion.selectedRows.map((row) => row.region));
-        // A plain setOption merges into the series the chart has: a click only restyles the bars.
-        // Rebuilding the series (replaceMerge) would replay the entry animation on every click.
         byRegionChart.setOption({
           textStyle: { color: theme.text },
           grid: { left: 8, right: 8, top: 16, bottom: 8, containLabel: true },
@@ -909,7 +847,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       }
 
       if (trend.result) {
-        // Label by the grain the shown rows came back in, not a grain still loading.
         if (trend.state === 'success') resultGrain = selectedGrain;
         const rows = trend.result.rows;
         trendChart.setOption({
@@ -932,7 +869,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
     app.subscribe(render);
     darkQuery.addEventListener('change', () => { applyTheme(); render(); });
 
-    // A click toggles that bar in or out of the selection, so a reader can pick several regions.
     byRegionChart.on('click', (params) => {
       const row = byRegion.result.rows[params.dataIndex];
       const selected = byRegion.selectedRows;
@@ -942,8 +878,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       app.execute();
     });
 
-    // Region multi-select. The combobox element is its own instance: refresh(), clear(), setValue().
-    // Basecoat's deferred script initializes it on DOMContentLoaded, so wait for that before refresh().
     const regionBox = document.getElementById('region-combobox');
     const regionList = document.getElementById('region-listbox');
     const domReady = document.readyState === 'loading'
@@ -965,9 +899,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       app.execute();
     });
 
-    // Date range: two date inputs for a fixed range, or a preset for a rolling one. A preset sends its
-    // AQL date phrase, which the server resolves in the workspace timezone, so "last 30 days" stays
-    // current in a saved app. Never compute preset dates in the browser.
     const fromInput = document.getElementById('date-from');
     const toInput = document.getElementById('date-to');
     const presets = document.querySelectorAll('[data-range]');
@@ -1004,7 +935,6 @@ A complete app in the default Holistics look. Start the file from its skeleton.
       });
     });
 
-    // Grain: a segmented control. The pressed button is the secondary variant.
     document.querySelectorAll('[data-grain]').forEach((button) => {
       button.addEventListener('click', () => {
         document.querySelectorAll('[data-grain]').forEach((other) => {
