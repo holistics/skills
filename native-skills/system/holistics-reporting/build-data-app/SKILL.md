@@ -107,6 +107,19 @@ skeleton: declare everything, `subscribe` a render function, `execute()`, then w
 clicks to set state and `execute()` again. Keep the look (styles, markup, chart theme) apart from
 the SDK wiring.
 
+**Fit it in one reply.** You write the whole file inside one `create_data_app` call, and one reply
+holds at most 8,192 output tokens: a longer file is cut off and never saved. Aim for about 15KB of
+HTML:
+
+- Write no comments: leave out the example's and add none of your own.
+- Keep only the CSS rules, tokens and classes the page uses.
+- Build at most 4 queries and 4 charts or tables in the first version, then offer to add more. When
+  the agreed list holds more, build the first 4 and name the rest in that offer.
+- Draw every chart and table through one shared render helper rather than repeating the setup per
+  chart.
+- Add a control (date presets, grain switch, cross-filter) only when the user asked for it or the
+  agreed list names it.
+
 **Queries.** Draft each `aql` with `generate_aql` when you need help with the syntax, then run each
 query once with `execute_aql` on its dataset and fix any error before saving. The SDK applies the reader's state (filters,
 selection, sorts, date drills, page) to the query's `explore { }` before it runs, so a pipe-style
@@ -184,7 +197,9 @@ text cannot close the script tag. Keep the block static, with no runtime script 
 When editing an older file, add missing fields using these rules; an unknown original creation
 time stays `null`.
 
-Done when the file holds every entity from the agreed list, every part is marked, each query
+Done when the file fits in one reply (about 15KB, no comments, only the CSS it uses, at most 4
+queries and 4 charts or tables, one shared render helper, no unrequested controls), holds every
+entity from the agreed list within that limit, every part is marked, each query
 renders all four states and ran once through `execute_aql` without error, every CDN asset carries its hash, the example's error banner script is kept,
 and the metadata block has all five fields with known values or explicit `null`s.
 
