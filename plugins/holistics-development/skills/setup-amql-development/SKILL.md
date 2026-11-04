@@ -44,8 +44,14 @@ The project's instructions take precedence over the plugin setting.
 Use [](../setup-holistics-cli/) skill
 
 ### Usage
-* Use `holistics sync-code --background` to synchronize local codes with Holistics backend, enabling and making sure tools run on latest codes
-  * Conflicts (with conflict markers) are normal. Resolve them in place — do **not** stop `sync-code --background` to resolve them; your local fix syncs to cloud, and stopping/restarting just re-triggers the conflict in a loop.
+* Use `holistics sync` to keep code sync running in the background, so it synchronizes local codes with Holistics backend and tools run on latest codes:
+  * `holistics sync status` — check first. It says whether a session is running and what to do next (exits `1` when something needs attention).
+  * `holistics sync start --background` — start a session when none is running. Always pass `--background`: without it the command runs in the foreground until stopped and blocks you.
+  * `holistics sync status --wait` — after a batch of edits, wait for a fresh sync cycle before calling tools that read the cloud's code.
+  * No local repo yet? `holistics sync init [dir]` clones the Holistics project into a new folder, set up for sync. Ask the user before running it.
+  * **Waiting for input** (e.g. local and cloud are on different branches): the session has stopped. `holistics sync status` lists the exact `holistics sync input …` commands. Ask the user which one to run — never pick a branch yourself — then run it; it restarts the session.
+  * **Conflicts** are normal. Resolve them without stopping the session; restarting resolves nothing. A conflicted file has conflict markers and is unmerged in git's index: fix the markers, then `git add <file>` (saving alone is not enough). If status shows *Open merge*, syncing is paused until every file is resolved and you `git commit`.
+  * A rebase, cherry-pick, revert, or detached HEAD stops the session. Finish it, then `holistics sync start --background` again.
 * Use `holistics aml validate <files...>` to validate AML files after making every new change. For example:
   * `holistics aml validate "new file.model.aml" "new_file2.dataset.aml"`
   * `holistics aml validate **/*.aml`
@@ -74,4 +80,4 @@ Short payloads without single quotes can go inline as one single-quoted argument
 
 Avoid heredocs and files outside your allowed directories for the payload: Claude Code asks for approval on every such call.
 
-The `⚠ Code sync is not running` line some calls print is a reminder that the cloud may not have your latest local edits (see `sync-code` above), not an error from the tool.
+The `⚠ Code sync is not running` line some calls print is a reminder that the cloud may not have your latest local edits: run the command it prints. `⚠ Code sync is waiting for input` means the session stopped on a decision for the user (see *Waiting for input* above). Neither is an error from the tool.

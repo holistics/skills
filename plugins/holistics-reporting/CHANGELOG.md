@@ -1,3 +1,9 @@
+## [0.3.3](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.2...holistics-reporting-v0.3.3) (2026-11-04)
+
+### Bug Fixes
+
+* **plugins.common,plugins.reporting:** rename sync-code to sync ([6e542d2](https://github.com/holistics/skills/commit/6e542d274f10766a56e5eddaa2508fca89634f11))
+
 ## [0.3.2](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.1...holistics-reporting-v0.3.2) (2026-11-03)
 
 ### Bug Fixes
