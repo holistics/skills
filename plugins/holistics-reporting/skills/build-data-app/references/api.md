@@ -96,7 +96,7 @@ a bare dataset metric is an aggregate condition too.
 | `query.selectedRows` | This query's rows that are currently selected, for highlighting. |
 | `query.abort()` | Cancels this query's in-flight request. |
 | `query.subscribe(fn)` | Change listener for just this query. |
-| `query.locate()` | Scrolls to the elements marked `data-anfra-query` with this query's name and shows them for a moment. See [Structure](#structure). |
+| `query.locate()` | Scrolls to the elements marked with this query. See [Structure](#structure). |
 
 ### Result shape
 
@@ -107,16 +107,15 @@ query.result.rows    // [{ month: '2026-01-01', total: '1234.5' }, ...]
 
 - Row keys are the **aliases your AQL declared** (`month`, `total`), matching `column.name`.
   `column.fieldName` is the underlying field, which you only need for debugging.
-- Values are raw, never formatted. Format numbers and dates yourself (`Intl.NumberFormat`,
-  `toLocaleDateString`).
+- Values are raw, never formatted. Format them yourself: a number with `Intl.NumberFormat`, which
+  formats the string as it is (`money.format(row.revenue)`), and a date with `toLocaleDateString`
+  and `timeZone: 'UTC'` on its date part, so the reader's timezone can't shift it a day.
 - **Every number arrives as a string**, with every digit: `"9007199254740993"`, `"97537.24"`, and
   a float's `"NaN"`, `"Infinity"` or `"-Infinity"`. Dates arrive as ISO strings
   (`"2025-06-01T00:00:00Z"`), `null` as `null`.
 - **Decide by `column.semantic_type`, never by `typeof`**: `number`, `text`, `date`, `datetime`,
   `truefalse`, `json`, `bit` (a true or false stored as a bit: `true`/`false`, or `"1"`/`"0"`), or
   `unknown` (a type AML gives no meaning yet).
-- **Display** a number with `Intl.NumberFormat`, which formats the string as it is:
-  `money.format(row.revenue)`.
 - **Compute, chart or sort** with `Number(v)`. Never do arithmetic or `<` on the strings: `"1" + 2`
   is `"12"`, and `"10" < "9"` is true. Check for `null` first, since `Number(null)` is `0`.
   `Number(v)` keeps every digit of a `floating_point` column (`column.arrow_type.type`). An `int`
@@ -161,7 +160,7 @@ attribute each.
 | `data-anfra-block="<id>"` | any element | A block: the smallest thing a reader sees as one. Holds no container or block. |
 | `data-anfra-label="<text>"` | a container or block | Its display name in the tree. Optional. |
 | `data-anfra-query="<name>"` | any element | This element is drawn by that query. Several names space-separated. On a block's own element it means the block is drawn by it. |
-| `data-anfra-control="<name>"` | any element | The same, for a filter or date drill. A control lives in a block like a query does: its own block when it stands alone, or the block of the chart it belongs to. |
+| `data-anfra-control="<name>"` | any element | The same, for a filter or date drill. |
 
 - Names are the ones given to `createQuery`, `createFilter` and `createDateDrill`. In a file that
   creates several apps, write `app/name` with the app's index (`1/trend`); a bare name is app 0.
@@ -172,7 +171,7 @@ attribute each.
 - The markup is optional, partial, and read only while the Inspect panel is open. A mistake (an
   unknown name, a duplicate id, a block inside a block) is shown on the node in the tree, never
   thrown. Elements added later (a table drawn on the first result) appear once they exist.
-- `query.locate()` and `control.locate()` scroll to the elements marked with that entity and show
+- `query.locate()` and `control.locate()` (a filter's or date drill's) scroll to the elements marked with that entity and show
   them for a moment, for a "find on page" button of the app's own. They return `false` when
   nothing is marked yet, and never throw.
 
@@ -194,8 +193,6 @@ const tier = app.createFilter('tier', { type: 'string', options: ['Gold', 'Silve
 
 Always pass `dataset:` alongside `field:`. It is only optional when the reader can see exactly one
 dataset, which is rare.
-
-A filter, like a date drill, has `locate()` too: see [Structure](#structure).
 
 Set a filter's value with a **condition**, then call `execute()`:
 
@@ -272,11 +269,8 @@ chart.on('click', (p) => {
   aliases (dimensions only). Naming a measure, a query-local expression or an alias missing from
   the last result throws a `ValidationError`.
 - One selection per app: selecting in another query replaces it. The source query is never
-  filtered by its own selection, so its `result` is the same object after a click. Use
-  `query.selectedRows` to dim the unselected marks, and restyle the chart in place: a render that
-  rebuilds the series on every change (ECharts' `replaceMerge`, or `clear()` then `setOption`)
-  replays the chart's entry animation each time the reader clicks. Rebuild only when `result`
-  changed.
+  filtered by its own selection, so its `result` is the same object after a click: dim its
+  unselected marks with `query.selectedRows`.
 - Both queries must use the same dataset. No self-edges.
 - Clear with `app.clearSelection(); app.execute();`.
 
