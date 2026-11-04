@@ -7,7 +7,7 @@ description: Migrate a Power BI semantic model (TMDL + DAX) and reports to Holis
 
 This skill orchestrates a migration. It does **not** author AML/AQL by hand. All code authoring, validation, and querying goes through the Holistics CLI (`holistics aml ...`, `holistics mcp ...`) and the companion skills in the `holistics-development` and `holistics-reporting` plugins.
 
-- **Prereqs:** Before writing anything, load the [`setup-amql-development`](../../../holistics-development/skills/setup-amql-development) skill first. It prepares the necessary tools such as `holistics aml validate`, `holistics aml compile`, `holistics sync-code`, `holistics mcp validate_aql`, `holistics mcp execute_aql`, etc., to let you work efficiently and accurately.
+- **Prereqs:** Before writing anything, load the [`setup-amql-development`](../../../holistics-development/skills/setup-amql-development) skill first. It prepares the necessary tools such as `holistics aml validate`, `holistics aml compile`, `holistics sync`, `holistics mcp validate_aql`, `holistics mcp execute_aql`, etc., to let you work efficiently and accurately.
 - **For every AML/AQL change**, defer to [`develop-amql`](../../../holistics-development/skills/develop-amql) (models, datasets, dashboards), [type references](../../../holistics-development/references), and [`write-aql`](../../../holistics-development/skills/write-aql) (metrics). They carry the AQL references and the validate workflow.
 - **NEVER** guess AML keys, AQL function names, or operator semantics. Use `holistics mcp search_docs '{"question": "..."}'` before writing anything novel.
 - **NEVER** write AQL from memory or DAX/SQL intuition. Write it through the `write-aql` skill, with the original DAX, the model schema, and the business intent as context.
@@ -37,7 +37,7 @@ Each phase calls out the **skills** and **CLI tools** to use.
 | 4. Translate | Build models → relationships → dataset → metrics → dashboards.      | `develop-amql`, `write-aql`, `visualize-data`. Validate with `holistics aml validate` + `holistics mcp validate_aql`. |
 | 5. Parity    | Run measure-value comparison vs Power BI.                           | `holistics mcp execute_aql`, `analyze-data`. See [](./references/validation.md).                                      |
 | 6. Cleanup   | Lift visual-level filters, dedupe, document.                        | `develop-amql`, manual review.                                                                                        |
-| 7. Sync      | Push to Holistics Cloud.                                            | `holistics sync-code`.                                                                                                |
+| 7. Sync      | Push to Holistics Cloud.                                            | `holistics sync start --background`, then `holistics sync status --wait`.                                             |
 
 ## Translation order
 
@@ -156,7 +156,7 @@ holistics mcp execute_aql '{"dataset_uname":"<ds>","aql":"<aql>","title":"parity
 - Every DAX measure has a metric or measure in Holistics.
 - Sample value parity ≥ 99% across 10 dim-combinations, verified via `holistics mcp execute_aql` (see [](./references/validation.md)).
 - Dashboard tab count matches; key visuals reproduce (`holistics mcp execute_viz`); filters are deduplicated.
-- Final push: `holistics sync-code` to publish to Holistics Cloud.
+- Final push: `holistics sync start --background` (if not running), then `holistics sync status --wait` until it reports the sync caught up.
 
 ## References
 
@@ -173,7 +173,7 @@ holistics mcp execute_aql '{"dataset_uname":"<ds>","aql":"<aql>","title":"parity
 
 This plugin orchestrates skills from the `holistics-development` and `holistics-reporting` plugins. Load them on demand:
 
-- `setup-holistics-cli` — install / authenticate the CLI; provides `holistics aml validate`, `holistics mcp`, `holistics sync-code`.
+- `setup-holistics-cli` — install / authenticate the CLI; provides `holistics aml validate`, `holistics mcp`, `holistics sync`.
 - `setup-amql-development` — repo conventions and the validate-as-you-go loop.
 - `develop-amql` — author AML models, datasets, and dashboards.
 - `write-aql` — write AQL (via `generate_aql`, or self-authored when opted in).
