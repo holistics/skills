@@ -190,19 +190,8 @@ and the metadata block has all five fields with known values or explicit `null`s
 
 Check every name against the environment before handing over.
 
-**Save with `create_data_app`**: `title`, the whole document as `code`, and a one-line
-`description`; leave out `category_id`, since the user picks the folder. The chat shows the user a
-folder picker; picking a folder is their approval to save the design agreed in step 2, and the app
-is saved there in the same call.
-
-If `create_data_app` fails, nothing was saved:
-
-- **Server error or timeout:** retry `create_data_app` once with the same arguments. The folder
-  picker shows again.
-- **Anything else** (the user cancelled or didn't answer, no permission in that folder or for Data
-  Apps at all, the folder no longer exists, or no permission to edit the app you are replacing), or
-  the retry fails too: tell the user in one sentence, following the error's message, and offer to
-  help another way. Call `create_data_app` again only when the user asks.
+**Save with `create_data_app`.** The folder the user picks is their approval to save the design
+agreed in step 2. If it fails, nothing was saved: follow the error's message.
 
 On success, hand over the app exactly as the tool's `note` says.
 
@@ -225,12 +214,8 @@ executed AQL with what you meant. A query marked "Not drawn yet" has no element 
 handle the user pastes is found as [Structure](#structure) says.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
-number means. Save the whole updated file with `create_data_app` and `overwrite_app_id` set to the
-`id` your own `create_data_app` call returned earlier in this chat; no folder picker shows. Overwrite
-only that app, even when the user names another one they can edit: tell them you can only change
-apps you created in this chat. Without `overwrite_app_id` each call makes a new app. Tell the user
-that overwriting replaces any edits made in the editor since. Preserve `prompt` and `createdAt`,
-refresh `model`, `effort` and `updatedAt`, and repeat until the user says it's done.
+number means. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and `updatedAt`, and
+repeat until the user says it's done.
 
 Done when your reply hands over the app as the tool's `note` says.
 
