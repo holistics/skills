@@ -26,16 +26,15 @@ If the user says "this file", "here" or "the selection", call `getCurrentFile()`
 
 ## Workspace rules
 - Every result has `workspace` and `readOnly`. `readOnly` decides whether you can edit. If a read-only file needs to change, ask the user.
-- In a personal workspace, you can edit only existing files under `getContext().personalFolder`. Everything else is public: read it freely (models, datasets, field names), but don't edit it; editing, moving or deleting a public file throws. Public files live only in the browser, not in the user's clone, so these tools are the only way to read them.
+- In a personal workspace, you can edit only existing files under `getContext().personalFolder`. Everything else is public: read it freely (models, datasets, field names). Public files live only in the browser, not in the user's clone, so these tools are the only way to read them.
 - You can't create files or folders in a personal workspace (`createFile` throws). For a new dashboard, ask the user to:
   1. Create it in Reporting, in their personal space. It lands on the members' spaces production branch, not the branch open here.
   2. Click "Pull from production" in AML Studio's top bar if it isn't on this branch yet, then tell you.
 
   Then find it with `searchFiles({ pattern: '*.page.aml', workspace: 'personal' })` and edit it as usual.
-- To build on public work, reference public objects by name. If a public file must change, ask the user to change it in the public workspace.
+- To build on read-only files, reference them by name. If a read-only file must change, ask the user to change it in the workspace it belongs to.
 - `saveFile` returns `conflict: true` when someone else saved the file after it loaded. Your edits stay in the editor, unsaved. Don't retry, don't overwrite with `writeFile`, and don't get around it any other way (deleting and recreating the file, reloading and re-saving, a force option). Ask the user to open the file and click "View conflict", then continue from `readFile`. `getContext().conflictedFiles` lists conflicted files.
-- Ask the user to do UI actions (open a file, switch editor mode or tab, press "Update", scroll). Do them yourself only if the user said you may drive the browser; having a browser tool isn't permission.
-  If you do drive it, report your checks as best-effort, not as "no errors": nothing signals when blocks finish loading. Opening a file in the editor can save it, so open it only after `readErrors` is clean.
+- Ask the user to do UI actions (open a file, switch editor mode or tab, press "Update", scroll), since they can be slow to respond. If you drive the browser yourself, report your checks as best-effort, not as "no errors": nothing signals when blocks finish loading. Opening a file in the editor can save it, so open it only after `readErrors` is clean.
 - Remove only code or blocks you added this session, or ones the user asked to remove. Delete, move or rename files only when the user asked, even with approval prompts off.
 
 ## Edit and validate
