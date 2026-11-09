@@ -1,8 +1,8 @@
 ## [0.3.3](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.2...holistics-reporting-v0.3.3) (2026-11-04)
 
-### Performance Improvements
+### Bug Fixes
 
-* **plugins.reporting:** trim build-data-app repetition to cut its context size ([8f9b4fa](https://github.com/holistics/skills/commit/8f9b4fa29bef527246c97c56c735e331a688cd82))
+* **plugins.common,plugins.reporting:** rename sync-code to sync ([6e542d2](https://github.com/holistics/skills/commit/6e542d274f10766a56e5eddaa2508fca89634f11))
 
 ## [0.3.2](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.1...holistics-reporting-v0.3.2) (2026-11-03)
 

@@ -1,3 +1,9 @@
+## [0.9.2](https://github.com/holistics/skills/compare/holistics-development-v0.9.1...holistics-development-v0.9.2) (2026-11-04)
+
+### Bug Fixes
+
+* **plugins.development,plugins.holistics-migrate-power-bi:** rename sync-code to sync ([6ffc683](https://github.com/holistics/skills/commit/6ffc683c0427b7a54ed929ed8e2abe4f5ef11f74))
+
 ## [0.9.1](https://github.com/holistics/skills/compare/holistics-development-v0.9.0...holistics-development-v0.9.1) (2026-11-03)
 
 ### Bug Fixes

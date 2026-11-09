@@ -1,6 +1,6 @@
 ---
 name: setup-holistics-cli
-description: Use this skill to set up Holistics CLI and enable useful tools such as `holistics aml validate`, `holistics sync-code`, and `holistics mcp` tools such as `holistics mcp execute_aql`, `holistics mcp list_datasets`
+description: Use this skill to set up Holistics CLI and enable useful tools such as `holistics aml validate`, `holistics sync`, and `holistics mcp` tools such as `holistics mcp execute_aql`, `holistics mcp list_datasets`
 ---
 
 ## Holistics CLI

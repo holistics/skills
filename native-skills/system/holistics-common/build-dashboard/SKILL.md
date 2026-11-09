@@ -53,7 +53,7 @@ The minimum requirement is a **quality standard, not a fixed layout**. A dashboa
   *A KPI row is not the default opening; non-monitoring dashboards rarely need one, and detail tables should only be included when row-level lookup is explicitly required.*
 * **Data-driven scope** — Use `fetch_dataset` to examine available fields and metrics. Let the user's ranked questions determine which metrics merit a section.
 * **Proportional depth** — Broad requests require wider, shallower sections; narrow requests require deep, focused sections.
-* **Real data & interactive controls** — Wire real fields and metrics. KPI comparisons must reference the dashboard's Period Comparison control rather than static values. Always wire dashboard controls explicitly and apply a theme (default: `theme: H.themes.classic`).
+* **Real data & interactive controls** — Wire real fields and metrics. KPI comparisons must reference the dashboard's Period Comparison control rather than static values. Always wire dashboard controls explicitly and apply a theme (default: `theme: DynamicPageTheme { light: H.themes.vanilla, dark: H.themes.charcoal }`).
 * **Grid layout** — Stack sections vertically by priority. Within each section, place 1–4 blocks per row (full-width for hero trends/tables; 2–3 columns for side-by-side comparisons). Maintain consistent grid alignment and sizing based on visual hierarchy. Each tab must be a self-contained canvas.
 
 If the user gives a tight instruction ("just build one chart for X"), stick strictly to their scope, mention potential additions, and complete the request.
@@ -145,7 +145,10 @@ Use the correct `ref:` syntax based on the field type:
 ```aml
 Dashboard sales_overview {
   title: 'Sales Overview'
-  theme: H.themes.classic
+  theme: DynamicPageTheme {
+    light: H.themes.vanilla
+    dark: H.themes.charcoal
+  }
   settings {                                           // no timezone — follows the Organization Timezone
     autorun_on_open: true
     autorun_on_changes: true
@@ -254,10 +257,25 @@ block <x>: TextBlock { content: @md ## Section heading ;; }
 
 When a block displays dynamic, real-time data values, use a data visualization block (`MetricKpi` or standard chart) instead of a `TextBlock`.
 
+### Layout — `TabLayout` by default, `HTMLLayout` for custom formats
+
+`TabLayout` covers standard dashboards, and users can rearrange its blocks in the GUI editor. `HTMLLayout` gives full control over format and presentation (any HTML and CSS around the blocks), but the dashboard can then only be edited in code. Use it only when the request needs a format or presentation a tab canvas can't produce, for example:
+
+* A printable or paginated report (A4 pages, PDF export, headers and footers)
+* Slides
+* A heavily styled or editorial layout, such as a newsletter with narrative between the charts
+
+Or when the user asks for an HTML layout. Don't switch just to make a standard dashboard look nicer, and keep `TabLayout` when the user needs tabs. When you choose `HTMLLayout`, say in the plan that the dashboard will be code-only.
+
+Before writing an `HTMLLayout`, read [HTML layout](https://docs.holistics.io/docs/dashboards/html-layout) (start from the closest example under *Examples*, and check *Limitations*) and the [AML reference](https://docs.holistics.io/reference/aml/html-layout).
+
+Give each block's container a fixed `height`, not only `min-height`. In an export, a container without a height grows to fit its content and stretches the dashboard into one long page.
+
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
 * **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure, following [Dashboard interactions → Interactions (legacy)](https://docs.holistics.io/reference/aml/dashboard-interactions#interactions-legacy).
+* **Don't add tags.** Leave `@tag(…)` off the dashboards and other items you create, including `Trust/Endorsed`, unless the user asks for a tag.
 * **Prefer generated visualizations.** Rely on tool-generated visualization AML rather than manually coding viz blocks to minimize syntax errors.
 * **Use global controls over per-chart filters.** Let dashboard-level filters control time ranges, grains, and segments across charts. Use chart-specific filters only for core chart definitions (e.g., Top 10 lists).
 * **Format text strings cleanly.** Use `@md … ;;` heredocs for multiline content or strings containing special characters and apostrophes. Write clear descriptions and titles aimed at end users.
