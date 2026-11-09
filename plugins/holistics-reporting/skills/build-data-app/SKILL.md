@@ -15,11 +15,10 @@ To export or convert a claude.ai artifact, load the `convert-artifact-dashboard`
 References, read when a step needs them:
 
 - [api.md](references/api.md): every SDK call, the result shape, page structure and errors. **Read it before
-  writing any code; do not invent APIs.** Only the core SDK is available: no export, render or
-  lineage.
+  writing any code; do not invent APIs.**
 - [aql](../aql/) skill: writing the query bodies.
 - [example.html](references/example.html): a complete app in the default Holistics look. Start the file from its
-  skeleton.
+  skeleton; its dataset and field names are placeholders.
 
 ## 1. Collect the datasets and the idea
 
@@ -112,7 +111,8 @@ text. In every look (default, creative or their own design):
 
 - A filter is a styled dropdown with search, multi-select for several values, never
   `<select multiple>`. For dates, two styled `<input type="date">` and preset buttons, as in the
-  example.
+  example. A preset sends its date phrase (`matches`, `last 30 days`) for the server to resolve, so
+  a saved app stays current: never compute preset dates in the browser.
 - Give ECharts hex colors: it cannot parse `oklch`.
 
 Then by look:
@@ -122,7 +122,9 @@ Then by look:
   variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
   32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
   and amber belong in charts and status, never on actions.
-  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values).
+  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values). Basecoat's
+    deferred script sets them up on `DOMContentLoaded`: add the options and call `refresh()` after
+    that, as the example does.
   - Basecoat `.card` is a flex column that clips overflow. On a filter bar card set
     `flex-direction: row; align-items: flex-end; overflow: visible` (as `.card.filters` in the
     example), or the controls drift right and dropdowns get cut off.
@@ -170,9 +172,7 @@ row keys all go by the alias.
 
 **Structure.** Mark the page as [api.md](references/api.md#structure) shows: `data-anfra-container`
 and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra-query` or
-`data-anfra-control` on the element each query and control draws into. Every query and control
-sits in a block; a chart's own control goes in the chart's block. The Inspect panel shows this tree
-and gives the user a handle for each part to hand back to you.
+`data-anfra-control` on the element each query and control draws into.
 
 **Rendering.**
 
@@ -184,45 +184,28 @@ and gives the user a handle for each part to hand back to you.
   selection with a plain `setOption(option)` and keep `replaceMerge` for a new result.
 - Put on the page the definitions, dates and rounding a reader needs to trust a number.
 
-Record **generation metadata** in `<head>`, as the first child after `<meta charset>`:
-
-```html
-<script type="application/json" id="data-app-metadata">
-{
-  "prompt": "a sales overview with revenue by region and a monthly trend",
-  "model": null,
-  "effort": null,
-  "createdAt": null,
-  "updatedAt": null
-}
-</script>
-```
+Record **generation metadata** in the example's `data-app-metadata` block, the first child of
+`<head>` after `<meta charset>`. Keep it static JSON, with every `<` escaped as `\u003c` so prompt
+text cannot close the script tag:
 
 - `prompt`: the user's description, verbatim, never summarised or corrected: the invocation text
-  without any pasted snapshot, else their first message describing the app. It is fixed for the life of the file.
-- `model`: the model name or identifier explicitly supplied by the runtime or session context for
-  the latest revision. Use `null` when unavailable; do not infer it from the agent or product name.
-- `effort`: the configured reasoning effort for the latest revision, when explicitly available
-  (for example, `"high"`). Otherwise use `null`; do not estimate it from task complexity.
-- `createdAt`: the first generation's UTC timestamp in ISO 8601 format, read from an available
-  clock (for example, `"2026-09-24T14:30:00Z"`). Preserve it on later revisions.
-- `updatedAt`: the latest revision's UTC timestamp, read when producing the file. On first
-  generation, set it equal to `createdAt`. Use `null` for unavailable timestamps rather than
-  inventing a time or using the time the reader opens the app.
+  without any pasted snapshot, else their first message describing the app. It never changes.
+- `model` and `effort`: the model and reasoning effort the runtime or session explicitly gives for
+  this revision; never infer them from the agent, product or task.
+- `createdAt`: the first generation's UTC time in ISO 8601 (`"2026-09-24T14:30:00Z"`), read from a
+  clock. Kept on later revisions.
+- `updatedAt`: this revision's UTC time; on the first generation, equal to `createdAt`.
 
-Serialize the metadata as JSON, escaping every `<` as the literal JSON escape `\u003c` so prompt
-text cannot close the script tag. Keep the block static, with no runtime script to populate it.
-When editing an older file, add missing fields using these rules; an unknown original creation
-time stays `null`.
+Any value you can't read is `null`, never a guess. When editing an older file, add the missing
+fields the same way.
 
 Done when the file holds every entity from the agreed list, every part is marked, each query
-renders all four states, every CDN asset carries its hash, the example's error banner script is kept,
+renders all four states, every CDN asset carries its hash, the example's error banner script is kept before every other script,
 and the metadata block has all five fields with known values or explicit `null`s.
 
 ## 4. Hand over and iterate
 
-You can't run the app against the user's data, so check every name against the environment before
-handing over.
+Check every name against the environment before handing over.
 
 **Save with `create_data_app` when that tool is available**, instead of handing over a file. Write
 the document straight into the call (`title`, `code`, and an optional `description`) and give the
@@ -260,14 +243,11 @@ the example names the line where the parser noticed, usually at or just after th
 user to paste again from the file or clipboard, and to compare the **Code** tab's last line number
 with the file's line count.
 
-Read their report against [api.md](references/api.md#errors): a `ValidationError` names a declaring
-line; a `QueryError` carries the server's message about the AQL, or names the bad entry
-(`filters[0].field`). Compare a misbehaving query's executed AQL with what you meant. A query
-marked "Not drawn yet" has no element marked with it. When the user names a part by its handle
-(`data-anfra-block="trend"`), search the file for that attribute: it is the element they mean.
+Read their report against [api.md](references/api.md#errors), and compare a misbehaving query's
+executed AQL with what you meant. A query marked "Not drawn yet" has no element marked with it. A
+handle the user pastes is found as [api.md](references/api.md#structure) says.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
-number means. Return the whole updated file the same way as the first (saved with
-`overwrite_app_id`; else saved file, clipboard and path; a code block only when you can't write
-files), never a diff or a snippet, since the whole **Code** tab is replaced. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and
+number means. Return the whole updated file the same way as the first, never a diff or a
+snippet, since the whole **Code** tab is replaced. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and
 `updatedAt`, and repeat until the user says it's done.

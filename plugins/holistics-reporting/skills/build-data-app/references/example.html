@@ -1,15 +1,4 @@
 <!doctype html>
-<!--
-  A complete Data App: a region multi-select, a date range, a date grain switch, a bar chart that
-  cross-filters a trend line. Dataset `ecommerce` and the `orders` / `users` fields are placeholders:
-  replace them with names from the user's data snapshot.
-
-  Two layers, change one without the other:
-  - Design layer: the Basecoat links, the <style> block (Holistics' in-app tokens mapped onto
-    Basecoat's variables), the markup classes, and chartTheme().
-  - SDK wiring: everything in the last <script> that touches `app`, a query, a filter or a drill.
-  This is the default Holistics look. Only replace it if the user asked for another design.
--->
 <html>
 <head>
   <meta charset="utf-8">
@@ -23,8 +12,6 @@
   }
   </script>
   <script>
-    // Error banner: shows any script error on the page, so a broken paste or a crash never leaves a
-    // silent blank page. Keep it first, before every other script, so it sees their errors too.
     (() => {
       const show = (text) => {
         let banner = document.getElementById('app-error-banner');
@@ -57,42 +44,39 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@6.1.0/dist/echarts.min.js"
     integrity="sha384-C2iskrW/uPW46KzOjrvJIQo4YkV8lkD+QS0CrDN18IIPIpT/g2USu8bTP3nvmIAD" crossorigin="anonymous"></script>
   <style>
-    /* Holistics' in-app tokens on Basecoat's variables, light and dark. Blue 600 is the one
-       primary action; ECharts cannot parse oklch, so every color is hex. */
     :root {
-      --background: #F5F8FA;          /* Gray 100: the page */
-      --foreground: #13151A;          /* Gray 900 */
+      --background: #F5F8FA;
+      --foreground: #13151A;
       --card: #FFFFFF;
       --card-foreground: #13151A;
       --popover: #FFFFFF;
       --popover-foreground: #13151A;
-      --primary: #1B7CE4;             /* Blue 600: the one primary action */
+      --primary: #1B7CE4;
       --primary-foreground: #FFFFFF;
-      --secondary: #D1E5FA;           /* Blue 100: a pressed segment */
+      --secondary: #D1E5FA;
       --secondary-foreground: #104A89;
       --muted: #F5F8FA;
-      --muted-foreground: #4C5159;    /* Gray 700 */
-      --accent: #D1E5FA;              /* Blue 100: hover, selected */
-      --accent-foreground: #104A89;   /* Blue 800 */
+      --muted-foreground: #4C5159;
+      --accent: #D1E5FA;
+      --accent-foreground: #104A89;
       --destructive: #E53E3E;
-      --border: #E3E7ED;              /* Gray 300 hairline */
-      --input: #CBD0D7;               /* Gray 400 */
+      --border: #E3E7ED;
+      --input: #CBD0D7;
       --ring: #1B7CE4;
-      --radius: 0.5rem;               /* 8px */
-      /* Charts: Blue 600 first, fixed order. */
+      --radius: 0.5rem;
       --chart-text: #4C5159;
       --chart-grid: #EDF1F5;
       --chart-cat-1: #1B7CE4; --chart-cat-2: #259B6C; --chart-cat-3: #9250E5; --chart-cat-4: #E9AB4A;
       --chart-cat-5: #104A89; --chart-cat-6: #52C396; --chart-cat-7: #B184EC; --chart-cat-8: #8F99A3;
     }
     .dark {
-      --background: #05264C;          /* Dark Blue 900 */
+      --background: #05264C;
       --foreground: #FFFFFF;
       --card: #0A3360;
       --card-foreground: #FFFFFF;
       --popover: #0A3360;
       --popover-foreground: #FFFFFF;
-      --primary: #5EA3ED;             /* Blue 400: Blue 600 is too dark on navy */
+      --primary: #5EA3ED;
       --primary-foreground: #05264C;
       --secondary: #104A89;
       --secondary-foreground: #FFFFFF;
@@ -110,8 +94,6 @@
       --chart-cat-5: #8DBEF2; --chart-cat-6: #7AD1AE; --chart-cat-7: #D0B5F4; --chart-cat-8: #B0B6BF;
     }
 
-    /* Holistics' in-app type: 24px page title, 14px titles and body, 12px captions; one control
-       height (32px); tabular numerals. */
     body {
       font: 14px/20px "Inter Variable", Inter, system-ui, sans-serif;
       font-variant-numeric: tabular-nums;
@@ -122,16 +104,12 @@
     .caption { font-size: 12px; line-height: 16px; color: var(--muted-foreground); }
     .header { margin-bottom: 16px; }
     .btn, .input { height: 32px; font-size: 14px; }
-    /* The multi-select's chip box defaults to 36px: bring it to 32px, growing as chips wrap. */
     .combobox-chips { min-height: 32px; padding-block: 5px; }
     .card { border-radius: 12px; box-shadow: none; position: relative; }
     .card > header { padding-bottom: 0; }
     .card h2 { font-size: 14px; line-height: 20px; font-weight: 500; }
-    /* A card header that carries the chart's own control or action, right-aligned. */
     .card > header.with-action { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 
-    /* Filter bar: one row, wraps on narrow screens. */
-    /* Basecoat's .card is a clipped column: make the bar a row and let combobox dropdowns overflow. */
     .card.filters { flex-direction: row; flex-wrap: wrap; gap: 16px; align-items: flex-end;
                     justify-content: flex-start; padding: 12px 16px; margin-bottom: 16px;
                     overflow: visible; }
@@ -159,11 +137,9 @@
     <div class="caption" id="user"></div>
   </div>
 
-  <!-- Controls that reach several charts. A control that belongs to one chart goes in its card. -->
   <div class="card filters" data-anfra-container="controls" data-anfra-label="Controls">
     <div class="field-group" data-anfra-block="region-picker" data-anfra-label="Region" data-anfra-control="region">
       <label for="region-input">Region</label>
-      <!-- Basecoat multi-select combobox: options are added once loadOptions() resolves -->
       <div id="region-combobox" class="combobox" style="width: 260px" data-auto-highlight="true">
         <input id="region-input" type="text" role="combobox" placeholder="All regions" autocomplete="off"
                autocorrect="off" spellcheck="false" aria-autocomplete="list" aria-expanded="false"
@@ -182,8 +158,6 @@
         <input id="date-from" class="input" type="date" aria-label="From">
         <span class="caption">to</span>
         <input id="date-to" class="input" type="date" aria-label="To">
-        <!-- Presets set the same `dates` filter, so they sit in its block. Each carries an AQL date
-             phrase; an empty one means no date filter. -->
         <div class="presets" role="group" aria-label="Quick range">
           <button class="btn" data-variant="outline" type="button" data-range="last 30 days" aria-pressed="false">30d</button>
           <button class="btn" data-variant="outline" type="button" data-range="last 90 days" aria-pressed="false">90d</button>
@@ -198,7 +172,6 @@
     <section class="card" data-anfra-block="by-region" data-anfra-label="Revenue by region">
       <header class="with-action">
         <h2>Revenue by region</h2>
-        <!-- Clears this chart's selection, so it lives in this chart's block. -->
         <button id="clear-selection" class="btn" data-variant="ghost" type="button">Clear selection</button>
       </header>
       <section><div id="by-region" class="chart" data-anfra-query="byRegion"></div></section>
@@ -207,7 +180,6 @@
     <section class="card" data-anfra-block="trend" data-anfra-label="Revenue over time">
       <header class="with-action">
         <h2>Revenue over time</h2>
-        <!-- The grain drill only reaches `trend`, so it is this chart's control, in this chart's block. -->
         <div class="button-group" id="grain-group" role="group" aria-label="Date grain" data-anfra-control="grain">
           <button class="btn" data-variant="outline" type="button" data-grain="week">Week</button>
           <button class="btn" data-variant="secondary" type="button" data-grain="month" aria-pressed="true">Month</button>
@@ -221,7 +193,6 @@
 </main>
 
   <script>
-    // ---- Design layer: follow the OS light/dark setting (no storage: the frame is sandboxed). ----
     const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const applyTheme = () => document.documentElement.classList.toggle('dark', darkQuery.matches);
     applyTheme();
@@ -236,7 +207,6 @@
       };
     }
 
-    // ---- SDK wiring ----
     const app = Anfra.createApp({ title: 'Sales Overview' });
 
     const byRegion = app.createQuery('byRegion', {
@@ -274,13 +244,10 @@
 
     document.getElementById('user').textContent = `Signed in as ${Anfra.user.name}`;
 
-    const CURRENCY = 'USD'; // The dataset's currency: ask the user when the snapshot doesn't say.
+    const CURRENCY = 'USD';
     const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
     const moneyShort = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, notation: 'compact', maximumFractionDigits: 1 });
-    // Numbers arrive as strings: convert for charts and math, keeping null as a gap (Number(null) is 0).
     const num = (value) => (value == null ? null : Number(value));
-    // A period label that follows the grain: "Jan 2026", "Q1 2026", or a week's first day "Jan 5".
-    // Read the date part only, in UTC, so the reader's timezone can't shift it to the day before.
     let selectedGrain = 'month';
     let resultGrain = selectedGrain;
     const periodLabel = (value) => {
@@ -292,7 +259,6 @@
     const byRegionChart = echarts.init(document.getElementById('by-region'));
     const trendChart = echarts.init(document.getElementById('trend'));
 
-    // The four states of a query: loading, error, no rows, success (status stays hidden).
     function renderStatus (query, elementId) {
       const el = document.getElementById(elementId);
       el.replaceChildren();
@@ -330,8 +296,6 @@
       if (byRegion.result) {
         const rows = byRegion.result.rows;
         const selected = new Set(byRegion.selectedRows.map((row) => row.region));
-        // A plain setOption merges into the series the chart has: a click only restyles the bars.
-        // Rebuilding the series (replaceMerge) would replay the entry animation on every click.
         byRegionChart.setOption({
           textStyle: { color: theme.text },
           grid: { left: 8, right: 8, top: 16, bottom: 8, containLabel: true },
@@ -350,7 +314,6 @@
       }
 
       if (trend.result) {
-        // Label by the grain the shown rows came back in, not a grain still loading.
         if (trend.state === 'success') resultGrain = selectedGrain;
         const rows = trend.result.rows;
         trendChart.setOption({
@@ -373,7 +336,6 @@
     app.subscribe(render);
     darkQuery.addEventListener('change', () => { applyTheme(); render(); });
 
-    // A click toggles that bar in or out of the selection, so a reader can pick several regions.
     byRegionChart.on('click', (params) => {
       const row = byRegion.result.rows[params.dataIndex];
       const selected = byRegion.selectedRows;
@@ -383,8 +345,6 @@
       app.execute();
     });
 
-    // Region multi-select. The combobox element is its own instance: refresh(), clear(), setValue().
-    // Basecoat's deferred script initializes it on DOMContentLoaded, so wait for that before refresh().
     const regionBox = document.getElementById('region-combobox');
     const regionList = document.getElementById('region-listbox');
     const domReady = document.readyState === 'loading'
@@ -406,9 +366,6 @@
       app.execute();
     });
 
-    // Date range: two date inputs for a fixed range, or a preset for a rolling one. A preset sends its
-    // AQL date phrase, which the server resolves in the workspace timezone, so "last 30 days" stays
-    // current in a saved app. Never compute preset dates in the browser.
     const fromInput = document.getElementById('date-from');
     const toInput = document.getElementById('date-to');
     const presets = document.querySelectorAll('[data-range]');
@@ -445,7 +402,6 @@
       });
     });
 
-    // Grain: a segmented control. The pressed button is the secondary variant.
     document.querySelectorAll('[data-grain]').forEach((button) => {
       button.addEventListener('click', () => {
         document.querySelectorAll('[data-grain]').forEach((other) => {

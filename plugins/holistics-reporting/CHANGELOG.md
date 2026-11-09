@@ -1,3 +1,13 @@
+## [0.3.4](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.3...holistics-reporting-v0.3.4) (2026-11-09)
+
+### Bug Fixes
+
+* **plugins.common,plugins.development,plugins.reporting:** drop Endorsed tags from AML examples ([fd493c9](https://github.com/holistics/skills/commit/fd493c9e4182663259c38501cfebe3cc3925b459))
+
+### Performance Improvements
+
+* **plugins.reporting:** trim build-data-app repetition to cut its context size ([8f9b4fa](https://github.com/holistics/skills/commit/8f9b4fa29bef527246c97c56c735e331a688cd82))
+
 ## [0.3.3](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.2...holistics-reporting-v0.3.3) (2026-11-04)
 
 ### Bug Fixes
