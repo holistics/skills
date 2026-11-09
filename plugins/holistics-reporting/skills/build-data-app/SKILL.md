@@ -34,8 +34,8 @@ Only the purpose must come from the user; the rest have defaults that the propos
    recommended answer.
 2. **Data:** use the datasets the user names. Otherwise pick the ones that fit from
    `list_datasets`, skipping archived or deprecated ones; ask only if two fit equally.
-   `fetch_dataset` each and follow its relationships and caveats. If
-   the data can't serve the purpose, say so and offer the nearest thing.
+   `fetch_dataset` each and follow its relationships and caveats. If the data can't serve the
+   purpose, say so and offer the nearest thing.
 3. **Design:** the Holistics style unless the user wants another (see
    [Look and feel](#look-and-feel)). Derive the screens (tabs, panels, steps) and each interaction
    from the job; keep a tight instruction tight.
@@ -158,7 +158,7 @@ a control (`createFilter` + `mapControl`). Write flat table queries, not pivot q
 (`region: users.region`, `revenue: orders.total_revenue`): sorts, date drills, cross-filters and
 row keys all go by the alias.
 
-### Structure
+### Structure marks
 
 Mark the page as [api.md](references/api.md#structure) shows: `data-anfra-container`
 and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra-query` or
