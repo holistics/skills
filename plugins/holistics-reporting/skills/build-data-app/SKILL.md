@@ -14,11 +14,11 @@ To export or convert a claude.ai artifact, load the `convert-artifact-dashboard`
 References, read when a step needs them:
 
 - [api.md](references/api.md): every SDK call, the result shape, page structure and errors. **Read it before
-  writing any code; do not invent APIs.** Only the core SDK is available: no export, render or
-  lineage.
+  writing any code; do not invent APIs.**
 - [aql](../aql/) skill: writing the query bodies.
 - [example.html](references/example.html): a complete app in the default Holistics look. Start the file from its
-  skeleton, but keep only the parts the agreed plan has.
+  skeleton and keep only the parts the agreed plan has; its dataset and field names are
+  placeholders.
 
 **Tools:** `list_datasets`, `fetch_dataset`, `validate_aql` and `create_data_app`. If they aren't
 available, load the `setup-holistics-mcp` skill first; without them the names are guesses and the
@@ -110,7 +110,8 @@ as in the example.
 
 Done when the file holds every part of the approved plan and nothing else, every part is marked,
 each query renders all four states, every CDN asset carries its hash, the example's error banner
-script is kept, and the metadata block has all five fields with known values or explicit `null`s.
+script is kept before every other script, and the metadata block has all five fields with known
+values or explicit `null`s.
 
 ### Sandbox
 
@@ -161,9 +162,7 @@ row keys all go by the alias.
 
 Mark the page as [api.md](references/api.md#structure) shows: `data-anfra-container`
 and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra-query` or
-`data-anfra-control` on the element each query and control draws into. Every query and control
-sits in a block; a chart's own control goes in the chart's block. The Inspect panel shows this tree
-and gives the user a handle for each part to hand back to you.
+`data-anfra-control` on the element each query and control draws into.
 
 ### Rendering
 
@@ -181,32 +180,20 @@ and gives the user a handle for each part to hand back to you.
 
 ### Metadata
 
-Record generation metadata in `<head>`, as the first child after `<meta charset>`:
-
-```html
-<script type="application/json" id="data-app-metadata">
-{
-  "prompt": "a sales overview with revenue by region and a monthly trend",
-  "model": null,
-  "effort": null,
-  "createdAt": null,
-  "updatedAt": null
-}
-</script>
-```
+Record generation metadata in the example's `data-app-metadata` block, the first child of
+`<head>` after `<meta charset>`. Keep it static JSON, with every `<` escaped as `\u003c` so prompt
+text cannot close the script tag:
 
 - `prompt`: the user's first message describing the app, verbatim, never summarised or corrected.
-  Fixed for the life of the file.
-- `model`, `effort`: the model and reasoning effort (`"high"`) of the latest revision, only as the
-  runtime or session states them. Otherwise `null`: never infer them from the product name or the
-  task.
-- `createdAt`, `updatedAt`: UTC ISO 8601 times (`"2026-09-24T14:30:00Z"`) read from a clock, never
-  invented. `createdAt` is the first generation and is preserved; `updatedAt` is the latest
-  revision, equal to `createdAt` at first. `null` without a clock.
+  It never changes.
+- `model` and `effort`: the model and reasoning effort the runtime or session explicitly gives for
+  this revision; never infer them from the agent, product or task.
+- `createdAt`: the first generation's UTC time in ISO 8601 (`"2026-09-24T14:30:00Z"`), read from a
+  clock. Kept on later revisions.
+- `updatedAt`: this revision's UTC time; on the first generation, equal to `createdAt`.
 
-Escape every `<` in the JSON as the literal `\u003c`, so the prompt can't close the script tag.
-Keep the block static. In an older file, add missing fields by these rules; an unknown creation
-time stays `null`.
+Any value you can't read is `null`, never a guess. When editing an older file, add the missing
+fields the same way.
 
 ### Look and feel
 
@@ -215,7 +202,8 @@ text. In every look (default, creative or their own design):
 
 - A filter is a styled dropdown with search, multi-select for several values, never
   `<select multiple>`. For dates, two styled `<input type="date">` and preset buttons, as in the
-  example.
+  example. A preset sends its date phrase (`matches`, `last 30 days`) for the server to resolve, so
+  a saved app stays current: never compute preset dates in the browser.
 - Give ECharts hex colors: it cannot parse `oklch`.
 - Lay out navigation, filter bars and grids with explicit `display`, `flex-direction`, sizing and
   wrapping, so a library's defaults can't change them.
@@ -227,7 +215,9 @@ Then by look:
   variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
   32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
   and amber belong in charts and status, never on actions.
-  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values).
+  - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values). Basecoat's
+    deferred script sets them up on `DOMContentLoaded`: add the options and call `refresh()` after
+    that, as the example does.
   - Basecoat `.card` is a flex column that clips overflow. On a filter bar card set
     `flex-direction: row; align-items: flex-end; overflow: visible` (as `.card.filters` in the
     example), or the controls drift right and dropdowns get cut off.
@@ -274,11 +264,9 @@ If anything is off, ask for:
 
 ## 6. Iterate
 
-Read their report against [api.md](references/api.md#errors): a `ValidationError` names a declaring
-line; a `QueryError` carries the server's message about the AQL, or names the bad entry
-(`filters[0].field`). Compare a misbehaving query's executed AQL with what you meant. A query
-marked "Not drawn yet" has no element marked with it. When the user names a part by its handle
-(`data-anfra-block="trend"`), search the file for that attribute: it is the element they mean.
+Read their report against [api.md](references/api.md#errors), and compare a misbehaving query's
+executed AQL with what you meant. A query marked "Not drawn yet" has no element marked with it. A
+handle the user pastes is found as [api.md](references/api.md#structure) says.
 A page that shows its static markup but nothing the script fills in means the script never ran:
 the example's error banner names the line where it failed.
 
