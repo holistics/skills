@@ -2,7 +2,7 @@
 <!--
   A complete Data App: a region multi-select, a date range, a date grain switch, a bar chart that
   cross-filters a trend line. Dataset `ecommerce` and the `orders` / `users` fields are placeholders:
-  replace them with names from the user's data snapshot.
+  replace them with the names fetch_dataset gives. Keep only the parts the agreed plan has.
 
   Two layers, change one without the other:
   - Design layer: the Basecoat links, the <style> block (Holistics' in-app tokens mapped onto
@@ -143,7 +143,8 @@
 
     .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-    .chart { height: 320px; }
+    /* Not .chart: Basecoat styles that class (aspect ratio, flex centering). */
+    .chart-box { height: 320px; }
     .status { position: absolute; inset: 56px 16px 16px; display: none; align-items: center;
               justify-content: center; background: color-mix(in oklab, var(--card) 85%, transparent); }
     .status.visible { display: flex; }
@@ -156,7 +157,6 @@
 <main data-anfra-container="page" data-anfra-label="Sales overview">
   <div class="header" data-anfra-block="title" data-anfra-label="Title">
     <h1>Sales overview</h1>
-    <div class="caption" id="user"></div>
   </div>
 
   <!-- Controls that reach several charts. A control that belongs to one chart goes in its card. -->
@@ -201,7 +201,7 @@
         <!-- Clears this chart's selection, so it lives in this chart's block. -->
         <button id="clear-selection" class="btn" data-variant="ghost" type="button">Clear selection</button>
       </header>
-      <section><div id="by-region" class="chart" data-anfra-query="byRegion"></div></section>
+      <section><div id="by-region" class="chart-box" data-anfra-query="byRegion"></div></section>
       <div id="by-region-status" class="status"></div>
     </section>
     <section class="card" data-anfra-block="trend" data-anfra-label="Revenue over time">
@@ -214,7 +214,7 @@
           <button class="btn" data-variant="outline" type="button" data-grain="quarter">Quarter</button>
         </div>
       </header>
-      <section><div id="trend" class="chart" data-anfra-query="trend"></div></section>
+      <section><div id="trend" class="chart-box" data-anfra-query="trend"></div></section>
       <div id="trend-status" class="status"></div>
     </section>
   </div>
@@ -272,9 +272,7 @@
     app.mapControl(grain, trend, { field: 'orders.created_at' });
     app.mapCrossFilter(byRegion, trend);
 
-    document.getElementById('user').textContent = `Signed in as ${Anfra.user.name}`;
-
-    const CURRENCY = 'USD'; // The dataset's currency: ask the user when the snapshot doesn't say.
+    const CURRENCY = 'USD'; // The dataset's currency: ask the user when the dataset doesn't say.
     const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
     const moneyShort = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, notation: 'compact', maximumFractionDigits: 1 });
     // Numbers arrive as strings: convert for charts and math, keeping null as a gap (Number(null) is 0).
