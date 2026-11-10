@@ -94,15 +94,17 @@ Build this app?
 
 - **Wireframe:** a `block:frame` with `columns 12`.
   - Spans: `3` = ¼, `4` = ⅓, `6` = ½, `12` = full. Every row adds up to 12; fill gaps with
-    `space:<n>`. A nested `block:<id>:<span>` (a side rail) counts as its span.
+    `space:<n>`. Don't nest blocks inside the frame; mermaid stacks and stretches them. Draw a
+    sidebar as the first columns of each row (`n_overview["Overview"]:3`), then `space:3` below it.
   - Colors: the exact `classDef` lines, with `sect` for text, `ctrl` for filters and navigation,
     `viz` for charts, tables and KPIs.
   - Labels: `<name> · <type>`, plus how it behaves when that isn't obvious: what a click does
     (`· Bar (click filters orders)`), or the charts a control reaches when not all
     (`Grain · trend only`). A click can only filter charts on its own dataset.
 - **Screens:** draw the app as the user first sees it, with its navigation where it sits (a
-  `· Tabs` row, a rail block for a sidebar). Add a diagram only for a screen laid out differently
-  (another tab, a panel that opens on a click), under a plain caption ("After clicking a rep").
+  `· Tabs` row, the first columns of each row for a sidebar). Add a diagram only for a screen laid
+  out differently (another tab, a panel that opens on a click), under a plain caption ("After
+  clicking a rep").
 - **These break the diagram:** a box id with anything but letters, digits and `_`; a box id of
   `end`; an unquoted label; a `"` inside a label (use `'`); a missing `end`.
 
