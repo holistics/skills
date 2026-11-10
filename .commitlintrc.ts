@@ -14,6 +14,7 @@ const Configuration: UserConfig = {
         'plugins.analytics',
         'plugins.analytics-finance',
         'plugins.holistics-migrate-power-bi',
+        'plugins.holistics-migrate-looker',
         'native',
         'native.default',
         'native.template',
