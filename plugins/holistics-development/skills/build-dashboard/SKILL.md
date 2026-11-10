@@ -259,6 +259,8 @@ block <x>: TextBlock { content: @md ## Section heading ;; }
 
 When a block displays dynamic, real-time data values, use a data visualization block (`MetricKpi` or standard chart) instead of a `TextBlock`.
 
+Size every text block to fit its content, so no line is cut off: about 100 high for a `#` title with one subtitle line, at least 80 for a `##` heading, and about 25 more per extra line of body text. Make a block wider before making it shorter, and don't shrink a heading to close a gap; move the blocks below it instead.
+
 ### Layout — `TabLayout` by default, `HTMLLayout` for custom formats
 
 `TabLayout` covers standard dashboards, and users can rearrange its blocks in the GUI editor. `HTMLLayout` gives full control over format and presentation (any HTML and CSS around the blocks), but the dashboard can then only be edited in code. Use it only when the request needs a format or presentation a tab canvas can't produce, for example:
@@ -295,13 +297,18 @@ Say which one you chose on the **Starts from** line of the proposal, and offer t
 
 * Keep the template's frame: its `theme` (instead of the default theme above), `settings`, canvas size, grid, header and intro text, branding, and where controls sit.
 * Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
+  * Before removing a placeholder, read its layout entry and note its `pos()`. Give the new block a layout entry at the same x, y and width. If it needs more height, increase it and move every block below down by the same amount.
 * Template viz blocks and filters on the request's dataset: keep them if they answer a ranked question, and wire them into `explicit_interactions`. Remove those on unrelated datasets.
 * When you remove a block, also remove its layout entry and every `explicit_interactions` reference to it.
+* Remove a kept template block that a new block duplicates (e.g. a template pivot of revenue by month when you add a revenue trend).
+* Edit the template's own `view`, whatever its layout type. Don't wrap it in a new `TabLayout` or rebuild the layout from scratch.
+* Lay out the whole canvas, including the template blocks you keep: each one needs a position that doesn't overlap any other block, or it must be removed. Never place new blocks over a kept block's position.
 
 **Build from it.**
 
 * **If you write dashboard files:** copy the template's code into a normal dashboard file under `dashboards/` named `<uname>.page.aml` (not `.page.tpl.aml`). Rename `Dashboard <template_name>` to `Dashboard <uname>`, set `title`, and delete the `@template(...)` decorator. Then fill the placeholders and add sections as above, and write the file with `suggest_file_creation`.
 * **If you build in a new-dashboard editor:** edit the open draft with `edit_dashboard`, following the keep/replace rules. For a blank start, first `remove` every template block (with its layout entry and interactions), then build as usual.
+* **Either way, check the final layout before handing off:** read the view and confirm that no two blocks on the same tab overlap and that every block has a layout entry. Fix any overlap first.
 
 ## Conventions
 
