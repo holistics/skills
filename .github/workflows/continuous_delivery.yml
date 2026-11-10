@@ -48,11 +48,16 @@ jobs:
               - '.claude-plugin/marketplace.json'
             native_skills:
               - 'native-skills/**'
+      # Only print the *_any_changed flags: the full outputs include every changed file path,
+      # which can exceed the env var size limit ("Argument list too long") on large pushes.
       - name: Show changes
-        run: echo "$OUTPUTS"
+        run: |
+          echo "holistics_development=${{ steps.filter.outputs.holistics_development_any_changed }}"
+          echo "holistics_reporting=${{ steps.filter.outputs.holistics_reporting_any_changed }}"
+          echo "holistics_migrate_power_bi=${{ steps.filter.outputs.holistics_migrate_power_bi_any_changed }}"
+          echo "marketplace=${{ steps.filter.outputs.marketplace_any_changed }}"
+          echo "native_skills=${{ steps.filter.outputs.native_skills_any_changed }}"
         shell: bash
-        env:
-          OUTPUTS: ${{ toJSON(steps.filter.outputs) }}
 
   tag_holistics_development:
     needs: [test_passed, changes]

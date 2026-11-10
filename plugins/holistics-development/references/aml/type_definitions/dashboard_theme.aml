@@ -60,7 +60,30 @@ Type CanvasTheme {
   opacity(optional): Number
 }
 
-Type ColorPalette = 'categorical' | 'div-blue-red' | 'div-teal-orange' | 'seq-blue' | 'seq-teal' | 'seq-viridis' | 'seq-magma' | Number
+Type ColorValue = String
+
+Type LabeledColor {
+  label: String
+  color: ColorValue
+}
+
+Type Color = ColorValue | LabeledColor
+
+Type LegacyColorPalette = 'categorical' | 'div-blue-red' | 'div-teal-orange' | 'seq-blue' | 'seq-teal' | 'seq-viridis' | 'seq-magma' | Number
+
+Type CategoricalColorPalette {
+  colors: List[Color]
+}
+
+Type ColorPalette {
+  title(optional): String
+
+  categorical(optional): CategoricalColorPalette
+}
+
+Type ColorTheme {
+  data(optional): ColorPalette
+}
 
 Type TableBorderVisibility {
   outer(optional): Boolean
@@ -111,6 +134,17 @@ Type TableSubTitleTheme {
   font_color(optional): String
 }
 
+Type TableSparklineTheme {
+  line(optional):  {
+    color(optional): String
+    width(optional): Number | String
+  }
+  column(optional):  {
+    color(optional): String
+    width(optional): Number | String
+  }
+}
+
 Type TableTheme {
   general(optional): TableGeneralTheme
   header(optional): TableHeaderTheme
@@ -120,6 +154,32 @@ Type TableTheme {
   column_header(optional): TableColumnHeaderTheme
   sub_header(optional): TableHeaderTheme
   sub_title(optional): TableSubTitleTheme
+  sparkline(optional): TableSparklineTheme
+}
+
+Type MetricKpiTheme {
+  alignment(optional): AlignmentPosition
+  label(optional): FontTheme
+  value(optional): FontTheme
+  progress(optional) {
+    text(optional): FontTheme
+    indicator(optional): BgTheme
+    track(optional): BgTheme
+  }
+  trend(optional) {
+    positive(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+    negative(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+    neutral(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+  }
 }
 
 Type VizTheme {
@@ -128,9 +188,10 @@ Type VizTheme {
 //  axis(optional): FontTheme
 //  label(optional): FontTheme
 //  text(optional): FontTheme
-//  colors(optional): List[String]
+  color(optional): ColorTheme
 //  color_palette(optional): ColorPalette
   table(optional): TableTheme
+  metric_kpi(optional): MetricKpiTheme
 }
 
 Type PageTheme {
@@ -140,6 +201,12 @@ Type PageTheme {
   block(optional): BlockTheme
   custom_css(optional): Heredoc['css']
   viz(optional): VizTheme
+  color(optional): ColorTheme
+}
+
+Type DynamicPageTheme {
+  light: PageTheme
+  dark: PageTheme
 }
 
 Type PartialFontTheme = Partial[FontTheme]

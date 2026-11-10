@@ -1,3 +1,24 @@
+## [0.9.2](https://github.com/holistics/skills/compare/holistics-development-v0.9.1...holistics-development-v0.9.2) (2026-11-04)
+
+### Bug Fixes
+
+* **plugins.development,plugins.holistics-migrate-power-bi:** rename sync-code to sync ([6ffc683](https://github.com/holistics/skills/commit/6ffc683c0427b7a54ed929ed8e2abe4f5ef11f74))
+
+## [0.9.1](https://github.com/holistics/skills/compare/holistics-development-v0.9.0...holistics-development-v0.9.1) (2026-11-03)
+
+### Bug Fixes
+
+* filter on measures ([d0188b9](https://github.com/holistics/skills/commit/d0188b91c9715394ca35a5df64260841aa0fb184))
+
+## [0.9.0](https://github.com/holistics/skills/compare/holistics-development-v0.8.0...holistics-development-v0.9.0) (2026-10-22)
+
+### Features
+
+* add skill to author viz ([1743d19](https://github.com/holistics/skills/commit/1743d19e184b0230e9cab11ba5592fcceb719c19))
+* **plugins.development:** improving CLI calling ([50e23f5](https://github.com/holistics/skills/commit/50e23f5121a1e0a6dd4dc026fe94b0de13a8a67d))
+* **plugins.development:** local aql skills ([04d5471](https://github.com/holistics/skills/commit/04d5471fc9bd484948de163122fd6ee3c888aa10))
+* update AML definitions ([bd691f2](https://github.com/holistics/skills/commit/bd691f2b26192f1c66936821f2147b96f66f93e1))
+
 ## [0.8.0](https://github.com/holistics/skills/compare/holistics-development-v0.7.0...holistics-development-v0.8.0) (2026-10-14)
 
 ### Features

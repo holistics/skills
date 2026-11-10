@@ -1,0 +1,35 @@
+
+Type SingleFormat {
+  condition {
+    operator: 'is' | 'is_not' | 'less_than' | 'less_than_equal' | 'greater_than' | 'greater_than_equal' | 'before' | 'after' | 'between' | 'contains' | 'does_not_contain'
+    value: String | Boolean | Number | List[String | Boolean | Number]
+  }
+  text_color: String
+  background_color: String
+  apply_to_row(optional): Boolean
+}
+
+Type ScaleFormat {
+  min {
+    type(optional): 'value' | 'percentage'
+    value: Number
+    color: String
+  }
+  mid(optional) {
+    type(optional): 'value' | 'percentage'
+    value: Number
+    color: String
+  }
+  max {
+    type(optional): 'value' | 'percentage'
+    value: Number
+    color: String
+  }
+}
+
+Type ConditionalFormat {
+  ref(optional): VizFieldRef
+  key(optional): String
+  aggregation(optional): AggregationType
+  format: SingleFormat | ScaleFormat
+}

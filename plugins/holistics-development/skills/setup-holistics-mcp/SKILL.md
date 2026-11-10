@@ -4,7 +4,7 @@ description: Use this skill to set up or review Holistics MCP connection and ena
 ---
 
 ## IMPORTANT: Use CLI MCP instead
-Use `holistics mcp` command instead. It provides access to all MCP tools without any additional setup or maintenance.
+Use `holistics mcp` command instead. It provides access to all MCP tools without any additional setup or maintenance. See *Calling tools via the CLI* in the [](../setup-amql-development/) skill for how to pass parameters.
 
 Only set up or maintain agent's direct MCP connection when explicitly asked by the user.
 

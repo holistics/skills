@@ -2,6 +2,8 @@ Type RelationshipConfig {
   rel: Relationship
   active: Boolean
   direction (default: 'two_way'): 'one_to_many' | 'one_way' | 'two_way'
+  rlp_propagation (default: 'inherit'): 'inherit' | 'one_way' | 'two_way'
+  nullable (default: true): Boolean
 }
 
 Func rel_config(rel: Relationship, active: Boolean, direction: 'one_to_many' | 'one_way' | 'two_way') {
@@ -12,8 +14,50 @@ Func rel_config(rel: Relationship, active: Boolean, direction: 'one_to_many' | '
   }
 }
 
-Type Relationship {
-  type: 'many_to_one' | 'one_to_one'
+// One column pair beyond the `from`/`to` pair. Blocks combine with AND.
+Type RelationshipKey {
   from: FieldRef
   to: FieldRef
 }
+
+// Each expression must reference columns of exactly one of the two models. It is
+// emitted into the join condition, not into WHERE, so it restricts the match
+// without deleting rows from the measure side.
+Type RelationshipFilter {
+  from (optional): Heredoc['aql']
+  to (optional): Heredoc['aql']
+}
+
+Type EqualityRelationship (elem_name_as: 'name') {
+  type: 'many_to_one' | 'one_to_one'
+  from: FieldRef
+  to: FieldRef
+  on (multiple: true, optional): RelationshipKey
+  where (optional): RelationshipFilter
+}
+
+// The `to` side stores both ends of the range, and `match` says which end is
+// inclusive. `match` carries the whole condition, including any equality that
+// partitions the ranges, so `from` and `to` are the unique key of each side here
+// rather than the two sides of an equality. The reverse direction fans out and
+// dedupes on the `to` key. The type claims many to one, so ranges within a
+// partition must not overlap. Nothing checks that claim.
+Type RangeRelationship (elem_name_as: 'name') {
+  type: 'range'
+  from: FieldRef
+  to: FieldRef
+  match: Heredoc['aql']
+  where (optional): RelationshipFilter
+}
+
+// `match` carries the whole condition, so `from` and `to` are the unique key of
+// each side here rather than the two sides of an equality. Both ends fan out.
+Type ManyToManyRelationship (elem_name_as: 'name') {
+  type: 'many_to_many'
+  from: FieldRef
+  to: FieldRef
+  match: Heredoc['aql']
+  where (optional): RelationshipFilter
+}
+
+Type Relationship = EqualityRelationship | RangeRelationship | ManyToManyRelationship
