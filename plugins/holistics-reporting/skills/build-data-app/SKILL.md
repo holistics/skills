@@ -49,7 +49,7 @@ plan and wireframe and propose again.
 ## What's in the app
 **App** — <what it is, such as "a metric catalog">
 **For** — <who> **to** <what for>
-**Data** — @Dataset:<dataset_uname> in <workspace>
+**Data** — <dataset label> (`<dataset_uname>`) in <workspace>
 **Assumptions** — <only choices that change a number: a term's meaning, the date field,
 exclusions; leave the line out when there are none>
 **Look** — <the direction in a few words, such as "calm executive brief: warm off-white, serif
@@ -258,8 +258,8 @@ do, and ask for a screenshot when the layout matters.
 ## 5. Save and hand over
 
 Save with `create_data_app`: `title`, the whole document as `code`, an optional `description`,
-and `overwrite_app_id` when changing an existing app. The user picks the folder. Give the user the
-returned URL.
+and `overwrite_app_id` when changing an existing app. Leave out `category_id`: the app is saved at
+the root, and the user can move it. Give the user the returned URL.
 
 Tell them, in their terms:
 

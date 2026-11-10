@@ -12,8 +12,8 @@ description: |-
 # Building a Data App
 
 A **Data App** is one self-contained HTML file stored in Holistics. It runs in a sandboxed frame
-with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours. You
-never run it against the user's data; the user does, and reports back.
+with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours. The
+user opens it and reports back what they see.
 
 References, in this file, read when a step needs them:
 
@@ -266,12 +266,9 @@ Then by look:
 1. **Run every query once** with `execute_aql` on its dataset and fix any error, and check every
    `createFilter` and `mapControl` field against `fetch_dataset`.
 2. **Match the plan:** its screens, interactions and layout are built as agreed, and nothing else.
-3. **Render it if you have a browser** (headless Chrome, Playwright), with a stub `Anfra` built
-   from `fetch_dataset` (`datasets`, a `user`, and queries that return one made-up row). It catches
-   syntax errors, crashes and broken layout, not AQL errors.
 
-If you have not rendered the app, don't tell the user how it looks: say what the code is meant to
-do, and ask for a screenshot when the layout matters.
+Describe what the code is meant to do, not how it looks, and ask for a screenshot when the layout
+matters.
 
 ## 5. Save and hand over
 
@@ -292,8 +289,8 @@ If `create_data_app` fails, nothing was saved:
 On success, hand over the app exactly as the tool's `note` says, and tell the user, in their terms:
 
 - what each screen is for, how to move between them, and what each control and click does;
-- that you could not run it against their data, so they should open it (or use the preview in the
-  chat), try every control and click, and check one headline number against one they trust.
+- to open it (or use the preview in the chat), try every control and click, and check one headline
+  number against one they trust.
 
 If anything is off, ask for:
 
