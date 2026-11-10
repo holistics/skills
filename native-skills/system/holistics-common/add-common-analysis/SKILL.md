@@ -2,13 +2,13 @@
 name: add-common-analysis
 label: Add Common Analysis
 description: |-
-  Add a common analysis to a chart's series, such as a trend line or a period-over-period comparison, while keeping the series it is computed from.
+  Add a common analysis, such as a trend line or a period-over-period comparison, while keeping the series it is computed from.
 
-  Use when the user asks to add an analysis to a chart, on a dashboard or while exploring a chart.
+  Use when the user asks for a trend or a comparison with an earlier period — on an existing chart or as a new question.
 
-  Typical phrasings: add a trend line, show the trend, fit a regression line, compare with last month, add period-over-period, show change vs same month last year.
+  Typical phrasings: add a trend line, show the trend, compare with last year, how did X do this year vs last year, year-over-year, month-over-month, add period-over-period.
 
-  Do NOT trigger for building a chart with no analysis on it, or for flagging unusual values (anomaly detection).
+  Do NOT trigger for a chart or question with no trend or period comparison, or for flagging unusual values (anomaly detection).
 user-invocable: false
 ---
 
