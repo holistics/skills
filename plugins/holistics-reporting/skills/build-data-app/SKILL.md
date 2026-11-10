@@ -16,9 +16,9 @@ References, read when a step needs them:
 - [api.md](references/api.md): every SDK call, the result shape, page structure and errors. **Read it before
   writing any code; do not invent APIs.**
 - [aql](../aql/) skill: writing the query bodies.
-- [example.html](references/example.html): a complete app in the default Holistics look. Start the file from its
-  skeleton and keep only the parts the agreed plan has; its dataset and field names are
-  placeholders.
+- [example.html](references/example.html): a complete app in the Holistics look. Start the file from its
+  skeleton and keep only the parts the agreed plan has, restyled to the agreed look; its dataset
+  and field names are placeholders.
 
 **Tools:** `list_datasets`, `fetch_dataset`, `validate_aql` and `create_data_app`. If they aren't
 available, load the `setup-holistics-mcp` skill first; without them the names are guesses and the
@@ -36,9 +36,9 @@ Only the purpose must come from the user; the rest have defaults that the propos
    `list_datasets`, skipping archived or deprecated ones; ask only if two fit equally.
    `fetch_dataset` each and follow its relationships and caveats. If the data can't serve the
    purpose, say so and offer the nearest thing.
-3. **Design:** the Holistics style unless the user wants another (see
-   [Look and feel](#look-and-feel)). Derive the screens (tabs, panels, steps) and each interaction
-   from the job; keep a tight instruction tight.
+3. **Design:** a creative look made for this app's audience and job, unless the user asks for the
+   Holistics look or brings their own design (see [Look and feel](#look-and-feel)). Derive the
+   screens (tabs, panels, steps) and each interaction from the job; keep a tight instruction tight.
 
 ## 2. Propose and confirm
 
@@ -52,6 +52,8 @@ plan and wireframe and propose again.
 **Data** — @Dataset:<dataset_uname> in <workspace>
 **Assumptions** — <only choices that change a number: a term's meaning, the date field,
 exclusions; leave the line out when there are none>
+**Look** — <the direction in a few words, such as "calm executive brief: warm off-white, serif
+headings, one deep-teal accent", or "Holistics">
 
 ```mermaid
 ---
@@ -81,7 +83,7 @@ class v_category,v_orders,v_trend viz
 
 Build this app?
 [Yes — build it as planned](#opt)
-[Use a creative look instead](#opt)
+[Use the Holistics look instead](#opt)
 [Use our brand colors](#opt)
 ````
 
@@ -198,7 +200,7 @@ fields the same way.
 ### Look and feel
 
 An app must look finished without the user asking: no native controls, default buttons or unstyled
-text. In every look (default, creative or their own design):
+text. In every look (creative, Holistics or their own design):
 
 - A filter is a styled dropdown with search, multi-select for several values, never
   `<select multiple>`. For dates, two styled `<input type="date">` and preset buttons, as in the
@@ -208,13 +210,7 @@ text. In every look (default, creative or their own design):
 - Lay out navigation, filter bars and grids with explicit `display`, `flex-direction`, sizing and
   wrapping, so a library's defaults can't change them.
 
-Then by look:
-
-- **Default style (Holistics):** start from the example, which maps Holistics' in-app tokens onto
-  [Basecoat UI](https://basecoatui.com), with pinned CDN CSS and JS. Use its tokens as CSS
-  variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
-  32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
-  and amber belong in charts and status, never on actions.
+- On Basecoat (the Holistics look always is; a creative look may be):
   - Filters are Basecoat comboboxes (`aria-multiselectable="true"` for several values). Basecoat's
     deferred script sets them up on `DOMContentLoaded`: add the options and call `refresh()` after
     that, as the example does.
@@ -225,9 +221,22 @@ Then by look:
     `.empty`, `.sidebar`, `.card` and `.btn`. Use one only with Basecoat's markup for that
     component; give your own parts a prefixed class (`.app-tabs`, `.chart-box`), or Basecoat's
     layout overrides yours (a custom `.tabs` row renders as a column).
-- **Creative:** your own palette, type and layout, in Basecoat or your own CSS, keeping readable
-  contrast, tabular numerals, light and dark (`prefers-color-scheme`), and styled loading, empty
-  and error states.
+
+Then by look:
+
+- **Creative (default):** a look made for this app, from who uses it and what for: a dense
+  operations monitor, a calm executive brief and an editorial report each want a different one.
+  Pick one direction and carry it through every part: a palette (a neutral base, one or two
+  accents, a chart palette in the same family), type (a Google Fonts pairing or a system stack),
+  and the layout and density. Name it on the proposal's **Look** line. Keep readable contrast,
+  tabular numerals, light and dark (`prefers-color-scheme`), and styled loading, empty and error
+  states. Use your own CSS, or Basecoat with your tokens set on its CSS variables, the quickest way
+  to searchable filter dropdowns.
+- **Holistics:** when the user asks for it. Keep the example's look, which maps Holistics' in-app
+  tokens onto [Basecoat UI](https://basecoatui.com), with pinned CDN CSS and JS. Use its tokens as
+  CSS variables, Inter, its text sizes (24px page title, 14px card titles and body, 12px captions),
+  32px controls, one Blue 600 primary action and the chart palette (Blue 600 first). Green, purple
+  and amber belong in charts and status, never on actions.
 - **Their own design:** follow it. Take only the SDK wiring and the sandbox rules from the example,
   not its look.
 
