@@ -267,9 +267,7 @@ When a block displays dynamic, real-time data values, use a data visualization b
 
 Or when the user asks for an HTML layout. Don't switch just to make a standard dashboard look nicer, and keep `TabLayout` when the user needs tabs. When you choose `HTMLLayout`, say in the plan that the dashboard will be code-only.
 
-Before writing an `HTMLLayout`, read [HTML layout](https://docs.holistics.io/docs/dashboards/html-layout) (start from the closest example under *Examples*, and check *Limitations*) and the [AML reference](https://docs.holistics.io/reference/aml/html-layout).
-
-Give each block's container a fixed `height`, not only `min-height`. In an export, a container without a height grows to fit its content and stretches the dashboard into one long page.
+Before writing an `HTMLLayout`, read [HTML layout](https://docs.holistics.io/docs/dashboards/html-layout) (start from the closest example under *Examples*, and check *Limitations*) and the [AML reference](https://docs.holistics.io/reference/aml/html-layout). In an `HTMLLayout`, give each block's container a fixed `height`, not only `min-height`: in an export, a container without a height grows to fit its content and stretches the dashboard into one long page.
 
 ## Conventions
 
