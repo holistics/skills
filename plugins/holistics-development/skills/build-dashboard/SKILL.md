@@ -282,11 +282,12 @@ A project can set a default dashboard template, the starting point an admin chos
 * **If you write dashboard files** (`read_file`, `suggest_file_creation`): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
 * **If you build in a new-dashboard editor** (`edit_dashboard`): the draft that opens is your starting point. You can't see it until the editor is open.
 
-**Decide.** Start from the template unless:
+**Decide.** The admin set the template as the project's starting point, but it isn't mandatory. Judge whether it fits the request, and don't ask the user to choose. Start from the template when it fits:
 
-* the user asks for a blank dashboard or names a different template,
-* the user describes a structure the template contradicts (e.g. a single full-width table when the template is a KPI-and-trend layout), or
-* the template's viz blocks are on datasets unrelated to the request and nothing else in it is worth keeping.
+* its layout suits what the user describes (e.g. a KPI-and-trend template for a KPI overview), and
+* its viz blocks and filters can use the request's dataset, or the rest of it (header, branding, controls) is worth keeping.
+
+Start blank when the user asks for blank or names a different template, describes a structure the template contradicts (e.g. a single full-width table when the template is a KPI-and-trend layout), or the template would leave little but blocks to remove.
 
 Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
 
