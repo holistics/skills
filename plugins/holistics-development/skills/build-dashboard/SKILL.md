@@ -60,13 +60,14 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
 
 ## Workflow
 
-1. **Derive the spec and rank the sections.** Collect specs from the prompt and run `fetch_dataset` (identifying metrics, primary date fields, and low-cardinality dimensions for slicing). Identify the reader's primary action and rank their core questions. Map these questions directly to dashboard sections. Clarify only critical ambiguities with the user; make reasonable assumptions for everything else and document them.
+1. **Derive the spec and rank the sections.** For a new dashboard, first check the project's default template and decide whether to start from it (see [Starting from the default template](#starting-from-the-default-template)). Collect specs from the prompt and run `fetch_dataset` (identifying metrics, primary date fields, and low-cardinality dimensions for slicing). Identify the reader's primary action and rank their core questions. Map these questions directly to dashboard sections. Clarify only critical ambiguities with the user; make reasonable assumptions for everything else and document them.
 2. **Propose and confirm.** Present a concise summary plan along with a grid wireframe detailing dataset references, ranked section questions, and filter controls:
 
    ````
    ## What's in the dashboard
    **For** — <audience> **doing** <monitoring | diagnosing | comparing | planning | looking something up>
    **Dataset** — @Dataset:<dataset_name>
+   **Starts from** — template `<template_name>` (keeps <what>, replaces <what>) | a blank dashboard (<why>)
    **Sections** — ordered by question hierarchy:
    - **<section>** — <question answered, in reader's words>
    **Controls** — date range and slicing dimensions:
@@ -104,11 +105,12 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
    * **Wireframe rules:** Enclose the layout in a `block:frame` with `columns 12`, unless the user's layout or reference calls for another split. Set spans to match canvas positions (on 12: `3` = ¼, `4` = ⅓, `6` = ½, `12` = full). Every row fills the frame's columns; a nested `block:<id>:<span>` (e.g., a side rail) counts as its span. Pad with bare `space:<n>`. Apply styles using the exact `classDef` definitions (`sect` for text, `ctrl` for filters, `viz` for visualizations). Label blocks as `<name> · <VizType>`. For multi-tab layouts, provide a separate diagram per tab under `**Tab: <label>**`.
    * **These break the whole diagram:** a box id with anything but letters, digits and `_` (`v_trend`, never `v-trend`); a box id of `end`; an unquoted label (`v_trend["Monthly Sales · Line"]`, never `v_trend[Monthly Sales]`); a `"` inside a label (use `'`); a missing `end` for `block:frame` or any nested block.
 
-   Include actionable option links at the end of your proposal:
+   Include actionable option links at the end of your proposal. Omit the **Starts from** line and the template option when editing an existing dashboard or when the project has no default template:
 
    ```
    Build this dashboard? 
    [Yes — build it as planned](#opt) 
+   [<start from a blank dashboard instead | start from template `<template_name>` instead>](#opt)
    [<alternative instruction or adjustment>](#opt)
    ```
 
@@ -270,6 +272,35 @@ Or when the user asks for an HTML layout. Don't switch just to make a standard d
 Before writing an `HTMLLayout`, read [HTML layout](https://docs.holistics.io/docs/dashboards/html-layout) (start from the closest example under *Examples*, and check *Limitations*) and the [AML reference](https://docs.holistics.io/reference/aml/html-layout).
 
 Give each block's container a fixed `height`, not only `min-height`. In an export, a container without a height grows to fit its content and stretches the dashboard into one long page.
+
+## Starting from the default template
+
+A project can set a default dashboard template, the starting point an admin chose for every new dashboard. Before planning a **new** dashboard, check for one and decide whether to use it. This does not apply when editing an existing dashboard.
+
+**Find it.**
+
+* **If you write dashboard files** (`read_file`, `suggest_file_creation`): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
+* **If you build in a new-dashboard editor** (`edit_dashboard`): the draft that opens is your starting point. You can't see it until the editor is open.
+
+**Decide.** Start from the template unless:
+
+* the user asks for a blank dashboard or names a different template,
+* the user describes a structure the template contradicts (e.g. a single full-width table when the template is a KPI-and-trend layout), or
+* the template's viz blocks are on datasets unrelated to the request and nothing else in it is worth keeping.
+
+Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
+
+**What to keep and what to replace.**
+
+* Keep the template's frame: its `theme` (instead of the default theme above), `settings`, canvas size, grid, header and intro text, branding, and where controls sit.
+* Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
+* Template viz blocks and filters on the request's dataset: keep them if they answer a ranked question, and wire them into `explicit_interactions`. Remove those on unrelated datasets.
+* When you remove a block, also remove its layout entry and every `explicit_interactions` reference to it.
+
+**Build from it.**
+
+* **If you write dashboard files:** copy the template's code into a normal dashboard file under `dashboards/` named `<uname>.page.aml` (not `.page.tpl.aml`). Rename `Dashboard <template_name>` to `Dashboard <uname>`, set `title`, and delete the `@template(...)` decorator. Then fill the placeholders and add sections as above, and write the file with `suggest_file_creation`.
+* **If you build in a new-dashboard editor:** edit the open draft with `edit_dashboard`, following the keep/replace rules. For a blank start, first `remove` every template block (with its layout entry and interactions), then build as usual.
 
 ## Conventions
 
