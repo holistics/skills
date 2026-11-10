@@ -88,8 +88,8 @@ class v_category,v_orders,v_trend viz
 
 Build this app?
 [Yes — build it as planned](#opt)
-[Use the Holistics look instead](#opt)
-[Use our brand colors](#opt)
+[Try a different look](#opt)
+[Match our brand](#opt)
 ````
 
 - **Wireframe:** a `block:frame` with `columns 12`.
