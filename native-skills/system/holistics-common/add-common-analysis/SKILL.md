@@ -45,8 +45,8 @@ When the user wants viewers to switch the comparison on a dashboard, use a `PopB
 
 Hard requirements:
 
-1. **Keep the existing raw series and viz config.**
-2. **Add the comparison as AQL metrics** — ask generate_aql for two metrics per metric in the chart: a previous-period value and a % change (e.g. `revenue_prev_month` and `revenue_prev_month_pct`), both compared along the date field. Compare all metrics, not only the first. Skip the absolute change unless the user asks.
+1. **Keep the chart as it is** — type, x-axis, breakdowns, settings. Do not add the date field as a dimension unless the chart already has it, the user asks, or the viz is a table or pivot table.
+2. **Add the comparison as AQL metrics with `relative_period`, not filtered metrics** — ask generate_aql for two metrics per metric in the chart: a previous-period value and a % change (e.g. `revenue_prev_month` and `revenue_prev_month_pct`), both compared along the date field. Compare all metrics, not only the first. Skip the absolute change unless the user asks.
 3. **Take the comparison from the user's words** — "last month", "same month last year", "previous 3 months". Pass that phrase to generate_aql as the comparison period; do not rewrite it. With no period given ("add period-over-period"), use the previous 1 period. Compare on the chart's left-most date field unless the user names another.
 4. **Ask generate_viz to place the series** — the raw series and the previous value on the y-axis; the % change in the tooltip. For a table or pivot table, add the % change as an extra column instead.
 5. **Name the series from the comparison** — `Revenue (Previous month)` and `Revenue %Δ (Previous month)`. A period of 1 is singular without the number; more than 1 keeps the number and is plural (`Revenue (Previous 3 months)`).
