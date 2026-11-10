@@ -92,7 +92,8 @@ Build this app?
     `space:<n>`. Don't nest blocks inside the frame; mermaid stacks and stretches them. Draw a
     sidebar as the first columns of each row (`n_overview["Overview"]:3`), then `space:3` below it.
   - Colors: the exact `classDef` lines, with `sect` for text, `ctrl` for filters and navigation,
-    `viz` for charts, tables and KPIs.
+    `viz` for charts, tables and KPIs. Keep them for every look and every revision: the wireframe
+    shows layout only, and the **Look** line describes the colors.
   - Labels: `<name> · <type>`, plus how it behaves when that isn't obvious: what a click does
     (`· Bar (click filters orders)`), or the charts a control reaches when not all
     (`Grain · trend only`). A click can only filter charts on its own dataset.
