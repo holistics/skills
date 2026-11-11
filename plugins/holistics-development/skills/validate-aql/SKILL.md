@@ -17,7 +17,7 @@ It returns `errors` (empty when valid) and `notes`. You can validate a
 `explore`.
 
 > Validation runs on Holistics, not on your local files. In the Development
-> environment, keep `holistics sync-code --background` running so it sees your
+> environment, keep `holistics sync start --background` running so it sees your
 > latest model/dataset edits (see the `setup-amql-development` skill).
 
 ## Writing valid queries
