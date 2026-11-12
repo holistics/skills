@@ -286,7 +286,12 @@ A project can set a default dashboard template, the starting point an admin chos
 
 **Find it** (when you write dashboard files): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
 
-**Decide.** The admin set the template as the project's starting point, but it isn't mandatory. Compare it with the request's dataset and ranked questions, and choose whether to start from it or from a blank dashboard. Make the call yourself; don't ask the user to choose.
+**Decide.** The admin set the template as the project's starting point, but it isn't mandatory. Judge whether it fits the request, and don't ask the user to choose. Start from the template when it fits:
+
+* its layout suits what the user describes (e.g. a KPI-and-trend template for a KPI overview), and
+* its viz blocks and filters can use the request's dataset, or the rest of it (header, branding, controls) is worth keeping.
+
+Start blank when the user asks for blank or names a different template, describes a structure the template contradicts (e.g. a single full-width table when the template is a KPI-and-trend layout), or the template would leave little but blocks to remove.
 
 Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
 
