@@ -115,7 +115,7 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
    ```
 
    Wait for user confirmation before building. Do not run queries or edit files until approved.
-3. **Build the dashboard.** Follow the AML Schema. Create static text blocks (`TextBlock`) for titles and guidance. Generate visualization AML for data blocks rather than hand-writing them. Construct the layout using a `TabLayout` structure with `pos()` coordinates matched precisely to your approved wireframe. Before handing off, check the layout: every `block` declaration has a position in `view`, and no two blocks on the same tab overlap.
+3. **Build the dashboard.** Follow the AML Schema. Create static text blocks (`TextBlock`) for titles and guidance. Generate visualization AML for data blocks rather than hand-writing them. Construct the layout using a `TabLayout` structure with `pos()` coordinates matched precisely to your approved wireframe.
 4. **Wire controls and interactions.** Include the `explicit_interactions: []` block on every dashboard. Map each control (`FilterBlock`, `PopBlock`, `DateDrillBlock`) to its target visualization blocks and fields. Ensure interactive controls reach all relevant data blocks on their respective tabs.
 5. **Verify output quality.** Confirm that every block answers a ranked question, opening blocks reflect the user's workflow, layout spans match the wireframe, control interactions are fully mapped, and no diagnostics errors exist.
 6. **Deliver.** Provide a handoff summary containing the dataset used, block-to-question mappings, date field references, tab structures, and key design assumptions.
@@ -284,7 +284,10 @@ Give each block's container a fixed `height`, not only `min-height`. In an expor
 
 A project can set a default dashboard template, the starting point an admin chose for every new dashboard. For a **new** dashboard, check for one once you know the request's dataset and ranked questions, and decide whether to use it before mapping sections. This does not apply when editing an existing dashboard.
 
-**Find it** (when you write dashboard files): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
+**Find it.**
+
+* **If you write dashboard files** (`read_file`, `suggest_file_creation`): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
+* **If you build in a new-dashboard editor** (`edit_dashboard`): the draft that opens is your starting point. You can't see it until the editor is open.
 
 **Decide.** The admin set the template as the project's starting point, but it isn't mandatory. Compare it with the request's dataset and ranked questions, and choose whether to start from it or from a blank dashboard. Make the call yourself; don't ask the user to choose.
 
@@ -294,19 +297,22 @@ If you start from the template, say so on the **Starts from** line of the propos
 
 * Keep the template's frame: its `theme` (instead of the default theme above), `settings`, canvas size, grid, header and intro text, branding, and where controls sit.
 * Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
-* Template viz blocks and filters on the request's dataset: keep them if they answer a ranked question that no new block already answers, and wire them into `explicit_interactions`. Remove the rest.
+  * Before removing a placeholder, read its layout entry and note its `pos()`. Give the new block a layout entry at the same x, y and width. If it needs more height, increase it and move every block below down by the same amount.
+* Template viz blocks and filters on the request's dataset: keep them if they answer a ranked question, and wire them into `explicit_interactions`. Remove those on unrelated datasets.
+* When you remove a block, also remove its layout entry and every `explicit_interactions` reference to it.
+* Remove a kept template block that a new block duplicates (e.g. a template pivot of revenue by month when you add a revenue trend).
 * Edit the template's own `view`, whatever its layout type. Don't wrap it in a new `TabLayout` or rebuild the layout from scratch.
-* Lay out the whole canvas, including the template blocks you keep. A new block takes its placeholder's x, y and width; if it needs more height, move every block below it down by the same amount. Every kept block needs a position that overlaps no other block, or remove it.
+* Lay out the whole canvas, including the template blocks you keep: each one needs a position that doesn't overlap any other block, or it must be removed. Never place new blocks over a kept block's position.
 
 **Build from it.**
 
-* **If you write dashboard files:** copy the template's code into a normal dashboard file under `dashboards/` named `<uname>.page.aml` (not `.page.tpl.aml`). Rename `Dashboard <template_name>` to `Dashboard <uname>`, set `title`, and delete the `@template(...)` decorator. Then fill the placeholders and add sections as above.
-* **If you build in a new-dashboard editor and start blank:** first remove every template block, then build as usual.
+* **If you write dashboard files:** copy the template's code into a normal dashboard file under `dashboards/` named `<uname>.page.aml` (not `.page.tpl.aml`). Rename `Dashboard <template_name>` to `Dashboard <uname>`, set `title`, and delete the `@template(...)` decorator. Then fill the placeholders and add sections as above, and write the file with `suggest_file_creation`.
+* **If you build in a new-dashboard editor:** edit the open draft with `edit_dashboard`, following the keep/replace rules. For a blank start, first `remove` every template block (with its layout entry and interactions), then build as usual.
+* **Either way, check the final layout before handing off:** read the view and confirm that no two blocks on the same tab overlap and that every block has a layout entry. Fix any overlap first.
 
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
-* **Remove blocks completely.** Removing a block means removing its `block` declaration, its layout entry, and every `explicit_interactions` reference to it. Rewriting `view` alone doesn't remove a block; the editor places a block without a layout entry on its own, over other blocks.
 * **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure, following [Dashboard interactions → Interactions (legacy)](https://docs.holistics.io/reference/aml/dashboard-interactions#interactions-legacy).
 * **Don't add tags.** Leave `@tag(…)` off the dashboards and other items you create, including `Trust/Endorsed`, unless the user asks for a tag.
 * **Prefer generated visualizations.** Rely on tool-generated visualization AML rather than manually coding viz blocks to minimize syntax errors.
