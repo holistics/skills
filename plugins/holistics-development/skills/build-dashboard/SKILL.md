@@ -288,6 +288,10 @@ Start blank when the user asks for blank or names a different template, describe
 
 Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
 
+**Replace rules.**
+
+* Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
+
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
