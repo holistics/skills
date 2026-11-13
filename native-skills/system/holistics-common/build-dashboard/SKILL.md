@@ -259,13 +259,6 @@ block <x>: TextBlock { content: @md ## Section heading ;; }
 
 When a block displays dynamic, real-time data values, use a data visualization block (`MetricKpi` or standard chart) instead of a `TextBlock`.
 
-A text block doesn't grow with its content, so size it by reference rather than by guessing, or lines get cut off:
-
-* Give a new heading the same height as an existing block with the same heading level: the template's own header and section headings, or the blocks in the worked example above.
-* Put one heading per text block. Give a subtitle or note its own block below it, sized like a matching block in the template or the worked example.
-* When you add lines to an existing block (e.g. a subtitle under a template's title), grow its height in proportion to the line count, and move the blocks below it down.
-* Make a block wider before making it shorter, and never shrink a heading to close a gap. When unsure, make it taller: extra space looks fine, a clipped line doesn't.
-
 ### Layout — `TabLayout` by default, `HTMLLayout` for custom formats
 
 `TabLayout` covers standard dashboards, and users can rearrange its blocks in the GUI editor. `HTMLLayout` gives full control over format and presentation (any HTML and CSS around the blocks), but the dashboard can then only be edited in code. Use it only when the request needs a format or presentation a tab canvas can't produce, for example:
