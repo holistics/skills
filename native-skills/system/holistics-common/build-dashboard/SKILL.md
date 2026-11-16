@@ -275,7 +275,7 @@ Give each block's container a fixed `height`, not only `min-height`. In an expor
 
 ## Starting from the default template
 
-A project can set a default dashboard template, the starting point an admin chose for every new dashboard. For a **new** dashboard, check for one once you know the request's dataset and ranked questions, and decide whether to use it before mapping sections. This does not apply when editing an existing dashboard.
+A project can set a default dashboard template for new dashboards.
 
 **Find it** (when you write dashboard files): before proposing, `read_file` `.holistics/settings/settings.aml` (or legacy `settings/settings.aml`) and look for `dashboard { default_template: <template_name> }`. If it is set, find `<template_name>.page.tpl.aml` in the library's `dashboard_templates/` folder with `read_folder`, then `read_file` it. No setting, or no file: start blank.
 
@@ -288,13 +288,10 @@ Start blank when the user asks for blank or names a different template, describe
 
 Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
 
-**Replace rules.**
-
-* Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
-
 ## Conventions
 
 * **Stick to supported AML syntax.** Use standard layout properties (`Dashboard`, `block`, `explicit_interactions`, `settings`, `theme`, `view` / `TabLayout` / `CanvasLayout`, `position: pos()`, `layer`, `mobile`). Spacing and gaps are managed using `pos()` coordinates.
+* **Change a block's type by replacing it.** Never change an existing block's type in place (e.g. a `TextBlock` into a `VizBlock`). Remove the block and add a new one under a new uname in the same position. Template placeholder blocks (such as "Add your chart here") are the common case.
 * **Avoid mixing interaction formats.** Do not combine `explicit_interactions: []` with legacy `interactions: []` or `CustomMapping`. If updating a legacy dashboard, convert all controls and interactions to the `explicit_interactions` structure, following [Dashboard interactions → Interactions (legacy)](https://docs.holistics.io/reference/aml/dashboard-interactions#interactions-legacy).
 * **Don't add tags.** Leave `@tag(…)` off the dashboards and other items you create, including `Trust/Endorsed`, unless the user asks for a tag.
 * **Prefer generated visualizations.** Rely on tool-generated visualization AML rather than manually coding viz blocks to minimize syntax errors.
