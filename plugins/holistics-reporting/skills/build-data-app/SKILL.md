@@ -123,7 +123,8 @@ values or explicit `null`s.
 The sandbox allows scripts only, has an opaque origin and a content policy:
 
 - Data comes only from the SDK. `fetch`, XHR, WebSocket and `sendBeacon` are blocked except to the
-  CDNs below; never call any service from the app.
+  CDNs below; never call any service from the app. A map's shapes are the one file you fetch (see
+  [Rendering](#rendering)).
 - Libraries, styles and fonts load only from cdn.jsdelivr.net and cdnjs.cloudflare.com, by pinned
   `https://` URL; esm.sh and unpkg.com are blocked. Load npm packages from jsDelivr
   (`/npm/<pkg>@<version>/<file>`, `+esm` for ES modules). Images may come from any `https://`
@@ -185,6 +186,10 @@ and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra
   rebuild the chart, which would replay its entry animation on every click. With ECharts, merge a
   selection with a plain `setOption(option)` and keep `replaceMerge` for a new result.
 - Put on the page the definitions, dates and rounding a user needs to trust a number.
+- Draw a map from real shapes, never ones you write or an SVG you draw: `fetch` a pinned GeoJSON
+  from jsDelivr, such as `https://cdn.jsdelivr.net/npm/echarts@4.9.0/map/json/world.json` for
+  countries, and `echarts.registerMap` it before the chart renders. Match the query's names to
+  the file's `properties.name`, mapping any that differ, so no region is left blank.
 
 ### Metadata
 
