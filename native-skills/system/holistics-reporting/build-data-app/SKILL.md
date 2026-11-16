@@ -12,8 +12,7 @@ description: |-
 # Building a Data App
 
 A **Data App** is one self-contained HTML file stored in Holistics. It runs in a sandboxed frame
-with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours. The
-user opens it and reports back what they see.
+with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours.
 
 References, in this file, read when a step needs them:
 
