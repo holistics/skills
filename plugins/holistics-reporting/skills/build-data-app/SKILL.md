@@ -124,8 +124,8 @@ The sandbox allows scripts only, has an opaque origin and a content policy:
 
 - Data comes only from the SDK. `fetch`, XHR, WebSocket and `sendBeacon` are blocked except to the
   CDNs below; never call any service from the app.
-- Libraries, styles and fonts load only from cdn.jsdelivr.net, cdnjs.cloudflare.com and Google
-  Fonts, by pinned `https://` URL; esm.sh and unpkg.com are blocked. Load npm packages from jsDelivr
+- Libraries, styles and fonts load only from cdn.jsdelivr.net and cdnjs.cloudflare.com, by pinned
+  `https://` URL; esm.sh and unpkg.com are blocked. Load npm packages from jsDelivr
   (`/npm/<pkg>@<version>/<file>`, `+esm` for ES modules). Images may come from any `https://`
   server.
 - Every CDN `<script src>` and `<link>` carries `integrity="sha384-…" crossorigin="anonymous"`, as
@@ -231,8 +231,8 @@ Then by look:
 - **Creative (default):** a look made for this app, from who uses it and what for: a dense
   operations monitor, a calm executive brief and an editorial report each want a different one.
   Pick one direction and carry it through every part: a palette (a neutral base, one or two
-  accents, a chart palette in the same family), type (a Google Fonts pairing or a system stack),
-  and the layout and density. Name it on the proposal's **Look** line. Keep readable contrast,
+  accents, a chart palette in the same family), type (a font pairing from `@fontsource` or a
+  system stack), and the layout and density. Name it on the proposal's **Look** line. Keep readable contrast,
   tabular numerals, light and dark (`prefers-color-scheme`), and styled loading, empty and error
   states. Use your own CSS, or Basecoat with your tokens set on its CSS variables, the quickest way
   to searchable filter dropdowns.
