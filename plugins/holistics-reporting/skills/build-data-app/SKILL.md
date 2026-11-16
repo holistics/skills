@@ -6,8 +6,7 @@ description: Build or change a Holistics Data App, one self-contained HTML file 
 # Building a Data App
 
 A **Data App** is one self-contained HTML file stored in Holistics. It runs in a sandboxed frame
-with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours. You
-never run it against the user's data; the user does, and reports back.
+with the SDK on the global `Anfra`: the SDK supplies data and state, and every pixel is yours.
 
 To export or convert a claude.ai artifact, load the `convert-artifact-dashboard` skill instead.
 
@@ -20,9 +19,10 @@ References, read when a step needs them:
   skeleton and keep only the parts the agreed plan has, restyled to the agreed look; its dataset
   and field names are placeholders.
 
-**Tools:** `list_datasets`, `fetch_dataset`, `validate_aql` and `create_data_app`. If they aren't
-available, load the `setup-holistics-mcp` skill first; without them the names are guesses and the
-queries unchecked.
+**Tools:** `list_datasets`, `fetch_dataset`, `validate_aql`, `execute_aql` and `create_data_app`.
+If no Holistics tool is available, load the `setup-holistics-mcp` skill first; without them the
+names are guesses and the queries unchecked. If the others are there but `create_data_app` isn't
+(Data Apps are off for the workspace), tell the user you can't create Data Apps there, and stop.
 
 ## 1. Understand the request
 
@@ -254,8 +254,9 @@ Then by look:
 
 ## 4. Verify
 
-1. **Validate every query** with `validate_aql` until it passes, and check every `createFilter`
-   and `mapControl` field against `fetch_dataset`.
+1. **Run every query once** with `execute_aql` on its dataset and fix any error (`validate_aql`
+   checks a fix without running it), and check every `createFilter` and `mapControl` field against
+   `fetch_dataset`.
 2. **Match the plan:** its screens, interactions and layout are built as agreed, and nothing else.
 3. **Render it if you have a browser** (headless Chrome, Playwright), with a stub `Anfra` built
    from `fetch_dataset` (`datasets`, a `user`, and queries that return one made-up row). It catches
@@ -273,8 +274,8 @@ the root, and the user can move it. Give the user the returned URL.
 Tell them, in their terms:
 
 - what each screen is for, how to move between them, and what each control and click does;
-- that you could not run it against their data, so they should open it, try every control and
-  click, and check one headline number against one they trust.
+- that each query ran once, but they should still open it, try every control and click, and check
+  one headline number against one they trust.
 
 If anything is off, ask for:
 
