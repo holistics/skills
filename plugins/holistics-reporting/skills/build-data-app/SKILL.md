@@ -43,7 +43,8 @@ Only the purpose must come from the user; the rest have defaults that the propos
 ## 2. Propose and confirm
 
 Propose this to the user, and wait for their approval before building. On a change, update the
-plan and wireframe and propose again.
+plan and wireframe and propose again. Where neither mermaid nor `#opt` links render, such as a
+terminal, draw the wireframe as a plain-text grid and list the choices as numbered options.
 
 ````
 ## What's in the app
