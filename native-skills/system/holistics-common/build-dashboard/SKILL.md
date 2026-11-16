@@ -298,7 +298,7 @@ When the user asks for a dashboard template, create a template, not a dashboard.
 
 Templates are project files, so you can create one only when you write dashboard files. When you can't, say that templates are created in the Development environment, and offer to build a regular dashboard instead.
 
-**From scratch.** Follow the [Workflow](#workflow) steps that apply to a template, and always propose the layout and wait for confirmation before writing the file. Plan for the dashboards that will start from the template rather than for a single reader: a title, the layout and section headings, the controls, and the theme. Fill the slots that each dashboard will replace with placeholder `TextBlock`s ("Add your chart here"). Add viz blocks only on a dataset the user names.
+**From scratch.** Follow the [Workflow](#workflow) steps that apply to a template, and always propose the layout and wait for confirmation before writing the file. Plan for the dashboards that will start from the template rather than for a single reader: a title, the layout and section headings, the controls, and the theme. Fill the slots that each dashboard will replace with placeholder `TextBlock`s ("Add your chart here").
 
 **From an existing dashboard.** Do this only when the user asks to turn a dashboard into a template. Create a new template from the dashboard and leave the original dashboard unchanged.
 
