@@ -41,7 +41,7 @@ Only the purpose must come from the user; the rest have defaults that the propos
 3. **Design:** a creative look made for this app's audience and job, unless the user asks for the
    Holistics look or brings their own design (see [Look and feel](#look-and-feel)). Derive the
    screens (tabs, panels, steps) and each interaction from the job; keep a tight instruction tight.
-   Plan at most 4 charts or tables for the first version, 3 in a creative look (see
+   Plan at most 4 charts or tables for the first version (see
    [Fit it in one reply](#fit-it-in-one-reply)).
 
 ## 2. Propose and confirm
@@ -126,16 +126,14 @@ explicit `null`s.
 ### Fit it in one reply
 
 You write the whole file inside one `create_data_app` call, and one reply holds at most 8,192
-output tokens, your reasoning included: a longer file is cut off and never saved. Aim for about
-15KB of HTML:
+output tokens: a longer file is cut off and never saved. Aim for about 15KB of HTML:
 
 - Write no comments.
 - Keep only the CSS rules, tokens and classes the page uses.
-- Build at most 4 queries and 4 charts or tables in the first version, 3 in a creative look, then
-  offer to add more. When the plan holds more, build the first ones and name the rest in that
-  offer.
-- In a creative look, restyle Basecoat through its CSS variables rather than writing component CSS
-  of your own.
+- A creative look costs more tokens than the Holistics look, since its CSS is written fresh: keep
+  it to a palette, type and the few rules that carry the direction, not a restyle of every part.
+- Build at most 4 queries and 4 charts or tables in the first version, then offer to add more. When
+  the plan holds more, build the first 4 and name the rest in that offer.
 - Draw every chart and table through one shared render helper rather than repeating the setup per
   chart.
 - Add a control (date presets, grain switch, cross-filter) only when the plan has it.
