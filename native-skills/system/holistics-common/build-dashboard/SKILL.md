@@ -4,9 +4,9 @@ label: Build Dashboard
 description: |-
   Build or edit a Holistics canvas dashboard (`page.aml` / a `Dashboard {}` object) — its blocks, layout, filter interactions, and theme.
 
-  Use when building a dashboard or report page, adding or arranging blocks, or adding dashboard-level filters.
+  Use when building a dashboard or report page, adding or arranging blocks, adding dashboard-level filters, or creating a dashboard template.
 
-  Typical phrasings: build a dashboard for X, make a dashboard showing X, add a chart or KPI or table to a dashboard, add a filter or date control, add or edit a title or section header.
+  Typical phrasings: build a dashboard for X, make a dashboard showing X, add a chart or KPI or table to a dashboard, add a filter or date control, add or edit a title or section header, create a dashboard template, turn this dashboard into a template.
 
   Do NOT trigger for answering a data question on its own — a one-off query, chart, or analysis with no dashboard to put it on — or for editing models, datasets, or metric definitions, authoring a reusable custom chart type or theme object, or restyling a dashboard's look.
 ---
@@ -291,6 +291,16 @@ Say which one you chose on the **Starts from** line of the proposal, and offer t
 **Replace rules.**
 
 * Placeholder blocks (`TextBlock`s such as "Add your chart here") are slots to fill. Replace each one by **removing the placeholder and adding a new block under a new uname** in the same position. Never change an existing block's type in place.
+
+## Creating a dashboard template
+
+When the user asks for a dashboard template, create a template, not a dashboard. Don't build a dashboard and offer to convert it afterwards.
+
+Templates are project files, so you can create one only when you write dashboard files. When you can't, say that templates are created in the Development environment, and offer to build a regular dashboard instead.
+
+**From scratch.** Follow the [Workflow](#workflow) steps that apply to a template, and always propose the layout and wait for confirmation before writing the file. Plan for the dashboards that will start from the template rather than for a single reader: a title, the layout and section headings, the controls, and the theme. Fill the slots that each dashboard will replace with placeholder `TextBlock`s ("Add your chart here"). Add viz blocks only on a dataset the user names.
+
+**From an existing dashboard.** Do this only when the user asks to turn a dashboard into a template. Create a new template from the dashboard and leave the original dashboard unchanged.
 
 ## Conventions
 
