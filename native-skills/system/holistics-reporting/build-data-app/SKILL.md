@@ -53,7 +53,7 @@ plan and wireframe and propose again.
 ## What's in the app
 **App** — <what it is, such as "a metric catalog">
 **For** — <who> **to** <what for>
-**Data** — @Dataset:<dataset_uname> in <workspace>
+**Data** — @Dataset:<dataset_uname>
 **Assumptions** — <only choices that change a number: a term's meaning, the date field,
 exclusions; leave the line out when there are none>
 **Look** — <the direction in a few words, such as "calm executive brief: warm off-white, serif

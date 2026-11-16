@@ -50,7 +50,7 @@ terminal, draw the wireframe as a plain-text grid and list the choices as number
 ## What's in the app
 **App** — <what it is, such as "a metric catalog">
 **For** — <who> **to** <what for>
-**Data** — <dataset label> (`<dataset_uname>`) in <workspace>
+**Data** — <dataset label> (`<dataset_uname>`)
 **Assumptions** — <only choices that change a number: a term's meaning, the date field,
 exclusions; leave the line out when there are none>
 **Look** — <the direction in a few words, such as "calm executive brief: warm off-white, serif
