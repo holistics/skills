@@ -178,8 +178,10 @@ Nothing a user changes goes in the AQL text: static conditions go in `filters`; 
 a control (`createFilter` + `mapControl`). Write flat table queries, not pivot queries (`rows { }` /
 `columns { }`): pivot the rows in the app when it needs a pivot. Alias every dimension and measure
 (`region: users.region`, `revenue: orders.total_revenue`): sorts, date drills, cross-filters and
-row keys all go by the alias. Cap rows with the query's `pageSize`, never `limit` in the AQL:
-`explore { }` rejects it and the query fails.
+row keys all go by the alias. Cap rows with the query's `pageSize`, never `limit:` in the AQL,
+although `generate_aql` and other AQL examples use it: here it is a Data App rule, since the SDK
+rewrites the `explore { }` with the user's state and a `limit:` in it fails to parse. For a top N,
+sort in the AQL, set `pageSize: N` and show only that first page.
 
 ### Structure marks
 
