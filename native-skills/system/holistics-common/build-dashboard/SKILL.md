@@ -286,7 +286,7 @@ A project can set a default dashboard template for new dashboards.
 
 Start blank when the user asks for blank or names a different template, describes a structure the template contradicts (e.g. a single full-width table when the template is a KPI-and-trend layout), or the template would leave little but blocks to remove.
 
-Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the template when proposing, so write **Starts from** — the project's default template, if one is set. Decide once the editor is open, and state your choice in the handoff summary.
+Say which one you chose on the **Starts from** line of the proposal, and offer the other as an option. In a new-dashboard editor you can't see the project's default template when proposing. Decide once the editor is open, and state your choice in the handoff summary.
 
 ## Conventions
 
