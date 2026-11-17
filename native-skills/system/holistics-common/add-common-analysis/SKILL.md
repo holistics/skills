@@ -32,7 +32,7 @@ Hard requirements:
 1. **Keep the existing raw series** — its metric, display type (column, line, …), and settings.
 2. **Alias the metric a second time in the AQL explore** — ask generate_aql for the same metric twice under two names (e.g. `revenue_won` and `revenue_won_trend: revenue_won`). Skip the alias only when the user asks for the trend alone.
 3. **Ask generate_viz for two y-axis series** — the raw metric with no analytic, and the alias with `analytic: RegressionLine` (`type: 'linear'` unless the user asks for another fit), displayed as a dashed line. A column raw series with a line trend needs a `CombinationChart`.
-   * **Moving average** — the alias takes `analytic: MovingCalculationField` instead, with `regression: 'linear'` — the marker that makes it a trend line, editable from the Analyze menu, rather than a standalone moving calculation.
+   * **Moving average** — the alias takes `analytic: MovingCalculationField` instead, with `regression: 'linear'` — the marker that makes it a trend line.
 4. **Verify before presenting** — after execute_viz, check that the result has both a raw-value column and a trend column. If one is missing, fix the explore or the `query` and run again.
 
 ## Period-over-period (PoP)
