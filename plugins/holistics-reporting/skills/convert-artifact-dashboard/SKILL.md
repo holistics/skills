@@ -1,24 +1,26 @@
 ---
 name: convert-artifact-dashboard
 description: |-
-  Convert a Claude Dashboard (a claude.ai page built on `dash.data`, `dash.onData`, `dash.params`) into a Holistics Data App, keeping its page and swapping its data for Holistics datasets.
+  Convert a Claude Data dashboard (a claude.ai page built on `dash.data`, `dash.onData`, `dash.params`) into a Holistics Data App, keeping its page and swapping its data for Holistics datasets.
 
-  Use when the user wants a claude.ai artifact, a Claude Dashboard or a plain HTML page, moved, exported or saved to Holistics. Do not trigger when the `create_data_app` tool is not available.
+  Use when the user wants a claude.ai artifact, a Claude Data dashboard (also called a Claude Dashboard) or a plain HTML page, moved, exported or saved to Holistics. Do not trigger when the `create_data_app` tool is not available.
 ---
 
-# Converting a Claude Dashboard
+# Converting a Claude Data dashboard
 
-**Check the artifact before anything else.** A Claude Dashboard reads its data through `dash.data`.
-A plain HTML artifact has its numbers written into the page, so a Data App made from it shows
-numbers that never update. If the page never calls `dash.data`, save nothing and say only: "I can
-only convert a Dashboard artifact to a Holistics Data App, and this is an HTML artifact. Do you want
-me to build it as a Dashboard artifact instead?"
+**Check the artifact before anything else.** A Claude Data dashboard reads its data through
+`dash.data`. A plain HTML artifact has its numbers written into the page, so a Data App made from
+it shows numbers that never update. If the page never calls `dash.data`, save nothing and say only: "I can
+only convert a Claude Data dashboard to a Holistics Data App, and this is an HTML artifact. Do you
+want me to build it as a Claude Data dashboard instead?"
 
-For a Claude Dashboard, load the `build-data-app` skill first for its SDK reference, query rules,
-sandbox, structure marks and how to save. Skip its design steps: the dashboard is the design. Keep
-the dashboard's own look, not the Holistics default style or `example.html`, and add no filter,
-control or chart the dashboard doesn't have. This skill adds what is specific to a Claude
-Dashboard: how to read it, how its sources map, and the `dash` adapter that lets its page run
+For a Claude Data dashboard, load the `build-data-app` skill first for its SDK reference, query rules,
+sandbox, structure marks and how to save. From its step 1, still read the datasets
+(`list_datasets`, `fetch_dataset`); skip its Design part and its step 2 proposal and wireframe: the
+dashboard is the design and the plan, so where that skill says "the approved plan", read "the
+dashboard". Keep the dashboard's own look, not the Holistics default style or `example.html`, and
+add no filter, control or chart the dashboard doesn't have. This skill adds what is specific to a Claude
+Data dashboard: how to read it, how its sources map, and the `dash` adapter that lets its page run
 unchanged.
 
 ## Read the dashboard

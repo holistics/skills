@@ -99,7 +99,7 @@ This checks that each linked directory matches its source and warns about missin
 Native skills can't read plugin settings (`${user_config.*}`) or files bundled next to a skill, so a plugin skill that depends on either can't be linked into `native-skills/`. These are kept as separate copies — when changing what both share (e.g. dashboard conventions), edit both:
 
 * `native-skills/system/holistics-common/build-visualizations/` — always uses `generate_aql` → `generate_viz`; the plugin version (`plugins/holistics-development/skills/build-visualizations/`) adds the authoring-mode switch and the `viz` skill.
-* `native-skills/system/holistics-reporting/build-data-app/` — the plugin skill (`plugins/holistics-reporting/skills/build-data-app/`) with `api.md` and `example.html` inlined; it reads datasets with `list_datasets` / `fetch_dataset`, writes AQL with `generate_aql` / `execute_aql`, and saves with `create_data_app`. The plugin version adds the snapshot step, the `aql` skill and the file handover.
+* `native-skills/system/holistics-reporting/build-data-app/` — the plugin skill (`plugins/holistics-reporting/skills/build-data-app/`) with `api.md` and `example.html` inlined; it reads datasets with `list_datasets` / `fetch_dataset`, writes AQL with `generate_aql` / `execute_aql`, and saves with `create_data_app` within one reply's size limit. The plugin version writes AQL with the `aql` skill and checks it with `validate_aql`.
 
 ## Sub-agents
 
