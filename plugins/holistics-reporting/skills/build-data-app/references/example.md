@@ -126,7 +126,7 @@ A complete app in the default Holistics look. Save it as an `.html` file without
 
     .grid { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
     @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
-    .chart { height: 320px; }
+    .chart-box { height: 320px; }
     .status { position: absolute; inset: 56px 16px 16px; display: none; align-items: center;
               justify-content: center; background: color-mix(in oklab, var(--card) 85%, transparent); }
     .status.visible { display: flex; }
@@ -139,7 +139,6 @@ A complete app in the default Holistics look. Save it as an `.html` file without
 <main data-anfra-container="page" data-anfra-label="Sales overview">
   <div class="header" data-anfra-block="title" data-anfra-label="Title">
     <h1>Sales overview</h1>
-    <div class="caption" id="user"></div>
   </div>
 
   <div class="card filters" data-anfra-container="controls" data-anfra-label="Controls">
@@ -179,7 +178,7 @@ A complete app in the default Holistics look. Save it as an `.html` file without
         <h2>Revenue by region</h2>
         <button id="clear-selection" class="btn" data-variant="ghost" type="button">Clear selection</button>
       </header>
-      <section><div id="by-region" class="chart" data-anfra-query="byRegion"></div></section>
+      <section><div id="by-region" class="chart-box" data-anfra-query="byRegion"></div></section>
       <div id="by-region-status" class="status"></div>
     </section>
     <section class="card" data-anfra-block="trend" data-anfra-label="Revenue over time">
@@ -191,7 +190,7 @@ A complete app in the default Holistics look. Save it as an `.html` file without
           <button class="btn" data-variant="outline" type="button" data-grain="quarter">Quarter</button>
         </div>
       </header>
-      <section><div id="trend" class="chart" data-anfra-query="trend"></div></section>
+      <section><div id="trend" class="chart-box" data-anfra-query="trend"></div></section>
       <div id="trend-status" class="status"></div>
     </section>
   </div>
@@ -246,8 +245,6 @@ A complete app in the default Holistics look. Save it as an `.html` file without
     app.mapControl(dates, trend, { field: 'orders.created_at' });
     app.mapControl(grain, trend, { field: 'orders.created_at' });
     app.mapCrossFilter(byRegion, trend);
-
-    document.getElementById('user').textContent = `Signed in as ${Anfra.user.name}`;
 
     const CURRENCY = 'USD';
     const money = new Intl.NumberFormat(undefined, { style: 'currency', currency: CURRENCY, maximumFractionDigits: 0 });
