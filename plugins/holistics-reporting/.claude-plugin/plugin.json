@@ -19,11 +19,7 @@
     "authoring_mode": {
       "type": "string",
       "title": "AQL & Viz authoring",
-      "description": "holistics-ai: Holistics AI writes AQL and Viz (generate_aql, generate_viz). self: the agent writes them from the bundled references and validates them.",
-      "options": [
-        "holistics-ai",
-        "self"
-      ],
+      "description": "Set to holistics-ai (default): Holistics AI writes AQL and Viz (generate_aql, generate_viz). Set to self: the agent writes them from the bundled references and validates them. Any other value uses holistics-ai.",
       "default": "holistics-ai"
     }
   }
