@@ -1,3 +1,18 @@
+## [0.9.3](https://github.com/holistics/skills/compare/holistics-development-v0.9.2...holistics-development-v0.9.3) (2026-11-18)
+
+### Features
+
+* **native.system,plugins.development:** add HTML layout guidance to build-dashboard ([3e8bbd6](https://github.com/holistics/skills/commit/3e8bbd676d4bdaf8b83e0c99cf03580849fe8e05))
+
+### Bug Fixes
+
+* **native.system,plugins.development:** default dashboards to the Vanilla and Charcoal themes ([8bbbf01](https://github.com/holistics/skills/commit/8bbbf0146621484d441b0cacd9dc6f6702a7816b))
+* **native.system,plugins.development:** scope the dashboard container height rule to HTMLLayout ([6686ef8](https://github.com/holistics/skills/commit/6686ef8dbc5ad3f55c8d1b5c698d34e8178b9934))
+* **native.system,plugins.development:** stop adding tags to new dashboards ([2450a48](https://github.com/holistics/skills/commit/2450a4838d8342750867683f53bb23b843762d47))
+* **plugins.common,plugins.development,plugins.reporting:** drop Endorsed tags from AML examples ([fd493c9](https://github.com/holistics/skills/commit/fd493c9e4182663259c38501cfebe3cc3925b459))
+* **plugins.common,plugins.development,plugins.reporting:** rename .upstream notes to UPSTREAM.md ([809b26c](https://github.com/holistics/skills/commit/809b26c55b7a0a774b3c2f1d2fec49eeb716abdd))
+* **plugins.development,plugins.reporting:** drop fixed choices from the authoring_mode setting ([13406fe](https://github.com/holistics/skills/commit/13406fe609899dd15b1e330bbb1534efa02c7346))
+
 ## [0.9.2](https://github.com/holistics/skills/compare/holistics-development-v0.9.1...holistics-development-v0.9.2) (2026-11-04)
 
 ### Bug Fixes

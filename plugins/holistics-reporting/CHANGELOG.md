@@ -1,3 +1,11 @@
+## [0.3.5](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.4...holistics-reporting-v0.3.5) (2026-11-18)
+
+### Bug Fixes
+
+* **plugins.common,plugins.development,plugins.reporting:** rename .upstream notes to UPSTREAM.md ([809b26c](https://github.com/holistics/skills/commit/809b26c55b7a0a774b3c2f1d2fec49eeb716abdd))
+* **plugins.development,plugins.reporting:** drop fixed choices from the authoring_mode setting ([13406fe](https://github.com/holistics/skills/commit/13406fe609899dd15b1e330bbb1534efa02c7346))
+* **plugins.reporting:** ship the build-data-app example as Markdown ([41f7923](https://github.com/holistics/skills/commit/41f792363423f77ef7156e9b745f0ac026fccd69))
+
 ## [0.3.4](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.3...holistics-reporting-v0.3.4) (2026-11-09)
 
 ### Bug Fixes
