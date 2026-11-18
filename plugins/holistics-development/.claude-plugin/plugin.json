@@ -7,6 +7,7 @@
   },
   "homepage": "https://holistics.io",
   "repository": "https://github.com/holistics/skills",
+  "icon": "./icon.svg",
   "keywords": [
     "holistics",
     "analytics",
