@@ -17,7 +17,7 @@ References, read when a step needs them:
 - [api.md](references/api.md): every SDK call, the result shape, page structure and errors. **Read it before
   writing any code; do not invent APIs.**
 - [aql](../aql/) skill: writing the query bodies.
-- [example.html](references/example.html): a complete app in the default Holistics look. Start the file from its
+- [example.md](references/example.md): a complete app in the default Holistics look. Start the file from its
   skeleton; its dataset and field names are placeholders.
 
 ## 1. Collect the datasets and the idea

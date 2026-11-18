@@ -1,3 +1,8 @@
+# Example Data App
+
+A complete app in the default Holistics look. Save it as an `.html` file without this heading and the code fence.
+
+```html
 <!doctype html>
 <html>
 <head>
@@ -429,3 +434,4 @@
   </script>
 </body>
 </html>
+```

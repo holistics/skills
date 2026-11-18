@@ -16,7 +16,7 @@ me to build it as a Dashboard artifact instead?"
 
 For a Claude Dashboard, load the `build-data-app` skill first for its SDK reference, query rules,
 sandbox, structure marks and how to save. Skip its design steps: the dashboard is the design. Keep
-the dashboard's own look, not the Holistics default style or `example.html`, and add no filter,
+the dashboard's own look, not the Holistics default style or the `build-data-app` example, and add no filter,
 control or chart the dashboard doesn't have. This skill adds what is specific to a Claude
 Dashboard: how to read it, how its sources map, and the `dash` adapter that lets its page run
 unchanged.
