@@ -1,10 +1,30 @@
-## [0.3.5](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.4...holistics-reporting-v0.3.5) (2026-11-18)
+## [0.4.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.4...holistics-reporting-v0.4.0) (2026-11-18)
+
+### Features
+
+* **native.system,plugins.reporting:** make a creative look the build-data-app default ([b7b840b](https://github.com/holistics/skills/commit/b7b840b5cea1b04476c2aafaf1aab895adbd8a4b))
+* **native.system,plugins.reporting:** mirror the new build-data-app flow in Holistics AI ([901c538](https://github.com/holistics/skills/commit/901c5389c7cd4e76a9e3d22377f235d91e656222))
+* **native.system,plugins.reporting:** offer look and brand choices on the build-data-app proposal ([2376d57](https://github.com/holistics/skills/commit/2376d57118ab281a033b2f26c16487e0188cdfcd))
+* **plugins.development,plugins.reporting:** add the Holistics icon to the plugin listings ([1faba75](https://github.com/holistics/skills/commit/1faba75e99fdb02f948da9ed7ec76669f6884c33))
+* **plugins.reporting:** plan build-data-app around the Holistics tools and a wireframe ([c2fbe32](https://github.com/holistics/skills/commit/c2fbe32f8f5da8a4540dee721e94986c63afcf40))
 
 ### Bug Fixes
 
+* **native.system,plugins.reporting:** address build-data-app review feedback from Hoa ([a122ffa](https://github.com/holistics/skills/commit/a122ffa505c18361b3aeae61bd0377b3f6cefa65))
+* **native.system,plugins.reporting:** cap build-data-app rows with pageSize, not AQL limit ([33f088f](https://github.com/holistics/skills/commit/33f088f4a649925bd9397894a4585e5f8703aa0c))
+* **native.system,plugins.reporting:** draw a build-data-app sidebar without nested blocks ([76db452](https://github.com/holistics/skills/commit/76db4523b90e7522f91a95c3d9f80cd90ee0378e))
+* **native.system,plugins.reporting:** draw build-data-app maps from a fetched GeoJSON ([d4e5129](https://github.com/holistics/skills/commit/d4e51294af2cc02a188e6dd1db9b9f5259568513))
+* **native.system,plugins.reporting:** drop the workspace from the build-data-app proposal ([6e889a7](https://github.com/holistics/skills/commit/6e889a765568443019334d46e18a8afda5162561))
+* **native.system,plugins.reporting:** keep the build-data-app wireframe colors fixed ([05ded6f](https://github.com/holistics/skills/commit/05ded6f8483fe8454698314065835f7db0884c9d))
+* **native.system,plugins.reporting:** match build-data-app font choices to the hash rule ([157638b](https://github.com/holistics/skills/commit/157638bb41165a7bc00623cf6202cebbf7b626a5))
+* **native.system,plugins.reporting:** scope build-data-app's limit rule to Data Apps ([8a60ba8](https://github.com/holistics/skills/commit/8a60ba82ee0bea10295337f7619b203d7f420e2c))
 * **plugins.common,plugins.development,plugins.reporting:** rename .upstream notes to UPSTREAM.md ([809b26c](https://github.com/holistics/skills/commit/809b26c55b7a0a774b3c2f1d2fec49eeb716abdd))
 * **plugins.development,plugins.reporting:** drop fixed choices from the authoring_mode setting ([13406fe](https://github.com/holistics/skills/commit/13406fe609899dd15b1e330bbb1534efa02c7346))
+* **plugins.reporting:** call Claude Dashboards Claude Data dashboards ([6de03d8](https://github.com/holistics/skills/commit/6de03d82eff7139a34ca2103183601ff10559080))
+* **plugins.reporting:** give build-data-app's proposal a plain-text fallback ([fc60e4b](https://github.com/holistics/skills/commit/fc60e4b8142d08b3bd0bf12a1d5ebee878b7a942))
+* **plugins.reporting:** run build-data-app queries and stop when create_data_app is missing ([e6847e9](https://github.com/holistics/skills/commit/e6847e93309bf05015f42d984bfcde15bba50f9a))
 * **plugins.reporting:** ship the build-data-app example as Markdown ([41f7923](https://github.com/holistics/skills/commit/41f792363423f77ef7156e9b745f0ac026fccd69))
+* **plugins.reporting:** spell out which build-data-app steps a conversion skips ([099de3b](https://github.com/holistics/skills/commit/099de3b825fc4a5740a63ef18876fc39cefef007))
 
 ## [0.3.4](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.3...holistics-reporting-v0.3.4) (2026-11-09)
 

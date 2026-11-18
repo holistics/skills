@@ -1,13 +1,24 @@
-## [0.9.3](https://github.com/holistics/skills/compare/holistics-development-v0.9.2...holistics-development-v0.9.3) (2026-11-18)
+## [0.10.0](https://github.com/holistics/skills/compare/holistics-development-v0.9.2...holistics-development-v0.10.0) (2026-11-18)
 
 ### Features
 
 * **native.system,plugins.development:** add HTML layout guidance to build-dashboard ([3e8bbd6](https://github.com/holistics/skills/commit/3e8bbd676d4bdaf8b83e0c99cf03580849fe8e05))
+* **native.system,plugins.development:** bring the replace rules back ([f94d835](https://github.com/holistics/skills/commit/f94d835c0a65a695288eabe3aea63c8e9d9a3505))
+* **native.system,plugins.development:** start new dashboards from the default template ([a7b09c9](https://github.com/holistics/skills/commit/a7b09c95a2db40374eaf026b54f910e73c6a8e1f))
+* **plugins.development,plugins.reporting:** add the Holistics icon to the plugin listings ([1faba75](https://github.com/holistics/skills/commit/1faba75e99fdb02f948da9ed7ec76669f6884c33))
 
 ### Bug Fixes
 
+* **native.system,plugins.development:** check the template after ranking questions ([46ece5e](https://github.com/holistics/skills/commit/46ece5e56a4889b4838a16e1aa0ae3a362b148cf))
 * **native.system,plugins.development:** default dashboards to the Vanilla and Charcoal themes ([8bbbf01](https://github.com/holistics/skills/commit/8bbbf0146621484d441b0cacd9dc6f6702a7816b))
+* **native.system,plugins.development:** drop the hedged Starts from line in the editor ([21dd684](https://github.com/holistics/skills/commit/21dd6843577166e51976a09625e83b3c3b3fbfad))
+* **native.system,plugins.development:** drop the text block sizing guidance ([655a30d](https://github.com/holistics/skills/commit/655a30dfe3956374a78ac0ee1450f7c4a7da0d96))
+* **native.system,plugins.development:** let HAI judge whether the default template fits ([736479f](https://github.com/holistics/skills/commit/736479f7b9be4777b7c58e6a402ee0b8c3a1c6a0))
+* **native.system,plugins.development:** place template blocks without overlap and size text blocks ([ce8f9e3](https://github.com/holistics/skills/commit/ce8f9e39c08bd16e888819607e200c9c1682b738))
+* **native.system,plugins.development:** restore the hedged Starts from line in the editor ([50d436b](https://github.com/holistics/skills/commit/50d436b64d8510eb8376d6b6fab50b8b9b7d1733))
+* **native.system,plugins.development:** restore the Starts from line for template and blank starts ([f7f1e43](https://github.com/holistics/skills/commit/f7f1e43569386a77e4a7af21589133c291103d8d))
 * **native.system,plugins.development:** scope the dashboard container height rule to HTMLLayout ([6686ef8](https://github.com/holistics/skills/commit/6686ef8dbc5ad3f55c8d1b5c698d34e8178b9934))
+* **native.system,plugins.development:** size text blocks by reference instead of fixed heights ([fa0030b](https://github.com/holistics/skills/commit/fa0030b3043e067eeb3a1ea592cdc716daec8105))
 * **native.system,plugins.development:** stop adding tags to new dashboards ([2450a48](https://github.com/holistics/skills/commit/2450a4838d8342750867683f53bb23b843762d47))
 * **plugins.common,plugins.development,plugins.reporting:** drop Endorsed tags from AML examples ([fd493c9](https://github.com/holistics/skills/commit/fd493c9e4182663259c38501cfebe3cc3925b459))
 * **plugins.common,plugins.development,plugins.reporting:** rename .upstream notes to UPSTREAM.md ([809b26c](https://github.com/holistics/skills/commit/809b26c55b7a0a774b3c2f1d2fec49eeb716abdd))
