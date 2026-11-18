@@ -109,7 +109,7 @@ After editing a template or an included file, run `pnpm build-agents`, then `pnp
 
 ## Content copied from other repos
 
-Some sources are copied from another repo and are **not** synced automatically. Each carries an `.upstream` file recording the origin repo, path, commit, and any transformation applied.
+Some sources are copied from another repo and are **not** synced automatically. Each carries an `UPSTREAM.md` file recording the origin repo, path, commit, and any transformation applied.
 
 * `plugins/holistics-common/skills/aql/` — `SKILL.md` and per-function docs from [anfra-ai/skills](https://github.com/anfra-ai/skills); `aqlearn.md` and the worked examples exported from the Holistics AI agent's AQL prompts (Aqua), which are the source of truth for Holistics AQL.
 * `plugins/holistics-common/skills/viz/references/` — exported from the Holistics AI agent's Viz prompt, docs, and AML type definitions (Vivid).
@@ -121,7 +121,7 @@ Exports run from the `holistics/ai` repo, in `apps/orca`:
 .venv/bin/python bin/export_skill_references.py viz <this repo>/plugins/holistics-common/skills/viz/references
 ```
 
-Then bump the commit in `.upstream`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
+Then bump the commit in `UPSTREAM.md`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
 
 ## Scripts
 
