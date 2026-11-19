@@ -48,8 +48,11 @@ fi
 
 mkdir -p "$DEST_DIR"
 cp -r "$SOURCE_DIR"/. "$DEST_DIR/"
-echo "$SOURCE_REL" > "$DEST_DIR/.link"
+
+LINKS_FILE="$REPO_ROOT/links.txt"
+{ head -n 1 "$LINKS_FILE"; { tail -n +2 "$LINKS_FILE"; echo "$DEST_PLUGIN/$REMAINDER <- $SOURCE_REL"; } | sort; } > "$LINKS_FILE.tmp"
+mv "$LINKS_FILE.tmp" "$LINKS_FILE"
 
 echo "Created $DEST_PLUGIN/$REMAINDER <- $SOURCE_REL"
 
-"$REPO_ROOT/scripts/sync-links.sh" "$DEST_DIR"
+"$REPO_ROOT/scripts/sync-links.sh" "$DEST_PLUGIN/$REMAINDER"

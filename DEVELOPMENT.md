@@ -49,7 +49,9 @@ scripts/
 
 ## Shared content via links
 
-Skills and references can be shared across plugins. A skill is defined once in a *source* plugin (e.g. `holistics-common`, or `analytics` for generic skills). Each consumer holds a **full copy** of the source directory with a `.link` file at its root pointing back to the source path — the copy is what the AI agent actually loads, and `pnpm sync-links` keeps it in step with the source.
+Skills and references can be shared across plugins. A skill is defined once in a *source* plugin (e.g. `holistics-common`, or `analytics` for generic skills). Each consumer holds a **full copy** of the source directory, and `links.txt` at the repository root lists each copy with its source path. The copy is what the AI agent actually loads, and `pnpm sync-links` keeps it in step with the source.
+
+The list lives at the root, not in the plugins, because the Claude plugin directory refuses plugins that ship files other than Markdown, text, JSON, YAML, and images.
 
 > **Always edit the source, never the copy.** Edits to a synced copy are overwritten on the next sync, and `pnpm validate-links` (run as a pre-commit hook) rejects copies that have diverged from their source.
 
@@ -67,7 +69,7 @@ Or pass them explicitly:
 pnpm create-link plugins/holistics-common/skills/analyze-data plugins/holistics-development
 ```
 
-This copies the source into the destination, writes the `.link` file, and runs an initial sync.
+This copies the source into the destination, adds the pair to `links.txt`, and runs an initial sync.
 
 **Update a shared skill**
 
@@ -82,9 +84,9 @@ This copies the source into the destination, writes the `.link` file, and runs a
 
 **Unshare a skill from a plugin**
 
-Delete the synced directory (the one containing the `.link` file) from the consumer. If no plugin still uses it, also delete the source.
+Delete the synced directory from the consumer and its line from `links.txt`. If no plugin still uses it, also delete the source.
 
-The pre-commit hook asks you to confirm any removed `.link` file. Committing from somewhere without a terminal (e.g. an IDE), confirm it up front instead: `VALIDATE_LINKS_IGNORE_REMOVALS=1 git commit ...`.
+The pre-commit hook asks you to confirm any line removed from `links.txt`. Committing from somewhere without a terminal (e.g. an IDE), confirm it up front instead: `VALIDATE_LINKS_IGNORE_REMOVALS=1 git commit ...`.
 
 **Verify everything is in sync**
 

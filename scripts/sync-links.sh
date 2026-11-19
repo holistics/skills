@@ -2,33 +2,44 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+LINKS_FILE="$REPO_ROOT/links.txt"
 
 sync_link() {
-  local link_file="$1"
-  local dest_dir source_rel source_dir
-  dest_dir="$(dirname "$link_file")"
-  source_rel="$(cat "$link_file" | tr -d '[:space:]')"
-  source_dir="$REPO_ROOT/$source_rel"
+  local dest_rel="$1" source_rel="$2"
+  local dest_dir="$REPO_ROOT/$dest_rel" source_dir="$REPO_ROOT/$source_rel"
 
   if [ ! -e "$source_dir" ]; then
-    echo "ERROR: source not found: $source_rel (referenced from $link_file)"
+    echo "ERROR: source not found: $source_rel (listed for $dest_rel in links.txt)"
     exit 1
   fi
 
-  echo "Syncing ${dest_dir#"$REPO_ROOT/"} <- $source_rel"
+  echo "Syncing $dest_rel <- $source_rel"
   rm -rf "$dest_dir"
+  mkdir -p "$(dirname "$dest_dir")"
   cp -r "$source_dir" "$dest_dir"
-  echo "$source_rel" > "$dest_dir/.link"
 }
 
-if [ $# -eq 1 ]; then
-  arg="$1"
-  [[ "$arg" != */.link ]] && arg="$arg/.link"
-  sync_link "$arg"
-else
-  while IFS= read -r -d '' link_file; do
-    sync_link "$link_file"
-  done < <(find "$REPO_ROOT" -name '.link' -print0)
+# Optional argument: sync only the copy at this path.
+only="${1:-}"
+only="${only#"$REPO_ROOT/"}"
+only="${only%/}"
+found=false
+
+while read -r dest_rel arrow source_rel; do
+  [[ -z "$dest_rel" || "$dest_rel" == \#* ]] && continue
+  if [ "$arrow" != "<-" ] || [ -z "$source_rel" ]; then
+    echo "ERROR: bad line in links.txt: $dest_rel $arrow $source_rel"
+    exit 1
+  fi
+  if [ -z "$only" ] || [ "$only" = "$dest_rel" ]; then
+    sync_link "$dest_rel" "$source_rel"
+    found=true
+  fi
+done < "$LINKS_FILE"
+
+if [ -n "$only" ] && [ "$found" = false ]; then
+  echo "ERROR: $only is not listed in links.txt"
+  exit 1
 fi
 
 echo ""

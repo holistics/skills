@@ -11,15 +11,22 @@ for arg in "$@"; do
   [ "$arg" = "--ignore-removals" ] && IGNORE_REMOVALS=true
 done
 
-# Detect removed .link files
+LINKS_FILE="$REPO_ROOT/links.txt"
+
+# Lines of links.txt that are entries, not comments or blanks.
+entries() { grep -vE '^[[:space:]]*(#|$)' || true; }
+
+# Detect links removed from links.txt since the last commit
 removed_links=()
-while IFS= read -r deleted; do
-  removed_links+=("$deleted")
-done < <(git -C "$REPO_ROOT" diff --name-only --diff-filter=D HEAD -- '*.link' 2>/dev/null | grep '\.link$' || true)
+while IFS= read -r removed; do
+  removed_links+=("$removed")
+done < <(comm -23 \
+  <(git -C "$REPO_ROOT" show HEAD:links.txt 2>/dev/null | entries | sort) \
+  <(entries < "$LINKS_FILE" | sort))
 
 if [ "${#removed_links[@]}" -gt 0 ]; then
   for f in "${removed_links[@]}"; do
-    echo "WARNING: .link file removed: $f"
+    echo "WARNING: link removed: $f"
     WARNINGS=$((WARNINGS + 1))
   done
   echo ""
@@ -40,25 +47,30 @@ if [ "${#removed_links[@]}" -gt 0 ]; then
 fi
 
 # Validate contents of each linked directory against its source
-while IFS= read -r -d '' link_file; do
-  dest_dir="$(dirname "$link_file")"
-  source_rel="$(cat "$link_file" | tr -d '[:space:]')"
+while read -r dest_rel arrow source_rel; do
   source_dir="$REPO_ROOT/$source_rel"
+  dest_dir="$REPO_ROOT/$dest_rel"
 
-  if [ ! -d "$source_dir" ]; then
-    echo "ERROR: source not found: $source_rel (referenced from ${link_file#"$REPO_ROOT/"})"
+  if [ "$arrow" != "<-" ] || [ -z "$source_rel" ]; then
+    echo "ERROR: bad line in links.txt: $dest_rel $arrow $source_rel"
     ERRORS=$((ERRORS + 1))
     continue
   fi
 
-  if ! diff -rq --exclude='.link' "$source_dir" "$dest_dir" > /dev/null 2>&1; then
-    echo "ERROR: out of sync: ${dest_dir#"$REPO_ROOT/"} <- $source_rel"
+  if [ ! -d "$source_dir" ]; then
+    echo "ERROR: source not found: $source_rel (listed for $dest_rel in links.txt)"
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+
+  if ! diff -rq "$source_dir" "$dest_dir" > /dev/null 2>&1; then
+    echo "ERROR: out of sync: $dest_rel <- $source_rel"
     echo "       Run 'pnpm sync-links' to fix."
     ERRORS=$((ERRORS + 1))
   else
-    echo "OK: ${dest_dir#"$REPO_ROOT/"} <- $source_rel"
+    echo "OK: $dest_rel <- $source_rel"
   fi
-done < <(find "$REPO_ROOT" -name '.link' -not -path '*/node_modules/*' -print0)
+done < <(entries < "$LINKS_FILE")
 
 echo ""
 [ "$WARNINGS" -gt 0 ] && echo "$WARNINGS warning(s)."
