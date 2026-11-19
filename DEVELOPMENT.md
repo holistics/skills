@@ -123,7 +123,7 @@ Exports run from the `holistics/ai` repo, in `apps/orca`:
 .venv/bin/python bin/export_skill_references.py viz <this repo>/plugins/holistics-common/skills/viz/references
 ```
 
-Then bump the commit in `UPSTREAM.md`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
+Copied `.aml` files are saved as `<name>.aml.md` inside an ```` ```aml ```` code block, because the Claude plugin directory refuses `.aml` files. Then bump the commit in `UPSTREAM.md`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
 
 ## Scripts
 

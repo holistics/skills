@@ -1,0 +1,14 @@
+```aml
+Type ProjectSettings {
+  viz(optional) {
+    default_color_palette(optional): ColorPalette
+  }
+  dashboard(optional) {
+    default_template(optional): Dashboard
+  }
+  data_import(optional) {
+    default_write_schema(optional): String
+  }
+}
+
+```

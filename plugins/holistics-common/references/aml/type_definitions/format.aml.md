@@ -1,0 +1,13 @@
+```aml
+Type DateFormat = String;
+
+Type SimpleNumberFormat = String;
+
+Type FullNumberFormat {
+  pattern: String,
+  groupSeparator (default: ','): '.' | ',' | ' ',
+  decimalSeparator (default: '.'): ',' | '.'
+}
+
+Type Format = DateFormat | SimpleNumberFormat | FullNumberFormat
+```

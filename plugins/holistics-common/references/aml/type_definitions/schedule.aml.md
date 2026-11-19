@@ -1,0 +1,23 @@
+```aml
+Type Schedule {
+  models: List[Any]
+  cron: String
+}
+
+Type PreAggregateSchedule {
+  cron: String
+  object: Dataset // | Model
+  pre_aggregates (optional): List[String]
+}
+
+Type ImportSchedule {
+  models: List[Any]
+  cron: String
+}
+
+Type AiSchedule {
+  cron: String
+  targets: List[AiTask]
+  run_as: String
+}
+```

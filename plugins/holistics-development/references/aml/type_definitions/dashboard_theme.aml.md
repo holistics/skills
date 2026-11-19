@@ -1,0 +1,219 @@
+```aml
+Type FontWeight = 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold'
+
+Type FontTheme {
+  font_family(optional): String
+  font_source(optional): String
+  font_size(optional): Number | String
+  font_color(optional): String
+  font_weight(optional): FontWeight
+  font_style(optional): 'normal' | 'italic'
+  letter_spacing(optional): Number | String
+  text_decoration(optional): 'underline' | 'overline' | 'line-through'
+  text_transform(optional): 'uppercase' | 'lowercase' | 'capitalize'
+}
+
+Type BgTheme {
+  bg_color(optional): String
+  bg_image(optional): String
+  bg_repeat(optional): Boolean | 'x' | 'y' | 'space' | 'round'
+  bg_size(optional): 'cover' | 'contain'
+}
+
+Type DetailedSpacing {
+  top: Number | String
+  left: Number | String
+  bottom: Number | String
+  right: Number | String
+}
+Type SpacingTheme = Number | String | DetailedSpacing
+Type DetailedRadius {
+  top_left: Number | String
+  top_right: Number | String
+  bottom_left: Number | String
+  bottom_right: Number | String
+}
+Type RadiusTheme = Number | String | DetailedRadius
+
+Type BorderTheme {
+  border_width(optional): SpacingTheme
+  border_radius(optional): RadiusTheme
+  border_color(optional): String
+  border_style(optional): 'none' | 'solid' | 'dotted' | 'dashed' | 'inset' | 'outset' | 'ridge' | 'groove' | 'double'
+}
+
+Type ShadowTheme = 'none' | 'sm' | 'md' | 'lg'
+
+Type BlockTheme {
+  label(optional): FontTheme
+  text(optional): FontTheme
+  border(optional): BorderTheme
+  background(optional): BgTheme
+  padding(optional): SpacingTheme
+  shadow(optional): ShadowTheme
+  opacity(optional): Number
+}
+
+Type CanvasTheme {
+  border(optional): BorderTheme
+  background(optional): BgTheme
+  shadow(optional): ShadowTheme
+  opacity(optional): Number
+}
+
+Type ColorValue = String
+
+Type LabeledColor {
+  label: String
+  color: ColorValue
+}
+
+Type Color = ColorValue | LabeledColor
+
+Type LegacyColorPalette = 'categorical' | 'div-blue-red' | 'div-teal-orange' | 'seq-blue' | 'seq-teal' | 'seq-viridis' | 'seq-magma' | Number
+
+Type CategoricalColorPalette {
+  colors: List[Color]
+}
+
+Type ColorPalette {
+  title(optional): String
+
+  categorical(optional): CategoricalColorPalette
+}
+
+Type ColorTheme {
+  data(optional): ColorPalette
+}
+
+Type TableBorderVisibility {
+  outer(optional): Boolean
+  vertical(optional): Boolean
+  horizontal(optional): Boolean
+  header(optional): Boolean
+  row_header(optional): Boolean
+}
+
+Type TableGeneralTheme {
+  bg_color(optional): String
+  hover_color(optional): String
+  banding_color(optional): String
+  cell_padding(optional): SpacingTheme
+  font_size(optional): Number | String
+  font_color(optional): String
+  font_family(optional): String
+  border_color(optional): String
+  border_width(optional): String | Number
+  borders(optional): TableBorderVisibility
+  grid_color(optional): String
+}
+
+Type TableHeaderTheme {
+  bg_color(optional): String
+  font_size(optional): Number | String
+  font_weight(optional): FontWeight
+  font_color(optional): String
+}
+
+Type TableRowHeaderTheme {
+  bg_color(optional): String
+  font_size(optional): Number | String
+  font_weight(optional): FontWeight
+  font_color(optional): String
+}
+
+Type TableColumnHeaderTheme {
+  bg_color(optional): String
+  font_size(optional): Number | String
+  font_weight(optional): FontWeight
+  font_color(optional): String
+}
+
+Type TableSubTitleTheme {
+  font_size(optional): Number | String
+  font_weight(optional): FontWeight
+  font_color(optional): String
+}
+
+Type TableSparklineTheme {
+  line(optional):  {
+    color(optional): String
+    width(optional): Number | String
+  }
+  column(optional):  {
+    color(optional): String
+    width(optional): Number | String
+  }
+}
+
+Type TableTheme {
+  general(optional): TableGeneralTheme
+  header(optional): TableHeaderTheme
+  @doc Deprecated. Use "header" and "sub_header" for header styling instead. ;;
+  row_header(optional): TableRowHeaderTheme
+  @doc Deprecated. Use "header" and "sub_header" for header styling instead. ;;
+  column_header(optional): TableColumnHeaderTheme
+  sub_header(optional): TableHeaderTheme
+  sub_title(optional): TableSubTitleTheme
+  sparkline(optional): TableSparklineTheme
+}
+
+Type MetricKpiTheme {
+  alignment(optional): AlignmentPosition
+  label(optional): FontTheme
+  value(optional): FontTheme
+  progress(optional) {
+    text(optional): FontTheme
+    indicator(optional): BgTheme
+    track(optional): BgTheme
+  }
+  trend(optional) {
+    positive(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+    negative(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+    neutral(optional) {
+      text(optional): FontTheme
+      background(optional): BgTheme
+    }
+  }
+}
+
+Type VizTheme {
+//  title(optional): FontTheme
+//  legend(optional): FontTheme
+//  axis(optional): FontTheme
+//  label(optional): FontTheme
+//  text(optional): FontTheme
+  color(optional): ColorTheme
+//  color_palette(optional): ColorPalette
+  table(optional): TableTheme
+  metric_kpi(optional): MetricKpiTheme
+}
+
+Type PageTheme {
+  title(optional): String
+  background(optional): BgTheme
+  canvas(optional): CanvasTheme
+  block(optional): BlockTheme
+  custom_css(optional): Heredoc['css']
+  viz(optional): VizTheme
+  color(optional): ColorTheme
+}
+
+Type DynamicPageTheme {
+  light: PageTheme
+  dark: PageTheme
+}
+
+Type PartialFontTheme = Partial[FontTheme]
+Type PartialBgTheme = Partial[BgTheme]
+Type PartialBorderTheme = Partial[BorderTheme]
+Type PartialBlockTheme = Partial[BlockTheme]
+Type PartialCanvasTheme = Partial[CanvasTheme]
+Type PartialPageTheme = Partial[PageTheme]
+```

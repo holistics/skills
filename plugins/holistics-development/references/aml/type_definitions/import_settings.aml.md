@@ -1,0 +1,5 @@
+```aml
+Type ImportSettings (elem_name_as: 'name') {
+  default_schema (optional): String
+}
+```

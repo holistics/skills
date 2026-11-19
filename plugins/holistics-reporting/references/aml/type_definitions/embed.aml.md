@@ -1,0 +1,49 @@
+```aml
+Type EmbedDashboard {
+  dashboard: Dashboard
+}
+
+Type EmbedDataset {
+  dataset: Dataset
+}
+
+Type EmbedObject = EmbedDashboard | EmbedDataset | Dashboard | Dataset
+
+// Type EmbedOrg (elem_name_as: 'uname')  {
+//   objects: List[EmbedObject]
+// }
+
+Type EmbedPortalAiCustomization {
+  global (optional) {
+    icon (optional): String
+    assistant_name (optional): String
+  }
+  chat_page (optional) {
+    icon (optional): String
+	  intro (optional) {
+	    header (optional): String
+	    body (optional): String | Heredoc['md']
+	  }
+	  prompt_placeholder (optional): String | List[String]
+  }
+  toolbar (optional) {
+	  icon (optional): String
+  }
+  left_panel (optional) {
+	  icon (optional): String
+  }
+}
+
+Type EmbedPortal (elem_name_as: 'uname') {
+  description (optional): String
+  objects: List[EmbedObject]
+  initial_object (optional): Dashboard | Dataset | 'ai'
+  required_permissions (optional): List[Any]
+  on_missing_user_attribute (default: 'show_error'): 'show_error' | 'show_no_data'
+  default_user_attributes (default: {}): Dict[String, String | Number | Boolean | List[String | Number | Boolean]]
+  ai (optional) {
+    customization: EmbedPortalAiCustomization
+  }
+  // orgs (optional): List[EmbedOrg]
+}
+```

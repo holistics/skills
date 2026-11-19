@@ -20,7 +20,7 @@ Write a Viz yourself with this skill **only** when the authoring mode is `self`.
 **Don't write Viz AML from memory — properties differ per viz type and invented ones fail.**
 
 1. **`references/guide.md` — read this first, before writing any Viz.** Field references (`r(...)` vs calculations), converting an AQL explore into a Viz, params, the rules for fitting dimensions into viz slots, and formatting defaults.
-2. **`references/type_definitions/viz.aml` — the schema.** Find your viz type's block and use only its properties. `conditional_format.aml`, `action.aml`, and `custom_chart_def.aml` define the types it refers to.
+2. **`references/type_definitions/viz.aml.md` — the schema.** Find your viz type's block and use only its properties. `conditional_format.aml.md`, `action.aml.md`, and `custom_chart_def.aml.md` define the types it refers to.
 3. **`references/examples.md` — worked examples.** Request → Viz pairs across viz types, BAD examples, and common errors with their fixes.
 4. **`references/data_format.md`** — the common date and number format patterns, with links to the full format docs for anything rarer (currency list, full syntax).
 5. **`MarkdownViz`** (data-driven HTML/Markdown) — its template syntax is in the public docs: [syntax reference](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference) and [getting started](https://docs.holistics.io/docs/charts/dynamic-content-blocks/getting-started).

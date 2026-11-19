@@ -150,7 +150,7 @@ Operator mapping from AQL to the Viz `filter` block:
 1. **Understand the request** — the viz type (if the caller chose one), the fields, and any formatting or conventions the caller passed on (e.g. what a dashboard's theme or controls already provide).
 2. **Read the dataset** with `fetch_dataset`. Reference only fields that exist there, or Viz `calculation`s you declare. If the caller gave an AQL explore, convert it as the guide above describes.
 3. **Look up what you need.**
-   * `references/type_definitions/viz.aml` — find your type's block (e.g. `Type PieChart (elem_name_as: 'uname') {`) and use only its properties; follow the types it refers to (`VizFieldFull`, ...). `conditional_format.aml`, `action.aml`, and `custom_chart_def.aml` hold the rest.
+   * `references/type_definitions/viz.aml.md` — find your type's block (e.g. `Type PieChart (elem_name_as: 'uname') {`) and use only its properties; follow the types it refers to (`VizFieldFull`, ...). `conditional_format.aml.md`, `action.aml.md`, and `custom_chart_def.aml.md` hold the rest.
    * `references/examples.md` — the example closest to your viz type, plus the BAD examples and common errors at the end.
    * `references/data_format.md` — date and number format patterns.
    * For a `MarkdownViz`, the [dynamic content block syntax](https://docs.holistics.io/docs/charts/dynamic-content-blocks/syntax-reference).

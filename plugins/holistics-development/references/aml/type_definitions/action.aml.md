@@ -1,0 +1,15 @@
+```aml
+Type ActionFieldInput {
+  ref: VizFieldRef
+  transformation(optional): String
+  aggregation(optional): String
+}
+
+Type GoToUrlAction {
+  type: 'GoToUrl'
+  label: String
+  url: ActionFieldInput | VizFieldRef
+}
+
+Type VizAction = GoToUrlAction
+```

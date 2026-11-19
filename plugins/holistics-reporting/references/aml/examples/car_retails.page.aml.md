@@ -1,0 +1,290 @@
+```aml
+Dashboard car_retails_dashboard {
+  title: 'Car Retails'
+  description: ''
+  owner: 'scott.bui@holistics.io'
+  block title: TextBlock {
+    content: @md # Your title goes here ;;
+  }
+  block v_2c7f: VizBlock {
+    label: 'Count of Employee_number by Country and City'
+    viz: ColumnChart {
+      dataset: car_retails
+      x_axis: VizFieldFull {
+        ref: r(car_retails_offices.country)
+        format {
+          type: 'text'
+        }
+      }
+      legend: VizFieldFull {
+        ref: r(car_retails_offices.city)
+        format {
+          type: 'text'
+        }
+      }
+      y_axis {
+        series {
+          field: VizFieldFull {
+            ref: r(car_retails_employees.employee_number)
+            aggregation: 'count'
+            format {
+              type: 'number'
+              pattern: 'inherited'
+            }
+          }
+          settings {
+            point {
+              value: 'Boston'
+              color: '#255DD4'
+            }
+            point {
+              value: 'London'
+              color: '#18A59E'
+            }
+            point {
+              value: 'NYC'
+              color: '#07326C'
+            }
+            point {
+              value: 'Paris'
+              color: '#AF7DED'
+            }
+            point {
+              value: 'San Francisco'
+              color: '#A50E43'
+            }
+            point {
+              value: 'Sydney'
+              color: '#F2B602'
+            }
+            point {
+              value: 'Tokyo'
+              color: '#E27712'
+            }
+          }
+        }
+      }
+      settings {
+        row_limit: 5000
+        x_axis_show_null_datetime: false
+        aggregate_awareness {
+          enabled: true
+          debug_comments: true
+        }
+      }
+    }
+  }
+
+  block v_total_sales: VizBlock {
+    settings {
+      hide_label: true
+    }
+    label: ''
+    viz: MetricKpi {
+      dataset: car_retails
+      calculation total_sales_amount {
+        label: ''
+        formula: @aql car_retails_payments | sum(car_retails_payments.amount);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      value: VizFieldFull {
+        ref: 'total_sales_amount'
+        format {
+          type: 'number'
+          pattern: '#,###0.00'
+        }
+      }
+      settings {
+        display_mode: 'single'
+        alignment: 'center'
+      }
+    }
+  }
+  block v_unique_customers: VizBlock {
+    label: 'Unique Customer Count KPI'
+    viz: MetricKpi {
+      dataset: car_retails
+      calculation unique_customer_count {
+        label: 'Unique Customer Count'
+        formula: @aql car_retails_customers | count_distinct(car_retails_customers.customer_number);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      value: VizFieldFull {
+        ref: 'unique_customer_count'
+        format {
+          type: 'number'
+          pattern: '#,###'
+        }
+      }
+      settings {
+        display_mode: 'single'
+        alignment: 'center'
+        metric_value {
+          font_size: 36
+        }
+        label {
+          font_size: 16
+        }
+        row_limit: 1
+      }
+    }
+    settings {
+      hide_label: true
+    }
+  }
+  block v_monthly_sales: VizBlock {
+    label: 'Monthly Sales Trend'
+    viz: LineChart {
+      dataset: car_retails
+      calculation total_amount {
+        label: 'Total Amount'
+        formula: @aql car_retails_payments | sum(car_retails_payments.amount);;
+        calc_type: 'measure'
+        data_type: 'number'
+      }
+      x_axis: VizFieldFull {
+        label: 'Payment Month'
+        ref: r(car_retails_payments.payment_date)
+        transformation: 'datetrunc month'
+        format {
+          type: 'date'
+          pattern: 'LLL yyyy'
+        }
+      }
+      y_axis {
+        series {
+          field: VizFieldFull {
+            label: 'Total Amount'
+            ref: 'total_amount'
+            format {
+              type: 'number'
+              pattern: '#,###0.00'
+            }
+          }
+        }
+      }
+      settings {
+        sort: LineFamilySort {
+          type: 'xaxis'
+          direction: 'asc'
+        }
+        row_limit: 100
+        show_data_points: true
+      }
+    }
+  }
+
+  // FilterBlock — a dashboard-level filter. In FieldFilterSource, `field:` is a model-field reference
+  // written r(model_name.field_name) — not the legacy string-arg ref(...) form.
+  block f_office_country: FilterBlock {
+    label: 'Office Country'
+    type: 'field'
+    source: FieldFilterSource {
+      dataset: car_retails
+      field: r(car_retails_offices.country)
+    }
+    default {
+      operator: 'is'
+      value: []
+    }
+  }
+
+  // DataTable demonstrating all field-reference forms in viz `ref:` slots (see comment per row).
+  block v_ref_examples: VizBlock {
+    label: 'Field-reference examples'
+    viz: DataTable {
+      dataset: car_retails
+
+      // Adhoc calculation: referenced below by its BARE string name, NOT r().
+      calculation avg_payment {
+        label: 'Avg Payment'
+        formula: @aql car_retails_payments | avg(car_retails_payments.amount);;
+        calc_type: 'measure'
+        data_type: 'number'
+        format {
+          type: 'number'
+          pattern: '#,###0.00'
+        }
+      }
+
+      fields: [
+        // 1) DATASET DIMENSION -> two-arg form: r(dataset_name, model_name.dimension_name)
+        VizFieldFull {
+          ref: r(car_retails, car_retails_customers.customer_segment)
+          format {
+            type: 'text'
+          }
+        },
+        // 2) MODEL FIELD / dimension -> r(model_name.field_name)
+        VizFieldFull {
+          ref: r(car_retails_offices.country)
+          format {
+            type: 'text'
+          }
+        },
+        // 3) DATASET METRIC -> r(dataset_name.metric_name)
+        VizFieldFull {
+          ref: r(car_retails.total_sales)
+          format {
+            type: 'number'
+            pattern: '#,###0.00'
+          }
+        },
+        // 4) ADHOC CALCULATION -> bare String name (defined above), NOT r()
+        VizFieldFull {
+          ref: 'avg_payment'
+          format {
+            type: 'number'
+            pattern: '#,###0.00'
+          }
+        }
+      ]
+
+      settings {
+        show_row_number: true
+        row_limit: 5000
+        aggregate_awareness {
+          enabled: true
+          debug_comments: true
+        }
+      }
+    }
+  }
+
+  view: CanvasLayout {
+    label: 'View 1'
+    width: 1300
+    height: 940
+    grid_size: 20
+    auto_expand_vertically: true
+    block f_office_country {
+      position: pos(20, 20, 400, 60)
+    }
+    block title {
+      position: pos(20, 100, 1260, 60)
+    }
+    block v_total_sales {
+      position: pos(20, 180, 400, 120)
+    }
+    block v_unique_customers {
+      position: pos(440, 180, 400, 120)
+    }
+    block v_monthly_sales {
+      position: pos(20, 320, 820, 280)
+    }
+    block v_2c7f {
+      position: pos(860, 180, 420, 420)
+    }
+    block v_ref_examples {
+      position: pos(20, 620, 1260, 280)
+    }
+    mobile {
+      mode: 'auto'
+    }
+  }
+
+  theme: H.themes.vanilla
+}
+```
