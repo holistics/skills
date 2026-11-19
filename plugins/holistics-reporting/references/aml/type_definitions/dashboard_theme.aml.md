@@ -1,3 +1,4 @@
+```aml
 Type FontWeight = 'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold'
 
 Type FontTheme {
@@ -215,3 +216,4 @@ Type PartialBorderTheme = Partial[BorderTheme]
 Type PartialBlockTheme = Partial[BlockTheme]
 Type PartialCanvasTheme = Partial[CanvasTheme]
 Type PartialPageTheme = Partial[PageTheme]
+```

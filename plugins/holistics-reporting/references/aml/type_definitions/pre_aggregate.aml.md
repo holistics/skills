@@ -1,3 +1,4 @@
+```aml
 Type PreAggTimeGranularity = 'minute' | 'hour' | 'day' | 'week' | 'month' | 'quarter' | 'year'
 Type PreAggAggregationType = 'avg' | 'sum' | 'count' | 'count distinct' | 'min' |
                              'max' | 'median' | 'stdev' | 'stdevp' | 'var' | 'varp' |
@@ -26,3 +27,4 @@ Type PreAggregate (elem_name_as: 'name') {
 
   persistence: ExternalPersistence | FullPersistence | IncrementalPersistence
 }
+```

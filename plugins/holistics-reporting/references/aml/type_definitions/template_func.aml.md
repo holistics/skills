@@ -1,3 +1,4 @@
+```aml
 Type GeneralParamMetadata {
   description(optional): String
 }
@@ -29,3 +30,4 @@ Type TemplateParamMetadata = GeneralParamMetadata | StringParamMetadata | Number
 Type TemplateFuncMetadata {
   param (elem_name_as: 'uname', body_as: 'def', multiple: true, unique_elem_name: true): TemplateParamMetadata
 }
+```

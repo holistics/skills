@@ -1,3 +1,4 @@
+```aml
 Type Dimension (elem_name_as: 'name') {
   label                                     : String
   type                                      : DimensionType
@@ -118,3 +119,4 @@ Func ref(model_name: String, field_name: String) {
 }
 
 Func r() {}
+```

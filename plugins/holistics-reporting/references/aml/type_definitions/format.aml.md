@@ -1,3 +1,4 @@
+```aml
 Type DateFormat = String;
 
 Type SimpleNumberFormat = String;
@@ -9,3 +10,4 @@ Type FullNumberFormat {
 }
 
 Type Format = DateFormat | SimpleNumberFormat | FullNumberFormat
+```

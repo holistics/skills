@@ -1,3 +1,4 @@
+```aml
 Type ImportColumnConfig {
   csv_column: String
   db_column: String
@@ -19,3 +20,4 @@ Type ImportSource (elem_name_as: 'name') {
     skip_rows (optional): Number
   }
 }
+```

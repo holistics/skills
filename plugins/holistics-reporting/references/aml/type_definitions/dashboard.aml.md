@@ -1,3 +1,4 @@
+```aml
 Type FieldFilterSource {
   dataset: String | Dataset
   field: VizFieldRef
@@ -208,3 +209,4 @@ Type Dashboard (elem_name_as: 'uname') {
 
 Type PartialDashboard = Partial[Dashboard]
 Type PartialVizBlock = Partial[VizBlock]
+```

@@ -1,3 +1,4 @@
+```aml
 Type ActionFieldInput {
   ref: VizFieldRef
   transformation(optional): String
@@ -11,3 +12,4 @@ Type GoToUrlAction {
 }
 
 Type VizAction = GoToUrlAction
+```

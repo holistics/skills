@@ -1,3 +1,4 @@
+```aml
 Dashboard car_retails_dashboard {
   title: 'Car Retails'
   description: ''
@@ -285,4 +286,4 @@ Dashboard car_retails_dashboard {
   }
 
   theme: H.themes.vanilla
-}
+}```

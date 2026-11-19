@@ -1,3 +1,4 @@
+```aml
 Type RelationshipConfig {
   rel: Relationship
   active: Boolean
@@ -61,3 +62,4 @@ Type ManyToManyRelationship (elem_name_as: 'name') {
 }
 
 Type Relationship = EqualityRelationship | RangeRelationship | ManyToManyRelationship
+```

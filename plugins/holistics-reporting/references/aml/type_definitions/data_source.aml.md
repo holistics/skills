@@ -1,3 +1,4 @@
+```aml
 Type PostgreSQL(elem_name_as: 'name') {
   display_name (optional): String
   type: 'postgresql'
@@ -25,3 +26,4 @@ Type PostgreSQL(elem_name_as: 'name') {
 // TODO: Support other data source types
 
 Type DataSource = PostgreSQL
+```

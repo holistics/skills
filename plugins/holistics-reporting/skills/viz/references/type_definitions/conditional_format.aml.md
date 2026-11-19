@@ -1,3 +1,4 @@
+```aml
 
 Type SingleFormat {
   condition {
@@ -32,4 +33,4 @@ Type ConditionalFormat {
   key(optional): String
   aggregation(optional): AggregationType
   format: SingleFormat | ScaleFormat
-}
+}```

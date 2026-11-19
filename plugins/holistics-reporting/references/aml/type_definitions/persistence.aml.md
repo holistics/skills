@@ -1,3 +1,4 @@
+```aml
 Type FullPersistence {
   // persisted table will be written into this schema
   schema: String
@@ -26,3 +27,4 @@ Type IncrementalPersistence {
 Type ExternalPersistence {
   table_name: String
 }
+```

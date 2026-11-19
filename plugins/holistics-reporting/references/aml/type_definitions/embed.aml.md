@@ -1,3 +1,4 @@
+```aml
 Type EmbedDashboard {
   dashboard: Dashboard
 }
@@ -45,3 +46,4 @@ Type EmbedPortal (elem_name_as: 'uname') {
   }
   // orgs (optional): List[EmbedOrg]
 }
+```

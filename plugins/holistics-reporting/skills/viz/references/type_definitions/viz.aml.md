@@ -1,3 +1,4 @@
+```aml
 Type Operator = 'is' | 'is_not' | 'contains' | 'does_not_contain' | 'starts_with' | 'ends_with' | 'is_null' | 'not_null' | 'matches_user_attribute' | 'top' | 'bottom' | 'matches' | 'last' | 'next' | 'between' | 'before' | 'after' | 'match_ranges' | 'less_than' | 'greater_than'
 
 Type Modifier = 'year' | 'quarter' | 'month' | 'week' | 'day' | 'hour' | 'minute';
@@ -1143,3 +1144,4 @@ Type MarkdownViz (elem_name_as: 'uname') {
 }
 
 Type Viz = DataTable | PivotTable | LineChart | ColumnChart | BarChart | AreaChart | CombinationChart | PieChart | PyramidChart | FunnelChart | RetentionHeatmap | BubbleChart | ScatterChart | ConversionFunnel | MetricSheet| MetricKpi | GaugeChart | WordCloud | RadarChart | Heatmap | FilledMap | PointMap | CustomChart | MarkdownViz
+```

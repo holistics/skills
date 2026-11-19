@@ -1,3 +1,4 @@
+```aml
 Type Schedule {
   models: List[Any]
   cron: String
@@ -18,4 +19,4 @@ Type AiSchedule {
   cron: String
   targets: List[AiTask]
   run_as: String
-}
+}```

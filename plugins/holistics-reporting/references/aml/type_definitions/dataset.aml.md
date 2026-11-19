@@ -1,3 +1,4 @@
+```aml
 Type AnalysisContextUnderlyingData {
   metric(elem_name_as: 'metric', multiple: true, unique_elem_name: true) {
     view(elem_name_as: 'uname', multiple: true, unique_elem_name: true) {
@@ -167,3 +168,4 @@ Type Dataset (elem_name_as: 'name') {
 }
 
 Type PartialDataset = Partial[Dataset]
+```

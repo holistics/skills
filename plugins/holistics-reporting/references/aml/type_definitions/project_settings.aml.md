@@ -1,3 +1,4 @@
+```aml
 Type ProjectSettings {
   viz(optional) {
     default_color_palette(optional): ColorPalette
@@ -10,3 +11,4 @@ Type ProjectSettings {
   }
 }
 
+```

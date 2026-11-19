@@ -1,3 +1,4 @@
+```aml
 Type CustomChartDef {
   label: String
   description(optional): String
@@ -23,3 +24,4 @@ Type CustomChartDef {
   }
   template: Heredoc['vg' | 'vgl']
 }
+```

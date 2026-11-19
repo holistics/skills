@@ -1,3 +1,4 @@
+```aml
 Model ecommerce_orders {
   type: 'table'
   label: 'Orders'
@@ -84,4 +85,4 @@ Model ecommerce_orders {
     type: "number"
     definition: @aql count(ecommerce_orders.id) | where(ecommerce_orders.created_at matches @2024) ;;
   }
-}
+}```

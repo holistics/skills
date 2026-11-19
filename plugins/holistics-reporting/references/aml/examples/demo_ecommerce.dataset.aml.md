@@ -1,3 +1,4 @@
+```aml
 const orders_detail = [
   r(ecommerce_orders.id),
   r(ecommerce_orders.status),
@@ -320,4 +321,4 @@ Note: For "fulfilled AOV," you would need NMV per delivered order.
       }
     }
   }
-}
+}```
