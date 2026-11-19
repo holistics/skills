@@ -1,4 +1,3 @@
-#!/usr/bin/env sh
 # PostToolUse hook: validate AML files with the Holistics CLI after Write/Edit.
 # Always non-blocking: emits findings as additionalContext (a warning the
 # agent sees) and exits 0. Silent on non-AML files and on successful
