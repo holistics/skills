@@ -18,7 +18,7 @@ For a Claude Data dashboard, load the `build-data-app` skill first for its SDK r
 sandbox, structure marks and how to save. From its step 1, still read the datasets
 (`list_datasets`, `fetch_dataset`); skip its Design part and its step 2 proposal and wireframe: the
 dashboard is the design and the plan, so where that skill says "the approved plan", read "the
-dashboard". Keep the dashboard's own look, not the Holistics default style or `example.html`, and
+dashboard". Keep the dashboard's own look, not the Holistics default style or the `build-data-app` example, and
 add no filter, control or chart the dashboard doesn't have. This skill adds what is specific to a Claude
 Data dashboard: how to read it, how its sources map, and the `dash` adapter that lets its page run
 unchanged.

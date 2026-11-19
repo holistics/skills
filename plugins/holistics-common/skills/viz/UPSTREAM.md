@@ -9,4 +9,4 @@ path: apps/orca/orca/agent/vivid
 commit: 944a9f0aa00eae8fdb5179c0eed256922d1c798e
 exported: 2026-10-22
 
-# references/type_definitions/ — copied from the aml repo; see its own .upstream.
+# references/type_definitions/ — copied from the aml repo; see its own UPSTREAM.md.

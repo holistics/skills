@@ -99,7 +99,7 @@ This checks that each linked directory matches its source and warns about missin
 Native skills can't read plugin settings (`${user_config.*}`) or files bundled next to a skill, so a plugin skill that depends on either can't be linked into `native-skills/`. These are kept as separate copies — when changing what both share (e.g. dashboard conventions), edit both:
 
 * `native-skills/system/holistics-common/build-visualizations/` — always uses `generate_aql` → `generate_viz`; the plugin version (`plugins/holistics-development/skills/build-visualizations/`) adds the authoring-mode switch and the `viz` skill.
-* `native-skills/system/holistics-reporting/build-data-app/` — the plugin skill (`plugins/holistics-reporting/skills/build-data-app/`) with `api.md` and `example.html` inlined; it reads datasets with `list_datasets` / `fetch_dataset`, writes AQL with `generate_aql` / `execute_aql`, and saves with `create_data_app` within one reply's size limit. The plugin version writes AQL with the `aql` skill and checks it with `validate_aql`.
+* `native-skills/system/holistics-reporting/build-data-app/` — the plugin skill (`plugins/holistics-reporting/skills/build-data-app/`) with `api.md` and `example.md` inlined; it reads datasets with `list_datasets` / `fetch_dataset`, writes AQL with `generate_aql` / `execute_aql`, and saves with `create_data_app` within one reply's size limit. The plugin version writes AQL with the `aql` skill and checks it with `validate_aql`.
 
 ## Sub-agents
 
@@ -109,7 +109,7 @@ After editing a template or an included file, run `pnpm build-agents`, then `pnp
 
 ## Content copied from other repos
 
-Some sources are copied from another repo and are **not** synced automatically. Each carries an `.upstream` file recording the origin repo, path, commit, and any transformation applied.
+Some sources are copied from another repo and are **not** synced automatically. Each carries an `UPSTREAM.md` file recording the origin repo, path, commit, and any transformation applied.
 
 * `plugins/holistics-common/skills/aql/` — `SKILL.md` and per-function docs from [anfra-ai/skills](https://github.com/anfra-ai/skills); `aqlearn.md` and the worked examples exported from the Holistics AI agent's AQL prompts (Aqua), which are the source of truth for Holistics AQL.
 * `plugins/holistics-common/skills/viz/references/` — exported from the Holistics AI agent's Viz prompt, docs, and AML type definitions (Vivid).
@@ -121,7 +121,7 @@ Exports run from the `holistics/ai` repo, in `apps/orca`:
 .venv/bin/python bin/export_skill_references.py viz <this repo>/plugins/holistics-common/skills/viz/references
 ```
 
-Then bump the commit in `.upstream`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
+Then bump the commit in `UPSTREAM.md`, run `pnpm build-agents` and `pnpm sync-links`. Keep Holistics-specific edits out of the copied/exported files so updating stays a clean overwrite; put them in `SKILL.md` instead.
 
 ## Scripts
 
