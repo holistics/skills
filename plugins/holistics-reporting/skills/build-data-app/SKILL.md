@@ -43,8 +43,9 @@ Only the purpose must come from the user; the rest have defaults that the propos
 ## 2. Propose and confirm
 
 Propose this to the user, and wait for their approval before building. On a change, update the
-plan and wireframe and propose again. Where neither mermaid nor `#opt` links render, such as a
-terminal, draw the wireframe as a plain-text grid and list the choices as numbered options.
+plan and wireframe and propose again. Where mermaid doesn't render, such as a terminal, draw the
+wireframe as a plain-text grid. List the choices as numbered options the user replies with, never
+as links.
 
 ````
 ## What's in the app
@@ -83,9 +84,9 @@ class v_category,v_orders,v_trend viz
 ```
 
 Build this app?
-[Yes — build it as planned](#opt)
-[Try a different look](#opt)
-[Match our brand](#opt)
+1. Yes, build it as planned
+2. Try a different look
+3. Match our brand
 ````
 
 - **Wireframe:** a `block:frame` with `columns 12`.

@@ -105,13 +105,13 @@ If the user gives a tight instruction ("just build one chart for X"), stick stri
    * **Wireframe rules:** Enclose the layout in a `block:frame` with `columns 12`, unless the user's layout or reference calls for another split. Set spans to match canvas positions (on 12: `3` = ¼, `4` = ⅓, `6` = ½, `12` = full). Every row fills the frame's columns; a nested `block:<id>:<span>` (e.g., a side rail) counts as its span. Pad with bare `space:<n>`. Apply styles using the exact `classDef` definitions (`sect` for text, `ctrl` for filters, `viz` for visualizations). Label blocks as `<name> · <VizType>`. For multi-tab layouts, provide a separate diagram per tab under `**Tab: <label>**`.
    * **These break the whole diagram:** a box id with anything but letters, digits and `_` (`v_trend`, never `v-trend`); a box id of `end`; an unquoted label (`v_trend["Monthly Sales · Line"]`, never `v_trend[Monthly Sales]`); a `"` inside a label (use `'`); a missing `end` for `block:frame` or any nested block.
 
-   Include actionable option links at the end of your proposal. Omit the **Starts from** line and the template option when editing an existing dashboard or when the project has no default template:
+   End your proposal with the choices below as numbered options the user replies with, never as links. Omit the **Starts from** line and the template option when editing an existing dashboard or when the project has no default template:
 
    ```
-   Build this dashboard? 
-   [Yes — build it as planned](#opt) 
-   [<start from a blank dashboard instead | start from template `<template_name>` instead>](#opt)
-   [<alternative instruction or adjustment>](#opt)
+   Build this dashboard?
+   1. Yes, build it as planned
+   2. <start from a blank dashboard instead | start from template `<template_name>` instead>
+   3. <alternative instruction or adjustment>
    ```
 
    Wait for user confirmation before building. Do not run queries or edit files until approved.
