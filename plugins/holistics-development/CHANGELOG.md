@@ -1,3 +1,9 @@
+## [0.10.1](https://github.com/holistics/skills/compare/holistics-development-v0.10.0...holistics-development-v0.10.1) (2026-11-24)
+
+### Bug Fixes
+
+* **plugins.development,plugins.reporting:** list proposal choices as numbered options ([de82057](https://github.com/holistics/skills/commit/de820576e0a4eab86a5c0317df64dd051ecd67c8))
+
 ## [0.10.0](https://github.com/holistics/skills/compare/holistics-development-v0.9.2...holistics-development-v0.10.0) (2026-11-18)
 
 ### Features
