@@ -6,7 +6,7 @@ description: |-
 
   Use when the user asks for a trend or a comparison with an earlier period — on an existing chart or as a new question.
 
-  Typical phrasings: add a trend line, show the trend, compare with last year, how did X do this year vs last year, year-over-year, month-over-month, add period-over-period.
+  Typical phrasings: add a trend line, show the trend, add a moving average, smooth the line with a rolling average, compare with last year, how did X do this year vs last year, year-over-year, month-over-month, add period-over-period.
 
   Do NOT trigger for a chart or question with no trend or period comparison, or for flagging unusual values (anomaly detection).
 user-invocable: false
@@ -25,12 +25,15 @@ Most trend requests keep the raw series; a few want the trend alone. When unsure
 * **Keep the raw series** — "add a trend line", "show the trend on this chart", "is revenue trending up?"
 * **Trend alone** — "show only the trend line", "replace the columns with a trend line"
 
+A trend line is a regression fit, or a moving average when the user asks for one ("add a 7-day moving average", "smooth the line with a rolling average"). Build the moving average as a trend line only when the chart is not stacked.
+
 Hard requirements:
 
 1. **Keep the existing raw series** — its metric, display type (column, line, …), and settings.
 2. **Alias the metric a second time in the AQL explore** — ask generate_aql for the same metric twice under two names (e.g. `revenue_won` and `revenue_won_trend: revenue_won`). Skip the alias only when the user asks for the trend alone.
 3. **Ask generate_viz for two y-axis series** — the raw metric with no analytic, and the alias with `analytic: RegressionLine` (`type: 'linear'` unless the user asks for another fit), displayed as a dashed line. A column raw series with a line trend needs a `CombinationChart`.
-4. **Verify before presenting** — after execute_viz, check that the result has both a raw-value column and a fitted-trend column. If one is missing, fix the explore or the `query` and run again.
+   * **Moving average** — the alias takes `analytic: MovingCalculationField` instead, with `regression: 'linear'` — the marker that makes it a trend line.
+4. **Verify before presenting** — after execute_viz, check that the result has both a raw-value column and a trend column. If one is missing, fix the explore or the `query` and run again.
 
 ## Period-over-period (PoP)
 
@@ -51,11 +54,11 @@ When the user wants viewers to switch the comparison on a dashboard, use a `PopB
 Hard requirements:
 
 1. **Keep the chart as it is** — type, x-axis, breakdowns, settings. Do not add the date field as a dimension unless the chart already has it, the user asks, or the viz is a table or pivot table.
-2. **Add the time condition if it is missing** — the current period at the date field's grain. Tell the user you added it.
+2. **Add the time condition if it is missing** — the current period at the date field's grain. Tell the user you added it. Ask generate_viz for it as a viz `filter` on the date field (operator `matches`, `last` or `between`), never as an AQL string in `conditions`: the Analyze menu reads only the `filter` form.
 3. **Compare with `relative_period`** — never with filtered metrics or fixed years. Ask generate_aql for two metrics per metric in the chart: a previous-period value and a % change (e.g. `revenue_prev_month` and `revenue_prev_month_pct`). Compare all metrics, not only the first. Skip the absolute change unless the user asks.
    * **Previous-period value** — `metric | relative_period(date_field, interval(-N unit), strict: true)`, where `interval(-N unit)` is the comparison from requirement 4 ("last month" → `interval(-1 month)`, "same month last year" → `interval(-1 year)`, "previous 3 months" → `interval(-3 month)`). Always `strict: true`, so a period with no earlier data gives null, not a fallback value.
-   * **% change** — `safe_divide(metric, metric | relative_period(date_field, interval(-N unit), strict: true)) - 1`.
+   * **% change** — `safe_divide(metric, metric | relative_period(date_field, interval(-N unit), strict: true)) - 1`, the same as the dashboard PoP in the UI. Write the `relative_period` out inside it; do not refer to the previous-period metric. Do not write it as `safe_divide(metric - previous_value, previous_value)`.
 4. **Take the period from the user's words** — "last month", "same month last year", "previous 3 months"; "last year vs this year" is the previous 1 year. Pass the phrase to generate_aql as the comparison period; do not rewrite it. With no period given, use the previous 1 period.
 5. **Place the series** — ask generate_viz for the raw series and the previous value on the y-axis, in the chart's current display type, and the % change in the tooltip. On a line chart, ask for the previous value as a dashed line; on a column chart it stays a column. For a table or pivot table, add the % change as an extra column instead.
 6. **Name the series from the comparison** — `Revenue (Previous month)` and `Revenue %Δ (Previous month)`. A period of 1 is singular without the number; more than 1 keeps the number and is plural (`Revenue (Previous 3 months)`).
-7. **Verify before presenting** — after execute_viz, check that each metric has a raw, previous-value and % change column, that the time condition is present, and that the chart type and breakdowns are unchanged. If not, fix the explore or the `query` and run again.
+7. **Verify before presenting** — after execute_viz, check that each metric has a raw, previous-value and % change column, that the time condition is present as a viz `filter`, and that the chart type and breakdowns are unchanged. If not, fix the explore or the `query` and run again.
