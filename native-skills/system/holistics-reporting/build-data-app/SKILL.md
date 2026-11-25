@@ -2,7 +2,7 @@
 name: build-data-app
 label: Build Data App
 description: |-
-  Build a Holistics Data App, one self-contained HTML page that queries the user's datasets through the `Anfra` SDK and renders them with its own HTML, CSS and JS, and save it with `create_data_app`.
+  Build a Holistics Data App, one self-contained HTML page that queries the user's datasets through the `Anfra` SDK and renders them with its own HTML, CSS and JS, and save it with `create_data_app` in a chat, or, in the data app editor, write it there with `write_data_app` and `edit_data_app` (or in the reply, for the user to paste) and leave the save to the user.
 
   Use when the user asks for a Data App, or a custom page, report or interactive analysis over their datasets saved as an app.
 
@@ -23,8 +23,33 @@ References, in this file, read when a step needs them:
   skeleton and keep only the parts the agreed plan has, restyled to the agreed look; its dataset
   and field names are placeholders.
 
-**No `create_data_app` tool** (a non-interactive run, or Data Apps not enabled): tell the user you
-can't create Data Apps here, and stop.
+## Where the code goes
+
+Before step 1, check the context to see where you are:
+
+- **In the editor**: the context says a data app, new or already saved, is open in the editor.
+- **Outside the editor**: anything else, such as a chat from the home page or viewing an app.
+
+Where you are decides how steps 3, 5 and 6 write and save the code:
+
+| Where you are | Write the code with | Who saves |
+|---|---|---|
+| Outside the editor | `create_data_app` | you, in [step 5](#5-save-and-hand-over) |
+| In the editor | `write_data_app` for the whole code, `edit_data_app` for a change | the user, with the editor's Save |
+| In the editor, with no `write_data_app` tool | your reply, for the user to paste into the editor | the user, with the editor's Save |
+
+**In the editor, never call `create_data_app`**: it saves a second app next to the one open in the
+editor. Before you change the code, read it with `read_data_app`, since the user may have edited
+it. Write the whole code with `write_data_app`, and change part of it with `edit_data_app`,
+whether or not the app has been saved.
+
+**Outside the editor, `create_data_app` only creates.** To change an existing app, including one you just
+created, call `go_to_edit_data_app` with its id and make the change in the editor. Do NOT call
+`create_data_app` again: it saves a second app. With no `go_to_edit_data_app` tool, tell the user
+you can't change an existing app here.
+
+**No `create_data_app` tool outside the editor** (a non-interactive run, or Data Apps not enabled): tell the
+user you can't create Data Apps here, and stop.
 
 ## 1. Understand the request
 
@@ -125,8 +150,9 @@ explicit `null`s.
 
 ### Fit it in one reply
 
-You write the whole file inside one `create_data_app` call, and one reply holds at most 8,192
-output tokens: a longer file is cut off and never saved. Aim for about 15KB of HTML:
+You write the whole file in one reply (inside the `create_data_app` or `write_data_app` call, or as
+code to paste), and one reply holds at most 8,192 output tokens: a longer file is cut off. Aim for
+about 15KB of HTML:
 
 - Write no comments.
 - Keep only the CSS rules, tokens and classes the page uses.
@@ -281,14 +307,22 @@ matters.
 
 ## 5. Save and hand over
 
-**Save with `create_data_app`.** The folder the user picks is their approval to save the plan
-agreed in step 2. If it fails, nothing was saved: follow the error's message.
+**In the editor, don't save.** Skip the folder and the save, hand over as below, and tell the user
+to click Save when the preview looks right:
 
-On success, hand over the app exactly as the tool's `note` says, and tell the user, in their terms:
+- With `write_data_app`, the code is already in the editor.
+- Without it, give the whole file in one code block, and tell the user to replace the editor's code
+  with it.
+
+**Outside the editor, save with `create_data_app`.** The folder the user picks is their approval to save the
+plan agreed in step 2. If it fails, nothing was saved: follow the error's message.
+
+On success, hand over the app as the tool's `note` says, if it gave one, and tell the user, in their
+terms:
 
 - what each screen is for, how to move between them, and what each control and click does;
-- to open it (or use the preview in the chat), try every control and click, and check one headline
-  number against one they trust.
+- to open it (or use the preview in the chat or the editor), try every control and click, and check
+  one headline number against one they trust.
 
 If anything is off, ask for:
 
@@ -306,10 +340,12 @@ the script fills in means the script never ran: the example's error banner names
 failed.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
-number means. Run any changed query again with `execute_aql`. Preserve `prompt` and `createdAt`,
-refresh `model`, `effort` and `updatedAt`, and repeat until the user says it's done.
+number means. Outside the editor, first open the app in the editor with `go_to_edit_data_app`. In the editor,
+make each change with `edit_data_app`, or without it give the whole changed file to paste again;
+either way, don't save. Run any changed query again with `execute_aql`. Preserve `prompt` and
+`createdAt`, refresh `model`, `effort` and `updatedAt`, and repeat until the user says it's done.
 
-Done when your reply hands over the app as the tool's `note` says.
+Done when your reply hands over the app as [step 5](#5-save-and-hand-over) says.
 
 ---
 
