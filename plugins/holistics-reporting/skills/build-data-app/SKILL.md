@@ -177,8 +177,8 @@ and `data-anfra-block` (with a `data-anfra-label`) on its parts, and `data-anfra
 ### Rendering
 
 - Render each query's four states: `executing`, `success`, `error` (show `error.message`, and a
-  distinct "you don't have access" for `PermissionError`), and success with no rows ("No sales this
-  week", never a bare zero). A screen that waits on a pick says so ("Pick a rep to see their
+  distinct "you don't have access" for `error.code === 'forbidden'`), and success with no rows
+  ("No sales this week", never a bare zero). A screen that waits on a pick says so ("Pick a rep to see their
   deals").
 - Show the result of every interaction: a selection is visible (dimmed marks, a highlighted row, a
   chip) and can be cleared, and the page always shows the active tab or step, the filters applied
