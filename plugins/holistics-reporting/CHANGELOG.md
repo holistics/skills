@@ -1,3 +1,9 @@
+## [0.4.1](https://github.com/holistics/skills/compare/holistics-reporting-v0.4.0...holistics-reporting-v0.4.1) (2026-11-25)
+
+### Bug Fixes
+
+* **plugins.reporting:** teach build-data-app and convert-artifact-dashboard the SDK 0.24 error codes ([bc0083a](https://github.com/holistics/skills/commit/bc0083abeca5da550f8c03944c4a801fb9cc0402))
+
 ## [0.4.0](https://github.com/holistics/skills/compare/holistics-reporting-v0.3.4...holistics-reporting-v0.4.0) (2026-11-18)
 
 ### Features
