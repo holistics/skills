@@ -269,7 +269,7 @@ A complete app in the default Holistics look. Save it as an `.html` file without
       } else if (query.state === 'error') {
         const alert = Object.assign(document.createElement('div'), { className: 'alert' });
         alert.dataset.variant = 'destructive';
-        const noAccess = query.error.name === 'PermissionError';
+        const noAccess = query.error.code === 'forbidden';
         const title = document.createElement('h2');
         title.textContent = noAccess ? "You don't have access to this data" : "Couldn't load this chart";
         const detail = document.createElement('section');

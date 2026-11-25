@@ -132,7 +132,7 @@ The Data App document is, in order:
   const STATUS = { idle: 'loading', executing: 'loading', success: 'ok', error: 'error' };
 
   function errorMessage (error) {
-    return error.name === 'PermissionError' ? "You don't have access to this data." : error.message;
+    return error.code === 'forbidden' ? "You don't have access to this data." : error.message;
   }
 
   // The SDK gives numbers as strings and dates as `2026-01-01T00:00:00Z`; the dashboard's code
