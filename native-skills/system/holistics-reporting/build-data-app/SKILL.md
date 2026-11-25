@@ -195,8 +195,8 @@ element each query and control draws into.
 ### Rendering
 
 - Render each query's four states: `executing`, `success`, `error` (show `error.message`, and a
-  distinct "you don't have access" for `PermissionError`), and success with no rows ("No sales this
-  week", never a bare zero). A screen that waits on a pick says so ("Pick a rep to see their
+  distinct "you don't have access" for `error.code === 'forbidden'`), and success with no rows
+  ("No sales this week", never a bare zero). A screen that waits on a pick says so ("Pick a rep to see their
   deals").
 - Show the result of every interaction: a selection is visible (dimmed marks, a highlighted row, a
   chip) and can be cleared, and the page always shows the active tab or step, the filters applied
@@ -346,7 +346,7 @@ How you name a field **to the SDK** (in `createFilter` and `mapControl`):
 `model.field` for a model field, a bare `name` for a dataset-level metric. Names come from
 `Anfra.datasets`, never from labels. A filter's `field` is checked at once (a `ValidationError`
 with a "did you mean"); a `mapControl` field is not checked until the query runs, so a typo there
-arrives as a `QueryError`.
+fails the query with a `query_invalid` or `query_failed` error.
 
 ## App
 
@@ -529,7 +529,7 @@ Useful operators by type (the full list is in the SDK's `Operator` type):
 - boolean: `is_true`, `is_false`
 
 `matches_user_attribute` and the `transform_pop_*` operators are not supported; a query
-they reach fails with a `QueryError`.
+they reach fails with a `query_invalid` or `query_failed` error.
 
 A condition with no values (or `operator: 'none'`) sends nothing: the query runs unfiltered. Give a
 filter a starting value with `default: { operator, values }`.
@@ -546,7 +546,7 @@ The server finds every dimension of the query built directly on that exact field
 at the grain, so:
 
 - Map to the **field reference** (`orders.created_at`), never the dimension's alias. A field no
-  dimension is built on fails the query with a `QueryError`.
+  dimension is built on fails the query with a `query_invalid` or `query_failed` error.
 - The dimension must be **aliased**, and can be the raw field (`period: orders.created_at`) or
   already truncated (`period: date_trunc(orders.created_at, "month")` or
   `period: orders.created_at | month()`); the drill overrides any of them. A computed dimension
@@ -591,15 +591,21 @@ chart.on('click', (p) => {
 
 ## Errors
 
-| Class | When | What to do |
-| --- | --- | --- |
-| `ValidationError` | Thrown synchronously while declaring: unknown dataset, unknown filter field, duplicate name, invalid mapping, disabled capability. | Fix the declaring line it names. It surfaces as an uncaught error in the console. |
-| `QueryError` | Stored on `query.error`: the server rejected the AQL, a mapped field or operator, or the query failed. | Read the message, which names the AQL problem or the bad entry (`filters[0].field`); fix the AQL or the mapping. |
-| `PermissionError` | Stored on `query.error`: this reader can't see the data. | Render "no access", not a failure. |
-| `TransportError` | Network or session problem. | Show a retry. |
+Every error is a `DataAppError`: branch on `err.code` (what happened) and `err.scope` (who must
+act: `'user'` the reader, `'client'` the app's own code, `'server'` the server), never on `err.name`.
+Every error has `message`, and `entity`, the query or control it concerns.
 
-Every error has `entity`, the query or control name it concerns. Check the class with `err.name`
-(`'PermissionError'`), since the classes themselves aren't exposed as globals.
+| Code | Scope | When | What to do |
+| --- | --- | --- | --- |
+| `declaration_invalid` | client | Thrown synchronously while declaring (a `ValidationError`): unknown dataset, unknown filter field, duplicate name, invalid mapping, disabled capability. | Fix the declaring line it names. It surfaces as an uncaught error in the console. |
+| `query_invalid` | user | Stored on `query.error`: the server refused the AQL, a mapped field or an operator. | Read the message, which names the AQL problem or the bad entry (`filters[0].field`); fix the AQL or the mapping. |
+| `query_failed` | user | Stored on `query.error`: the query ran and failed, a data source error included. | Read the message; fix the AQL, or show the message. |
+| `forbidden` / `unauthenticated` | user | This reader can't see the data / their session is gone. | Render "no access" or "sign in again", not a failure. |
+| `invalid_request` | client | A call the app made wrong, such as a query on a dataset the app wasn't given. | Fix the call it names. |
+| `connection_failed`, `internal_server_error`, `call_failed` | server | The server couldn't be reached, or failed. | Show "couldn't load" with a Retry that calls `app.execute()`, which reruns only the failed queries. |
+
+Treat a code not listed here by its `scope`. A query's error is stored on the query, never thrown;
+`fetchMore` rejects with one.
 
 ---
 
@@ -875,7 +881,7 @@ parts the agreed plan has, restyled to the agreed look.
       } else if (query.state === 'error') {
         const alert = Object.assign(document.createElement('div'), { className: 'alert' });
         alert.dataset.variant = 'destructive';
-        const noAccess = query.error.name === 'PermissionError';
+        const noAccess = query.error.code === 'forbidden';
         const title = document.createElement('h2');
         title.textContent = noAccess ? "You don't have access to this data" : "Couldn't load this chart";
         const detail = document.createElement('section');
