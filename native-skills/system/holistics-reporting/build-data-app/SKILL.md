@@ -40,6 +40,11 @@ editor. Before you change the code, read it with `read_data_app`, since the user
 it. Write the whole code with `write_data_app`, and change part of it with `edit_data_app`,
 whether or not the app has been saved.
 
+**In a chat, `create_data_app` only creates.** To change an existing app, including one you just
+created, call `go_to_edit_data_app` with its id and make the change in the editor. Do NOT call
+`create_data_app` again: it saves a second app. With no `go_to_edit_data_app` tool, tell the user
+you can't change an existing app here.
+
 **No `create_data_app` tool in a chat** (a non-interactive run, or Data Apps not enabled): tell the
 user you can't create Data Apps here, and stop.
 
@@ -332,10 +337,10 @@ the script fills in means the script never ran: the example's error banner names
 failed.
 
 Change the smallest thing that explains the problem, and restate a change first if it alters what a
-number means. In the editor, make each change with `edit_data_app`, or without it give the whole
-changed file to paste again; either way, don't save. Run any changed query again with
-`execute_aql`. Preserve `prompt` and `createdAt`, refresh `model`, `effort` and `updatedAt`, and
-repeat until the user says it's done.
+number means. In a chat, first open the app in the editor with `go_to_edit_data_app`. In the editor,
+make each change with `edit_data_app`, or without it give the whole changed file to paste again;
+either way, don't save. Run any changed query again with `execute_aql`. Preserve `prompt` and
+`createdAt`, refresh `model`, `effort` and `updatedAt`, and repeat until the user says it's done.
 
 Done when your reply hands over the app as [step 5](#5-save-and-hand-over) says.
 
