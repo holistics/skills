@@ -2,7 +2,7 @@
 name: build-data-app
 label: Build Data App
 description: |-
-  Build a Holistics Data App, one self-contained HTML page that queries the user's datasets through the `Anfra` SDK and renders them with its own HTML, CSS and JS, and save it with `create_data_app` in a chat, or, in the data app editor, write it there with `edit_data_app` (or in the reply, for the user to paste) and leave the save to the user.
+  Build a Holistics Data App, one self-contained HTML page that queries the user's datasets through the `Anfra` SDK and renders them with its own HTML, CSS and JS, and save it with `create_data_app` in a chat, or, in the data app editor, write it there with `write_data_app` and `edit_data_app` (or in the reply, for the user to paste) and leave the save to the user.
 
   Use when the user asks for a Data App, or a custom page, report or interactive analysis over their datasets saved as an app.
 
@@ -32,13 +32,13 @@ save the code:
 | Where you are | Write the code with | Who saves |
 |---|---|---|
 | A chat | `create_data_app` | you, in [step 5](#5-save-and-hand-over) |
-| The editor | `edit_data_app` | the user, with the editor's Save |
-| The editor, with no `edit_data_app` tool | your reply, for the user to paste into the editor | the user, with the editor's Save |
+| The editor | `write_data_app` for the whole code, `edit_data_app` for a change | the user, with the editor's Save |
+| The editor, with no `write_data_app` tool | your reply, for the user to paste into the editor | the user, with the editor's Save |
 
 **In the editor, never call `create_data_app`**: it saves a second app next to the one open in the
 editor. Before you change the code, read it with `read_data_app`, since the user may have edited
-it. `edit_data_app`'s description says when to write the whole code and when to patch part of it:
-follow it, whether or not the app has been saved.
+it. Write the whole code with `write_data_app`, and change part of it with `edit_data_app`,
+whether or not the app has been saved.
 
 **No `create_data_app` tool in a chat** (a non-interactive run, or Data Apps not enabled): tell the
 user you can't create Data Apps here, and stop.
@@ -142,7 +142,7 @@ explicit `null`s.
 
 ### Fit it in one reply
 
-You write the whole file in one reply (inside the `create_data_app` or `edit_data_app` call, or as
+You write the whole file in one reply (inside the `create_data_app` or `write_data_app` call, or as
 code to paste), and one reply holds at most 8,192 output tokens: a longer file is cut off. Aim for
 about 15KB of HTML:
 
@@ -302,7 +302,7 @@ matters.
 **In the editor, don't save.** Skip the folder and the save, hand over as below, and tell the user
 to click Save when the preview looks right:
 
-- With `edit_data_app`, the code is already in the editor.
+- With `write_data_app`, the code is already in the editor.
 - Without it, give the whole file in one code block, and tell the user to replace the editor's code
   with it.
 
