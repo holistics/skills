@@ -1049,10 +1049,15 @@ NOTE: The source model should be on the "many" side of the relationship.
 ### MUST use aliases in explore sorts
 We can **ONLY** use dimension and measure **aliases** inside `explore.sorts`.
 
-### Aliases in explore filters
+### Aliases in explore filters and having
+An alias in `explore.dimensions` or `explore.measures` names a column of the explore's **result table**. AQL uses the name to decide what a condition targets:
+* An alias targets the result table column. The condition filters the result rows **after** aggregation.
+* A metric name targets the metric. A model dimension (e.g. `orders.status`) targets the model rows.
+
 * Measures: **ALWAYS** filter a measure by its **alias** in `explore.measures`, **NEVER** by its metric name. A metric used in `explore.filters` must be added to `explore.measures` first.
   * DO: `measures { country_rank: country_rank_by_order_count }` + `filters { country_rank < 11 }`
   * DON'T: `measures { country_rank: country_rank_by_order_count }` + `filters { country_rank_by_order_count < 11 }`
+* `explore.having` targets **metrics**, by their metric name (e.g. `having { country_rank_by_order_count < 11 }`). An alias there that is not a metric name gives a type-check error, and the error suggests the same condition in `filters`. To filter the result rows by an alias, use `explore.filters`.
 * Dimensions: the left operand decides when the filter is applied:
   * Model dimension (e.g. `orders.status == 'delivered'`): applied **before** aggregation, to the rows the measures aggregate.
   * Dimension alias (e.g. `status == 'delivered'`): applied **after** aggregation, to the explore result rows.
@@ -1133,7 +1138,7 @@ metric total_area =
   | sum(square.area);
 ```
 
-`explore.filters` is a smart shortcut that can act like `where()` or `filter()` depending on the left operand: a model dimension filters the rows **before** aggregation, a measure alias or dimension alias filters the result **after** aggregation (see "Aliases in explore filters").
+`explore.filters` is a smart shortcut that can act like `where()` or `filter()` depending on the left operand: a model dimension filters the rows **before** aggregation, a measure alias or dimension alias filters the result **after** aggregation (see "Aliases in explore filters and having").
 Prefer using `explore.filters` (instead of local `where()` or `filter()`) when the filtering need to be applied to **all** explore measures.
 
 ### Avoid <= and >=
